@@ -1,0 +1,62 @@
+From 0d748767a04ad79ec542ebf302a31a31ae96c62b Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Tue, 5 Aug 2014 16:26:24 -0500
+Subject: [PATCH 03/10] When using --setconf without a hostname we default to
+ localhost
+
+---
+ ricci/ccs/ccs | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/ricci/ccs/ccs b/ricci/ccs/ccs
+index 95e011c..f3786b2 100755
+--- a/ricci/ccs/ccs
++++ b/ricci/ccs/ccs
+@@ -2227,8 +2227,13 @@ def send_cluster_conf():
+ 
+ # Set the cluster.conf file and increment the version
+ def set_cluster_conf(xml, increment = True):
++    global hostname
+     dom = minidom.parseString(xml)
+ 
++# If the hostname is not set, the we try localhost
++    if hostname == False:
++        hostname = "localhost"
++
+     if increment:
+       version = dom.getElementsByTagName("cluster")[0].getAttribute("config_version")
+       version = int(version) + 1
+-- 
+2.1.0
+
+From 4fe1b42e289553d2b3825e0deeaf31e49df6c43f Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Tue, 5 Aug 2014 16:29:51 -0500
+Subject: [PATCH 04/10] Require -h when using --setconf
+
+---
+ ricci/ccs/ccs | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/ricci/ccs/ccs b/ricci/ccs/ccs
+index f3786b2..582387a 100755
+--- a/ricci/ccs/ccs
++++ b/ricci/ccs/ccs
+@@ -2227,12 +2227,12 @@ def send_cluster_conf():
+ 
+ # Set the cluster.conf file and increment the version
+ def set_cluster_conf(xml, increment = True):
+-    global hostname
+     dom = minidom.parseString(xml)
+ 
+ # If the hostname is not set, the we try localhost
+     if hostname == False:
+-        hostname = "localhost"
++        print "Error: you must specify a filename and host when using --setconf"
++        sys.exit(1)
+ 
+     if increment:
+       version = dom.getElementsByTagName("cluster")[0].getAttribute("config_version")
+-- 
+2.1.0
+

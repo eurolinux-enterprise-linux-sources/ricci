@@ -1,0 +1,3429 @@
+--- a/ccs/cluster.rng.in.orig	2015-04-15 17:40:42.210388581 +0200
++++ b/ccs/cluster.rng.in	2015-04-15 16:55:13.000000000 +0200
+@@ -1473,6 +1473,7 @@
+     </element>
+   </define>
+ 
++  <!-- Problem evaluating metadata for /usr/share/cluster/checkquorum -->
+ 
+   <define name="CLUSTERFS">
+     <element name="clusterfs" rha:description="Defines a cluster file system mount.">
+@@ -1535,6 +1536,8 @@
+     </element>
+   </define>
+ 
++  <!-- Problem evaluating metadata for /usr/share/cluster/fence_scsi_check.pl -->
++  <!-- Problem evaluating metadata for /usr/share/cluster/fence_scsi_check_hardreboot.pl -->
+ 
+   <define name="FS">
+     <element name="fs" rha:description="Defines a file system mount.">
+@@ -1703,6 +1706,8 @@
+     </element>
+   </define>
+ 
++  <!-- Problem evaluating metadata for /usr/share/cluster/lvm_by_lv.sh -->
++  <!-- Problem evaluating metadata for /usr/share/cluster/lvm_by_vg.sh -->
+ 
+   <define name="MYSQL">
+     <element name="mysql" rha:description="Defines a MySQL database server">
+@@ -2019,6 +2024,7 @@
+     </element>
+   </define>
+ 
++  <!-- Problem evaluating metadata for /usr/share/cluster/ocf-shellfuncs -->
+ 
+   <define name="OPENLDAP">
+     <element name="openldap" rha:description="Defines an Open LDAP server">
+@@ -2353,6 +2359,7 @@
+     </element>
+   </define>
+ 
++  <!-- Problem evaluating metadata for /usr/share/cluster/svclib_nfslock -->
+ 
+   <define name="TOMCAT-6">
+     <element name="tomcat-6" rha:description="Defines a Tomcat server">
+@@ -2552,7 +2559,7 @@
+     <!-- begin specific fence devices -->
+ 
+        <!-- begin auto-generated device definitions -->
+-      <!-- No metadata for /usr/sbin/fence_ack_manual -->
++      <!-- Problem evaluating metadata for /usr/sbin/fence_ack_manual -->
+ 
+       <!-- fence_apc -->
+       <group rha:name="fence_apc" rha:description="Fence agent for APC over telnet/ssh">
+@@ -2563,43 +2570,43 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
++          <attribute name="cmd_prompt" rha:description="Force Python regex for command prompt" />
+         </optional>
+         <optional>
+-          <attribute name="login" rha:description="Login Name" />
++          <attribute name="identity_file" rha:description="Identity file for ssh" />
+         </optional>
+         <optional>
+-          <attribute name="passwd" rha:description="Login password or passphrase" />
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="secure" rha:description="SSH connection" />
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+-          <attribute name="port" rha:description="Physical plug number or name of virtual machine" />
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
+         </optional>
+         <optional>
+-          <attribute name="identity_file" rha:description="Identity file for ssh" />
++          <attribute name="login" rha:description="Login Name" />
+         </optional>
+         <optional>
+-          <attribute name="switch" rha:description="Physical switch number on device" />
++          <attribute name="passwd" rha:description="Login password or passphrase" />
+         </optional>
+         <optional>
+-          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
+         </optional>
+         <optional>
+-          <attribute name="ipport" rha:description="TCP port to use for connection with device" />
++          <attribute name="secure" rha:description="SSH connection" />
+         </optional>
+         <optional>
+-          <attribute name="cmd_prompt" rha:description="Force command prompt" />
++          <attribute name="ssh_options" rha:description="SSH options to use" />
+         </optional>
+         <optional>
+-          <attribute name="ssh_options" rha:description="SSH options to use" />
++          <attribute name="switch" rha:description="Physical switch number on device" />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+@@ -2617,28 +2624,34 @@
+           <attribute name="separator" rha:description="Separator for CSV created by operation list" />
+         </optional>
+         <optional>
+-          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
+-          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+-          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
+           <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+           <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+         </optional>
++        <optional>
++          <attribute name="ssh_path" rha:description="Path to ssh binary" />
++        </optional>
++        <optional>
++          <attribute name="telnet_path" rha:description="Path to telnet binary" />
++        </optional>
+       </group>
+ 
+ 
+       <!-- fence_apc_snmp -->
+-      <group rha:name="fence_apc_snmp" rha:description="Fence agent for APC over SNMP">
++      <group rha:name="fence_apc_snmp" rha:description="Fence agent for APC, Tripplite PDU over SNMP">
+         <optional>
+           <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
+         </optional>
+@@ -2646,34 +2659,31 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+-        </optional>
+-        <optional>
+-          <attribute name="login" rha:description="Login Name" />
++          <attribute name="community" rha:description="Set the community string" />
+         </optional>
+         <optional>
+-          <attribute name="passwd" rha:description="Login password or passphrase" />
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="port" rha:description="Physical plug number or name of virtual machine" />
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_version" rha:description="Specifies SNMP version to use (1,2c,3)" />
++          <attribute name="login" rha:description="Login Name" />
+         </optional>
+         <optional>
+-          <attribute name="community" rha:description="Set the community string" />
++          <attribute name="passwd" rha:description="Login password or passphrase" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_auth_prot" rha:description="Set authentication protocol (MD5|SHA)" />
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_sec_level" rha:description="Set security level (noAuthNoPriv|authNoPriv|authPriv)" />
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_priv_prot" rha:description="Set privacy protocol (DES|AES)" />
++          <attribute name="snmp_auth_prot" rha:description="Set authentication protocol (MD5|SHA)" />
+         </optional>
+         <optional>
+           <attribute name="snmp_priv_passwd" rha:description="Set privacy protocol password" />
+@@ -2682,13 +2692,16 @@
+           <attribute name="snmp_priv_passwd_script" rha:description="Script to run to retrieve privacy password" />
+         </optional>
+         <optional>
+-          <attribute name="udpport" rha:description="UDP/TCP port to use for connection with device" />
++          <attribute name="snmp_priv_prot" rha:description="Set privacy protocol (DES|AES)" />
+         </optional>
+         <optional>
+-          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++          <attribute name="snmp_sec_level" rha:description="Set security level (noAuthNoPriv|authNoPriv|authPriv)" />
+         </optional>
+         <optional>
+-          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++          <attribute name="snmp_version" rha:description="Specifies SNMP version to use (1,2c,3)" />
++        </optional>
++        <optional>
++          <attribute name="udpport" rha:description="UDP/TCP port to use for connection with device" />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+@@ -2706,19 +2719,19 @@
+           <attribute name="separator" rha:description="Separator for CSV created by operation list" />
+         </optional>
+         <optional>
+-          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
+-          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+-          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
+           <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+           <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+@@ -2735,37 +2748,40 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
++          <attribute name="cmd_prompt" rha:description="Force Python regex for command prompt" />
+         </optional>
+         <optional>
+-          <attribute name="login" rha:description="Login Name" />
++          <attribute name="identity_file" rha:description="Identity file for ssh" />
+         </optional>
+         <optional>
+-          <attribute name="passwd" rha:description="Login password or passphrase" />
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="cmd_prompt" rha:description="Force command prompt" />
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+-          <attribute name="secure" rha:description="SSH connection" />
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
+         </optional>
+         <optional>
+-          <attribute name="port" rha:description="Physical plug number or name of virtual machine" />
++          <attribute name="login" rha:description="Login Name" />
+         </optional>
+         <optional>
+-          <attribute name="identity_file" rha:description="Identity file for ssh" />
++          <attribute name="passwd" rha:description="Login password or passphrase" />
+         </optional>
+         <optional>
+-          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
++        </optional>
++        <optional>
++          <attribute name="secure" rha:description="SSH connection" />
+         </optional>
+         <optional>
+-          <attribute name="ipport" rha:description="TCP port to use for connection with device" />
++          <attribute name="ssh_options" rha:description="SSH options to use" />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+@@ -2783,26 +2799,32 @@
+           <attribute name="separator" rha:description="Separator for CSV created by operation list" />
+         </optional>
+         <optional>
+-          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
+-          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+-          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++          <attribute name="missing_as_off" rha:description="Missing port returns OFF instead of failure" />
+         </optional>
+         <optional>
+-          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="missing_as_off" rha:description="Missing port returns OFF instead of failure" />
++          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+           <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+         </optional>
++        <optional>
++          <attribute name="ssh_path" rha:description="Path to ssh binary" />
++        </optional>
++        <optional>
++          <attribute name="telnet_path" rha:description="Path to telnet binary" />
++        </optional>
+       </group>
+ 
+ 
+@@ -2815,34 +2837,31 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+-        </optional>
+-        <optional>
+-          <attribute name="login" rha:description="Login Name" />
++          <attribute name="community" rha:description="Set the community string" />
+         </optional>
+         <optional>
+-          <attribute name="passwd" rha:description="Login password or passphrase" />
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="port" rha:description="Physical plug number or name of virtual machine" />
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_version" rha:description="Specifies SNMP version to use (1,2c,3)" />
++          <attribute name="login" rha:description="Login Name" />
+         </optional>
+         <optional>
+-          <attribute name="community" rha:description="Set the community string" />
++          <attribute name="passwd" rha:description="Login password or passphrase" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_auth_prot" rha:description="Set authentication protocol (MD5|SHA)" />
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_sec_level" rha:description="Set security level (noAuthNoPriv|authNoPriv|authPriv)" />
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_priv_prot" rha:description="Set privacy protocol (DES|AES)" />
++          <attribute name="snmp_auth_prot" rha:description="Set authentication protocol (MD5|SHA)" />
+         </optional>
+         <optional>
+           <attribute name="snmp_priv_passwd" rha:description="Set privacy protocol password" />
+@@ -2851,13 +2870,16 @@
+           <attribute name="snmp_priv_passwd_script" rha:description="Script to run to retrieve privacy password" />
+         </optional>
+         <optional>
+-          <attribute name="udpport" rha:description="UDP/TCP port to use for connection with device" />
++          <attribute name="snmp_priv_prot" rha:description="Set privacy protocol (DES|AES)" />
+         </optional>
+         <optional>
+-          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++          <attribute name="snmp_sec_level" rha:description="Set security level (noAuthNoPriv|authNoPriv|authPriv)" />
+         </optional>
+         <optional>
+-          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++          <attribute name="snmp_version" rha:description="Specifies SNMP version to use (1,2c,3)" />
++        </optional>
++        <optional>
++          <attribute name="udpport" rha:description="UDP/TCP port to use for connection with device" />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+@@ -2875,19 +2897,19 @@
+           <attribute name="separator" rha:description="Separator for CSV created by operation list" />
+         </optional>
+         <optional>
+-          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
+-          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+-          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
+           <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+           <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+@@ -2901,40 +2923,43 @@
+           <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
++          <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+-          <attribute name="login" rha:description="Login Name" />
++          <attribute name="cmd_prompt" rha:description="Force Python regex for command prompt" />
+         </optional>
+         <optional>
+-          <attribute name="passwd" rha:description="Login password or passphrase" />
++          <attribute name="identity_file" rha:description="Identity file for ssh" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="secure" rha:description="SSH connection" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="identity_file" rha:description="Identity file for ssh" />
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+-          <attribute name="cmd_prompt" rha:description="Force command prompt" />
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
+         </optional>
+         <optional>
+-          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++          <attribute name="login" rha:description="Login Name" />
+         </optional>
+         <optional>
+-          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++          <attribute name="passwd" rha:description="Login password or passphrase" />
+         </optional>
+         <optional>
+-          <attribute name="ipport" rha:description="TCP port to use for connection with device" />
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="action" rha:description="Fencing Action" />
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
+         </optional>
+         <optional>
+-          <attribute name="port" rha:description="Physical plug number or name of virtual machine" />
++          <attribute name="secure" rha:description="SSH connection" />
++        </optional>
++        <optional>
++          <attribute name="ssh_options" rha:description="SSH options to use" />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+@@ -2952,26 +2977,32 @@
+           <attribute name="separator" rha:description="Separator for CSV created by operation list" />
+         </optional>
+         <optional>
+-          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
+-          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+-          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
+           <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+           <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+         </optional>
++        <optional>
++          <attribute name="ssh_path" rha:description="Path to ssh binary" />
++        </optional>
++        <optional>
++          <attribute name="telnet_path" rha:description="Path to telnet binary" />
++        </optional>
+       </group>
+ 
+-      <!-- No metadata for /usr/sbin/fence_check -->
++      <!-- Problem evaluating metadata for /usr/sbin/fence_check -->
+ 
+       <!-- fence_cisco_mds -->
+       <group rha:name="fence_cisco_mds" rha:description="Fence agent for Cisco MDS">
+@@ -2982,34 +3013,31 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+-        </optional>
+-        <optional>
+-          <attribute name="login" rha:description="Login Name" />
++          <attribute name="community" rha:description="Set the community string" />
+         </optional>
+         <optional>
+-          <attribute name="passwd" rha:description="Login password or passphrase" />
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="port" rha:description="Physical plug number or name of virtual machine" />
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_version" rha:description="Specifies SNMP version to use (1,2c,3)" />
++          <attribute name="login" rha:description="Login Name" />
+         </optional>
+         <optional>
+-          <attribute name="community" rha:description="Set the community string" />
++          <attribute name="passwd" rha:description="Login password or passphrase" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_auth_prot" rha:description="Set authentication protocol (MD5|SHA)" />
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_sec_level" rha:description="Set security level (noAuthNoPriv|authNoPriv|authPriv)" />
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_priv_prot" rha:description="Set privacy protocol (DES|AES)" />
++          <attribute name="snmp_auth_prot" rha:description="Set authentication protocol (MD5|SHA)" />
+         </optional>
+         <optional>
+           <attribute name="snmp_priv_passwd" rha:description="Set privacy protocol password" />
+@@ -3018,13 +3046,16 @@
+           <attribute name="snmp_priv_passwd_script" rha:description="Script to run to retrieve privacy password" />
+         </optional>
+         <optional>
+-          <attribute name="udpport" rha:description="UDP/TCP port to use for connection with device" />
++          <attribute name="snmp_priv_prot" rha:description="Set privacy protocol (DES|AES)" />
+         </optional>
+         <optional>
+-          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++          <attribute name="snmp_sec_level" rha:description="Set security level (noAuthNoPriv|authNoPriv|authPriv)" />
+         </optional>
+         <optional>
+-          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++          <attribute name="snmp_version" rha:description="Specifies SNMP version to use (1,2c,3)" />
++        </optional>
++        <optional>
++          <attribute name="udpport" rha:description="UDP/TCP port to use for connection with device" />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+@@ -3042,19 +3073,19 @@
+           <attribute name="separator" rha:description="Separator for CSV created by operation list" />
+         </optional>
+         <optional>
+-          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
+-          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+-          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
+           <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+           <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+@@ -3071,31 +3102,40 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++        </optional>
++        <optional>
+           <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
++        </optional>
++        <optional>
+           <attribute name="login" rha:description="Login Name" />
+         </optional>
+         <optional>
+-          <attribute name="passwd" rha:description="Login password or passphrase" />
++          <attribute name="notls" rha:description="Disable TLS negotiation, force SSL 3.0" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++          <attribute name="passwd" rha:description="Login password or passphrase" />
+         </optional>
+         <optional>
+-          <attribute name="ssl" rha:description="SSL connection" />
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
+         </optional>
+         <optional>
+-          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++          <attribute name="ssl" rha:description="SSL connection" />
+         </optional>
+         <optional>
+-          <attribute name="ipport" rha:description="TCP port to use for connection with device" />
++          <attribute name="ssl_insecure" rha:description="SSL connection without verifying fence device's certificate" />
+         </optional>
+         <optional>
+-          <attribute name="port" rha:description="Physical plug number or name of virtual machine" />
++          <attribute name="ssl_secure" rha:description="SSL connection with verifying fence device's certificate" />
+         </optional>
+         <optional>
+           <attribute name="suborg" rha:description="Additional path needed to access suborganization" />
+@@ -3116,22 +3156,25 @@
+           <attribute name="separator" rha:description="Separator for CSV created by operation list" />
+         </optional>
+         <optional>
+-          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++        </optional>
++        <optional>
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+           <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+           <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+         </optional>
+         <optional>
+-          <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
++          <attribute name="gnutlscli_path" rha:description="Path to gnutls-cli binary" />
+         </optional>
+       </group>
+ 
+@@ -3186,40 +3229,46 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
++          <attribute name="cmd_prompt" rha:description="Force Python regex for command prompt" />
+         </optional>
+         <optional>
+-          <attribute name="login" rha:description="Login Name" />
++          <attribute name="drac_version" rha:description="Force DRAC version to use (DRAC 5, DRAC CMC, DRAC MC)" />
+         </optional>
+         <optional>
+-          <attribute name="passwd" rha:description="Login password or passphrase" />
++          <attribute name="identity_file" rha:description="Identity file for ssh" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="cmd_prompt" rha:description="Force command prompt" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="secure" rha:description="SSH connection" />
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+-          <attribute name="identity_file" rha:description="Identity file for ssh" />
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
+         </optional>
+         <optional>
+-          <attribute name="drac_version" rha:description="Force DRAC version to use" />
++          <attribute name="login" rha:description="Login Name" />
+         </optional>
+         <optional>
+           <attribute name="module_name" rha:description="DRAC/MC module name" />
+         </optional>
+         <optional>
+-          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++          <attribute name="passwd" rha:description="Login password or passphrase" />
+         </optional>
+         <optional>
+-          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="ipport" rha:description="TCP port to use for connection with device" />
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
++        </optional>
++        <optional>
++          <attribute name="secure" rha:description="SSH connection" />
++        </optional>
++        <optional>
++          <attribute name="ssh_options" rha:description="SSH options to use" />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+@@ -3237,23 +3286,29 @@
+           <attribute name="separator" rha:description="Separator for CSV created by operation list" />
+         </optional>
+         <optional>
+-          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
+-          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+-          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
+           <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+           <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+         </optional>
++        <optional>
++          <attribute name="ssh_path" rha:description="Path to ssh binary" />
++        </optional>
++        <optional>
++          <attribute name="telnet_path" rha:description="Path to telnet binary" />
++        </optional>
+       </group>
+ 
+ 
+@@ -3266,34 +3321,31 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+-        </optional>
+-        <optional>
+-          <attribute name="login" rha:description="Login Name" />
++          <attribute name="community" rha:description="Set the community string" />
+         </optional>
+         <optional>
+-          <attribute name="passwd" rha:description="Login password or passphrase" />
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="port" rha:description="Physical plug number or name of virtual machine" />
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_version" rha:description="Specifies SNMP version to use (1,2c,3)" />
++          <attribute name="login" rha:description="Login Name" />
+         </optional>
+         <optional>
+-          <attribute name="community" rha:description="Set the community string" />
++          <attribute name="passwd" rha:description="Login password or passphrase" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_auth_prot" rha:description="Set authentication protocol (MD5|SHA)" />
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_sec_level" rha:description="Set security level (noAuthNoPriv|authNoPriv|authPriv)" />
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_priv_prot" rha:description="Set privacy protocol (DES|AES)" />
++          <attribute name="snmp_auth_prot" rha:description="Set authentication protocol (MD5|SHA)" />
+         </optional>
+         <optional>
+           <attribute name="snmp_priv_passwd" rha:description="Set privacy protocol password" />
+@@ -3302,13 +3354,16 @@
+           <attribute name="snmp_priv_passwd_script" rha:description="Script to run to retrieve privacy password" />
+         </optional>
+         <optional>
+-          <attribute name="udpport" rha:description="UDP/TCP port to use for connection with device" />
++          <attribute name="snmp_priv_prot" rha:description="Set privacy protocol (DES|AES)" />
+         </optional>
+         <optional>
+-          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++          <attribute name="snmp_sec_level" rha:description="Set security level (noAuthNoPriv|authNoPriv|authPriv)" />
+         </optional>
+         <optional>
+-          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++          <attribute name="snmp_version" rha:description="Specifies SNMP version to use (1,2c,3)" />
++        </optional>
++        <optional>
++          <attribute name="udpport" rha:description="UDP/TCP port to use for connection with device" />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+@@ -3326,19 +3381,19 @@
+           <attribute name="separator" rha:description="Separator for CSV created by operation list" />
+         </optional>
+         <optional>
+-          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
+-          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+-          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
+           <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+           <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+@@ -3375,8 +3430,8 @@
+       </group>
+ 
+ 
+-      <!-- fence_eps -->
+-      <group rha:name="fence_eps" rha:description="Fence agent for ePowerSwitch">
++      <!-- fence_emerson -->
++      <group rha:name="fence_emerson" rha:description="Fence agent for Emerson over SNMP">
+         <optional>
+           <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
+         </optional>
+@@ -3384,6 +3439,15 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
++          <attribute name="community" rha:description="Set the community string" />
++        </optional>
++        <optional>
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++        </optional>
++        <optional>
+           <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+@@ -3396,10 +3460,28 @@
+           <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="port" rha:description="Physical plug number or name of virtual machine" />
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
+         </optional>
+         <optional>
+-          <attribute name="hidden_page" rha:description="Name of hidden page" />
++          <attribute name="snmp_auth_prot" rha:description="Set authentication protocol (MD5|SHA)" />
++        </optional>
++        <optional>
++          <attribute name="snmp_priv_passwd" rha:description="Set privacy protocol password" />
++        </optional>
++        <optional>
++          <attribute name="snmp_priv_passwd_script" rha:description="Script to run to retrieve privacy password" />
++        </optional>
++        <optional>
++          <attribute name="snmp_priv_prot" rha:description="Set privacy protocol (DES|AES)" />
++        </optional>
++        <optional>
++          <attribute name="snmp_sec_level" rha:description="Set security level (noAuthNoPriv|authNoPriv|authPriv)" />
++        </optional>
++        <optional>
++          <attribute name="snmp_version" rha:description="Specifies SNMP version to use (1,2c,3)" />
++        </optional>
++        <optional>
++          <attribute name="udpport" rha:description="UDP/TCP port to use for connection with device" />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+@@ -3420,13 +3502,25 @@
+           <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++        </optional>
++        <optional>
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++        </optional>
++        <optional>
+           <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+         </optional>
+       </group>
+ 
+ 
+-      <!-- fence_hpblade -->
+-      <group rha:name="fence_hpblade" rha:description="Fence agent for HP BladeSystem">
++      <!-- fence_eps -->
++      <group rha:name="fence_eps" rha:description="Fence agent for ePowerSwitch">
+         <optional>
+           <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
+         </optional>
+@@ -3434,37 +3528,31 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+-        </optional>
+-        <optional>
+-          <attribute name="login" rha:description="Login Name" />
+-        </optional>
+-        <optional>
+-          <attribute name="passwd" rha:description="Login password or passphrase" />
++          <attribute name="hidden_page" rha:description="Name of hidden page" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="cmd_prompt" rha:description="Force command prompt" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="secure" rha:description="SSH connection" />
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+-          <attribute name="port" rha:description="Physical plug number or name of virtual machine" />
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
+         </optional>
+         <optional>
+-          <attribute name="identity_file" rha:description="Identity file for ssh" />
++          <attribute name="login" rha:description="Login Name" />
+         </optional>
+         <optional>
+-          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++          <attribute name="passwd" rha:description="Login password or passphrase" />
+         </optional>
+         <optional>
+-          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="ipport" rha:description="TCP port to use for connection with device" />
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+@@ -3482,22 +3570,19 @@
+           <attribute name="separator" rha:description="Separator for CSV created by operation list" />
+         </optional>
+         <optional>
+-          <attribute name="missing_as_off" rha:description="Missing port returns OFF instead of failure" />
+-        </optional>
+-        <optional>
+-          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
+-          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+-          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
+           <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+           <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+@@ -3505,8 +3590,8 @@
+       </group>
+ 
+ 
+-      <!-- fence_ibmblade -->
+-      <group rha:name="fence_ibmblade" rha:description="Fence agent for IBM BladeCenter over SNMP">
++      <!-- fence_hpblade -->
++      <group rha:name="fence_hpblade" rha:description="Fence agent for HP BladeSystem">
+         <optional>
+           <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
+         </optional>
+@@ -3514,49 +3599,40 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+-        </optional>
+-        <optional>
+-          <attribute name="login" rha:description="Login Name" />
+-        </optional>
+-        <optional>
+-          <attribute name="passwd" rha:description="Login password or passphrase" />
+-        </optional>
+-        <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++          <attribute name="cmd_prompt" rha:description="Force Python regex for command prompt" />
+         </optional>
+         <optional>
+-          <attribute name="port" rha:description="Physical plug number or name of virtual machine" />
++          <attribute name="identity_file" rha:description="Identity file for ssh" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_version" rha:description="Specifies SNMP version to use (1,2c,3)" />
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="community" rha:description="Set the community string" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_auth_prot" rha:description="Set authentication protocol (MD5|SHA)" />
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_sec_level" rha:description="Set security level (noAuthNoPriv|authNoPriv|authPriv)" />
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_priv_prot" rha:description="Set privacy protocol (DES|AES)" />
++          <attribute name="login" rha:description="Login Name" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_priv_passwd" rha:description="Set privacy protocol password" />
++          <attribute name="passwd" rha:description="Login password or passphrase" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_priv_passwd_script" rha:description="Script to run to retrieve privacy password" />
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="udpport" rha:description="UDP/TCP port to use for connection with device" />
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
+         </optional>
+         <optional>
+-          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++          <attribute name="secure" rha:description="SSH connection" />
+         </optional>
+         <optional>
+-          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++          <attribute name="ssh_options" rha:description="SSH options to use" />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+@@ -3574,83 +3650,51 @@
+           <attribute name="separator" rha:description="Separator for CSV created by operation list" />
+         </optional>
+         <optional>
+-          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+-        </optional>
+-        <optional>
+-          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+-        </optional>
+-        <optional>
+-          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+-        </optional>
+-        <optional>
+-          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+-        </optional>
+-        <optional>
+           <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
+-          <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+-        </optional>
+-      </group>
+-
+-
+-      <!-- fence_idrac -->
+-      <group rha:name="fence_idrac" rha:description="Fence agent for IPMI over LAN">
+-        <optional>
+-          <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
+-        </optional>
+-        <optional>
+-          <attribute name="auth" rha:description="IPMI Lan Auth type (md5, password, or none)" />
+-        </optional>
+-        <optional>
+-          <attribute name="ipaddr" rha:description="IPMI Lan IP to talk to" />
+-        </optional>
+-        <optional>
+-          <attribute name="passwd" rha:description="Password (if required) to control power on IPMI device" />
+-        </optional>
+-        <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password (if required)" />
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+-          <attribute name="lanplus" rha:description="Use Lanplus to improve security of connection" />
++          <attribute name="missing_as_off" rha:description="Missing port returns OFF instead of failure" />
+         </optional>
+         <optional>
+-          <attribute name="login" rha:description="Username/Login (if required) to control power on IPMI device" />
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="action" rha:description="Operation to perform. Valid operations: on, off, reboot, status, list, diag, monitor or metadata" />
++          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="timeout" rha:description="Timeout (sec) for IPMI operation" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+-          <attribute name="cipher" rha:description="Ciphersuite to use (same as ipmitool -C parameter)" />
++          <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+         </optional>
+         <optional>
+-          <attribute name="method" rha:description="Method to fence (onoff or cycle)" />
++          <attribute name="ssh_path" rha:description="Path to ssh binary" />
+         </optional>
+         <optional>
+-          <attribute name="power_wait" rha:description="Wait X seconds after on/off operation" />
++          <attribute name="telnet_path" rha:description="Path to telnet binary" />
+         </optional>
++      </group>
++
++
++      <!-- fence_ibmblade -->
++      <group rha:name="fence_ibmblade" rha:description="Fence agent for IBM BladeCenter over SNMP">
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
+         </optional>
+         <optional>
+-          <attribute name="privlvl" rha:description="Privilege level on IPMI device" />
++          <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+-          <attribute name="verbose" rha:description="Verbose mode" />
++          <attribute name="community" rha:description="Set the community string" />
+         </optional>
+-      </group>
+-
+-
+-      <!-- fence_ifmib -->
+-      <group rha:name="fence_ifmib" rha:description="Fence agent for IF MIB">
+         <optional>
+-          <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="action" rha:description="Fencing Action" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+           <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+@@ -3665,39 +3709,30 @@
+           <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="port" rha:description="Physical plug number or name of virtual machine" />
+-        </optional>
+-        <optional>
+-          <attribute name="snmp_version" rha:description="Specifies SNMP version to use (1,2c,3)" />
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
+         </optional>
+         <optional>
+-          <attribute name="community" rha:description="Set the community string" />
++          <attribute name="snmp_auth_prot" rha:description="Set authentication protocol (MD5|SHA)" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_auth_prot" rha:description="Set authentication protocol (MD5|SHA)" />
++          <attribute name="snmp_priv_passwd" rha:description="Set privacy protocol password" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_sec_level" rha:description="Set security level (noAuthNoPriv|authNoPriv|authPriv)" />
++          <attribute name="snmp_priv_passwd_script" rha:description="Script to run to retrieve privacy password" />
+         </optional>
+         <optional>
+           <attribute name="snmp_priv_prot" rha:description="Set privacy protocol (DES|AES)" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_priv_passwd" rha:description="Set privacy protocol password" />
++          <attribute name="snmp_sec_level" rha:description="Set security level (noAuthNoPriv|authNoPriv|authPriv)" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_priv_passwd_script" rha:description="Script to run to retrieve privacy password" />
++          <attribute name="snmp_version" rha:description="Specifies SNMP version to use (1,2c,3)" />
+         </optional>
+         <optional>
+           <attribute name="udpport" rha:description="UDP/TCP port to use for connection with device" />
+         </optional>
+         <optional>
+-          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+-        </optional>
+-        <optional>
+-          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+-        </optional>
+-        <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+         </optional>
+         <optional>
+@@ -3713,19 +3748,19 @@
+           <attribute name="separator" rha:description="Separator for CSV created by operation list" />
+         </optional>
+         <optional>
+-          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
+-          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+-          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
+           <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+           <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+@@ -3733,8 +3768,8 @@
+       </group>
+ 
+ 
+-      <!-- fence_ilo -->
+-      <group rha:name="fence_ilo" rha:description="Fence agent for HP iLO">
++      <!-- fence_idrac -->
++      <group rha:name="fence_idrac" rha:description="Fence agent for IPMI">
+         <optional>
+           <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
+         </optional>
+@@ -3742,31 +3777,40 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
++          <attribute name="auth" rha:description="IPMI Lan Auth type." />
+         </optional>
+         <optional>
+-          <attribute name="login" rha:description="Login Name" />
++          <attribute name="cipher" rha:description="Ciphersuite to use (same as ipmitool -C parameter)" />
+         </optional>
+         <optional>
+-          <attribute name="passwd" rha:description="Login password or passphrase" />
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="ssl" rha:description="SSL connection" />
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+-          <attribute name="ribcl" rha:description="Force ribcl version to use" />
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
+         </optional>
+         <optional>
+-          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++          <attribute name="lanplus" rha:description="Use Lanplus to improve security of connection" />
+         </optional>
+         <optional>
+-          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++          <attribute name="login" rha:description="Login Name" />
++        </optional>
++        <optional>
++          <attribute name="method" rha:description="Method to fence (onoff|cycle)" />
++        </optional>
++        <optional>
++          <attribute name="passwd" rha:description="Login password or passphrase" />
++        </optional>
++        <optional>
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="ipport" rha:description="TCP port to use for connection with device" />
++          <attribute name="privlvl" rha:description="Privilege level on IPMI device" />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+@@ -3781,28 +3825,37 @@
+           <attribute name="help" rha:description="Display help and exit" />
+         </optional>
+         <optional>
+-          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
+-          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++          <attribute name="ipmitool_path" rha:description="Path to ipmitool binary" />
+         </optional>
+         <optional>
+           <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++        </optional>
++        <optional>
+           <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+           <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+         </optional>
++        <optional>
++          <attribute name="sudo" rha:description="Use sudo (without password) when calling 3rd party sotfware." />
++        </optional>
++        <optional>
++          <attribute name="sudo_path" rha:description="Path to sudo binary" />
++        </optional>
+       </group>
+ 
+ 
+-      <!-- fence_ilo2 -->
+-      <group rha:name="fence_ilo2" rha:description="Fence agent for HP iLO">
++      <!-- fence_ifmib -->
++      <group rha:name="fence_ifmib" rha:description="Fence agent for IF MIB">
+         <optional>
+           <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
+         </optional>
+@@ -3810,6 +3863,15 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
++          <attribute name="community" rha:description="Set the community string" />
++        </optional>
++        <optional>
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++        </optional>
++        <optional>
+           <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+@@ -3822,19 +3884,28 @@
+           <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="ssl" rha:description="SSL connection" />
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
+         </optional>
+         <optional>
+-          <attribute name="ribcl" rha:description="Force ribcl version to use" />
++          <attribute name="snmp_auth_prot" rha:description="Set authentication protocol (MD5|SHA)" />
+         </optional>
+         <optional>
+-          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++          <attribute name="snmp_priv_passwd" rha:description="Set privacy protocol password" />
+         </optional>
+         <optional>
+-          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++          <attribute name="snmp_priv_passwd_script" rha:description="Script to run to retrieve privacy password" />
++        </optional>
++        <optional>
++          <attribute name="snmp_priv_prot" rha:description="Set privacy protocol (DES|AES)" />
++        </optional>
++        <optional>
++          <attribute name="snmp_sec_level" rha:description="Set security level (noAuthNoPriv|authNoPriv|authPriv)" />
+         </optional>
+         <optional>
+-          <attribute name="ipport" rha:description="TCP port to use for connection with device" />
++          <attribute name="snmp_version" rha:description="Specifies SNMP version to use (1,2c,3)" />
++        </optional>
++        <optional>
++          <attribute name="udpport" rha:description="UDP/TCP port to use for connection with device" />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+@@ -3849,19 +3920,22 @@
+           <attribute name="help" rha:description="Display help and exit" />
+         </optional>
+         <optional>
+-          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++          <attribute name="separator" rha:description="Separator for CSV created by operation list" />
+         </optional>
+         <optional>
+-          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
+           <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++        </optional>
++        <optional>
+           <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+           <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+@@ -3869,108 +3943,174 @@
+       </group>
+ 
+ 
+-      <!-- fence_ilo3 -->
+-      <group rha:name="fence_ilo3" rha:description="Fence agent for IPMI over LAN">
++      <!-- fence_ilo -->
++      <group rha:name="fence_ilo" rha:description="Fence agent for HP iLO">
+         <optional>
+           <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
+         </optional>
+         <optional>
+-          <attribute name="auth" rha:description="IPMI Lan Auth type (md5, password, or none)" />
++          <attribute name="action" rha:description="Fencing Action" />
++        </optional>
++        <optional>
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IPMI Lan IP to talk to" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="passwd" rha:description="Password (if required) to control power on IPMI device" />
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password (if required)" />
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
+         </optional>
+         <optional>
+-          <attribute name="lanplus" rha:description="Use Lanplus to improve security of connection" />
++          <attribute name="login" rha:description="Login Name" />
+         </optional>
+         <optional>
+-          <attribute name="login" rha:description="Username/Login (if required) to control power on IPMI device" />
++          <attribute name="notls" rha:description="Disable TLS negotiation, force SSL 3.0" />
+         </optional>
+         <optional>
+-          <attribute name="action" rha:description="Operation to perform. Valid operations: on, off, reboot, status, list, diag, monitor or metadata" />
++          <attribute name="passwd" rha:description="Login password or passphrase" />
+         </optional>
+         <optional>
+-          <attribute name="timeout" rha:description="Timeout (sec) for IPMI operation" />
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="cipher" rha:description="Ciphersuite to use (same as ipmitool -C parameter)" />
++          <attribute name="ribcl" rha:description="Force ribcl version to use" />
+         </optional>
+         <optional>
+-          <attribute name="method" rha:description="Method to fence (onoff or cycle)" />
++          <attribute name="ssl" rha:description="SSL connection" />
+         </optional>
+         <optional>
+-          <attribute name="power_wait" rha:description="Wait X seconds after on/off operation" />
++          <attribute name="ssl_insecure" rha:description="SSL connection without verifying fence device's certificate" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="ssl_secure" rha:description="SSL connection with verifying fence device's certificate" />
+         </optional>
+         <optional>
+-          <attribute name="privlvl" rha:description="Privilege level on IPMI device" />
++          <attribute name="tls1.0" rha:description="Disable TLS negotiaton, force TLS 1.0" />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+         </optional>
++        <optional>
++          <attribute name="debug" rha:description="Write debug information to given file" />
++        </optional>
++        <optional>
++          <attribute name="version" rha:description="Display version information and exit" />
++        </optional>
++        <optional>
++          <attribute name="help" rha:description="Display help and exit" />
++        </optional>
++        <optional>
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++        </optional>
++        <optional>
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++        </optional>
++        <optional>
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++        </optional>
++        <optional>
++          <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
++        </optional>
++        <optional>
++          <attribute name="gnutlscli_path" rha:description="Path to gnutls-cli binary" />
++        </optional>
+       </group>
+ 
+ 
+-      <!-- fence_ilo4 -->
+-      <group rha:name="fence_ilo4" rha:description="Fence agent for IPMI over LAN">
++      <!-- fence_ilo2 -->
++      <group rha:name="fence_ilo2" rha:description="Fence agent for HP iLO">
+         <optional>
+           <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
+         </optional>
+         <optional>
+-          <attribute name="auth" rha:description="IPMI Lan Auth type (md5, password, or none)" />
++          <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IPMI Lan IP to talk to" />
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="passwd" rha:description="Password (if required) to control power on IPMI device" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password (if required)" />
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+-          <attribute name="lanplus" rha:description="Use Lanplus to improve security of connection" />
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
+         </optional>
+         <optional>
+-          <attribute name="login" rha:description="Username/Login (if required) to control power on IPMI device" />
++          <attribute name="login" rha:description="Login Name" />
+         </optional>
+         <optional>
+-          <attribute name="action" rha:description="Operation to perform. Valid operations: on, off, reboot, status, list, diag, monitor or metadata" />
++          <attribute name="notls" rha:description="Disable TLS negotiation, force SSL 3.0" />
+         </optional>
+         <optional>
+-          <attribute name="timeout" rha:description="Timeout (sec) for IPMI operation" />
++          <attribute name="passwd" rha:description="Login password or passphrase" />
+         </optional>
+         <optional>
+-          <attribute name="cipher" rha:description="Ciphersuite to use (same as ipmitool -C parameter)" />
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="method" rha:description="Method to fence (onoff or cycle)" />
++          <attribute name="ribcl" rha:description="Force ribcl version to use" />
+         </optional>
+         <optional>
+-          <attribute name="power_wait" rha:description="Wait X seconds after on/off operation" />
++          <attribute name="ssl" rha:description="SSL connection" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="ssl_insecure" rha:description="SSL connection without verifying fence device's certificate" />
+         </optional>
+         <optional>
+-          <attribute name="privlvl" rha:description="Privilege level on IPMI device" />
++          <attribute name="ssl_secure" rha:description="SSL connection with verifying fence device's certificate" />
++        </optional>
++        <optional>
++          <attribute name="tls1.0" rha:description="Disable TLS negotiaton, force TLS 1.0" />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+         </optional>
++        <optional>
++          <attribute name="debug" rha:description="Write debug information to given file" />
++        </optional>
++        <optional>
++          <attribute name="version" rha:description="Display version information and exit" />
++        </optional>
++        <optional>
++          <attribute name="help" rha:description="Display help and exit" />
++        </optional>
++        <optional>
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++        </optional>
++        <optional>
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++        </optional>
++        <optional>
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++        </optional>
++        <optional>
++          <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
++        </optional>
++        <optional>
++          <attribute name="gnutlscli_path" rha:description="Path to gnutls-cli binary" />
++        </optional>
+       </group>
+ 
+ 
+-      <!-- fence_ilo_mp -->
+-      <group rha:name="fence_ilo_mp" rha:description="Fence agent for HP iLO MP">
++      <!-- fence_ilo3 -->
++      <group rha:name="fence_ilo3" rha:description="Fence agent for IPMI">
+         <optional>
+           <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
+         </optional>
+@@ -3978,34 +4118,40 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
++          <attribute name="auth" rha:description="IPMI Lan Auth type." />
+         </optional>
+         <optional>
+-          <attribute name="login" rha:description="Login Name" />
++          <attribute name="cipher" rha:description="Ciphersuite to use (same as ipmitool -C parameter)" />
+         </optional>
+         <optional>
+-          <attribute name="passwd" rha:description="Login password or passphrase" />
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="secure" rha:description="SSH connection" />
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+-          <attribute name="identity_file" rha:description="Identity file for ssh" />
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
+         </optional>
+         <optional>
+-          <attribute name="cmd_prompt" rha:description="Force command prompt" />
++          <attribute name="lanplus" rha:description="Use Lanplus to improve security of connection" />
+         </optional>
+         <optional>
+-          <attribute name="ipport" rha:description="TCP port to use for connection with device" />
++          <attribute name="login" rha:description="Login Name" />
+         </optional>
+         <optional>
+-          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++          <attribute name="method" rha:description="Method to fence (onoff|cycle)" />
+         </optional>
+         <optional>
+-          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++          <attribute name="passwd" rha:description="Login password or passphrase" />
++        </optional>
++        <optional>
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++        </optional>
++        <optional>
++          <attribute name="privlvl" rha:description="Privilege level on IPMI device" />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+@@ -4020,75 +4166,615 @@
+           <attribute name="help" rha:description="Display help and exit" />
+         </optional>
+         <optional>
+-          <attribute name="separator" rha:description="Separator for CSV created by operation list" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++        </optional>
++        <optional>
++          <attribute name="ipmitool_path" rha:description="Path to ipmitool binary" />
++        </optional>
++        <optional>
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+           <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
++          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
++        </optional>
++        <optional>
+           <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+-          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++          <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+         </optional>
+         <optional>
+-          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
++          <attribute name="sudo" rha:description="Use sudo (without password) when calling 3rd party sotfware." />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="sudo_path" rha:description="Path to sudo binary" />
++        </optional>
++      </group>
++
++
++      <!-- fence_ilo3_ssh -->
++      <group rha:name="fence_ilo3_ssh" rha:description="Fence agent for HP iLO over SSH">
++        <optional>
++          <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
++        </optional>
++        <optional>
++          <attribute name="action" rha:description="Fencing Action" />
++        </optional>
++        <optional>
++          <attribute name="cmd_prompt" rha:description="Force Python regex for command prompt" />
++        </optional>
++        <optional>
++          <attribute name="identity_file" rha:description="Identity file for ssh" />
++        </optional>
++        <optional>
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
++        </optional>
++        <optional>
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
++        </optional>
++        <optional>
++          <attribute name="login" rha:description="Login Name" />
++        </optional>
++        <optional>
++          <attribute name="method" rha:description="Method to fence (onoff|cycle)" />
++        </optional>
++        <optional>
++          <attribute name="passwd" rha:description="Login password or passphrase" />
++        </optional>
++        <optional>
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++        </optional>
++        <optional>
++          <attribute name="secure" rha:description="SSH connection" />
++        </optional>
++        <optional>
++          <attribute name="ssh_options" rha:description="SSH options to use" />
++        </optional>
++        <optional>
++          <attribute name="verbose" rha:description="Verbose mode" />
++        </optional>
++        <optional>
++          <attribute name="debug" rha:description="Write debug information to given file" />
++        </optional>
++        <optional>
++          <attribute name="version" rha:description="Display version information and exit" />
++        </optional>
++        <optional>
++          <attribute name="help" rha:description="Display help and exit" />
++        </optional>
++        <optional>
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++        </optional>
++        <optional>
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++        </optional>
++        <optional>
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++        </optional>
++        <optional>
++          <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
++        </optional>
++        <optional>
++          <attribute name="ssh_path" rha:description="Path to ssh binary" />
++        </optional>
++        <optional>
++          <attribute name="telnet_path" rha:description="Path to telnet binary" />
++        </optional>
++      </group>
++
++
++      <!-- fence_ilo4 -->
++      <group rha:name="fence_ilo4" rha:description="Fence agent for IPMI">
++        <optional>
++          <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
++        </optional>
++        <optional>
++          <attribute name="action" rha:description="Fencing Action" />
++        </optional>
++        <optional>
++          <attribute name="auth" rha:description="IPMI Lan Auth type." />
++        </optional>
++        <optional>
++          <attribute name="cipher" rha:description="Ciphersuite to use (same as ipmitool -C parameter)" />
++        </optional>
++        <optional>
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
++        </optional>
++        <optional>
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
++        </optional>
++        <optional>
++          <attribute name="lanplus" rha:description="Use Lanplus to improve security of connection" />
++        </optional>
++        <optional>
++          <attribute name="login" rha:description="Login Name" />
++        </optional>
++        <optional>
++          <attribute name="method" rha:description="Method to fence (onoff|cycle)" />
++        </optional>
++        <optional>
++          <attribute name="passwd" rha:description="Login password or passphrase" />
++        </optional>
++        <optional>
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++        </optional>
++        <optional>
++          <attribute name="privlvl" rha:description="Privilege level on IPMI device" />
++        </optional>
++        <optional>
++          <attribute name="verbose" rha:description="Verbose mode" />
++        </optional>
++        <optional>
++          <attribute name="debug" rha:description="Write debug information to given file" />
++        </optional>
++        <optional>
++          <attribute name="version" rha:description="Display version information and exit" />
++        </optional>
++        <optional>
++          <attribute name="help" rha:description="Display help and exit" />
++        </optional>
++        <optional>
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++        </optional>
++        <optional>
++          <attribute name="ipmitool_path" rha:description="Path to ipmitool binary" />
++        </optional>
++        <optional>
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++        </optional>
++        <optional>
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++        </optional>
++        <optional>
++          <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
++        </optional>
++        <optional>
++          <attribute name="sudo" rha:description="Use sudo (without password) when calling 3rd party sotfware." />
++        </optional>
++        <optional>
++          <attribute name="sudo_path" rha:description="Path to sudo binary" />
++        </optional>
++      </group>
++
++
++      <!-- fence_ilo4_ssh -->
++      <group rha:name="fence_ilo4_ssh" rha:description="Fence agent for HP iLO over SSH">
++        <optional>
++          <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
++        </optional>
++        <optional>
++          <attribute name="action" rha:description="Fencing Action" />
++        </optional>
++        <optional>
++          <attribute name="cmd_prompt" rha:description="Force Python regex for command prompt" />
++        </optional>
++        <optional>
++          <attribute name="identity_file" rha:description="Identity file for ssh" />
++        </optional>
++        <optional>
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
++        </optional>
++        <optional>
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
++        </optional>
++        <optional>
++          <attribute name="login" rha:description="Login Name" />
++        </optional>
++        <optional>
++          <attribute name="method" rha:description="Method to fence (onoff|cycle)" />
++        </optional>
++        <optional>
++          <attribute name="passwd" rha:description="Login password or passphrase" />
++        </optional>
++        <optional>
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++        </optional>
++        <optional>
++          <attribute name="secure" rha:description="SSH connection" />
++        </optional>
++        <optional>
++          <attribute name="ssh_options" rha:description="SSH options to use" />
++        </optional>
++        <optional>
++          <attribute name="verbose" rha:description="Verbose mode" />
++        </optional>
++        <optional>
++          <attribute name="debug" rha:description="Write debug information to given file" />
++        </optional>
++        <optional>
++          <attribute name="version" rha:description="Display version information and exit" />
++        </optional>
++        <optional>
++          <attribute name="help" rha:description="Display help and exit" />
++        </optional>
++        <optional>
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++        </optional>
++        <optional>
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++        </optional>
++        <optional>
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++        </optional>
++        <optional>
++          <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
++        </optional>
++        <optional>
++          <attribute name="ssh_path" rha:description="Path to ssh binary" />
++        </optional>
++        <optional>
++          <attribute name="telnet_path" rha:description="Path to telnet binary" />
++        </optional>
++      </group>
++
++
++      <!-- fence_ilo_moonshot -->
++      <group rha:name="fence_ilo_moonshot" rha:description="Fence agent for HP Moonshot iLO">
++        <optional>
++          <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
++        </optional>
++        <optional>
++          <attribute name="action" rha:description="Fencing Action" />
++        </optional>
++        <optional>
++          <attribute name="cmd_prompt" rha:description="Force Python regex for command prompt" />
++        </optional>
++        <optional>
++          <attribute name="identity_file" rha:description="Identity file for ssh" />
++        </optional>
++        <optional>
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
++        </optional>
++        <optional>
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
++        </optional>
++        <optional>
++          <attribute name="login" rha:description="Login Name" />
++        </optional>
++        <optional>
++          <attribute name="passwd" rha:description="Login password or passphrase" />
++        </optional>
++        <optional>
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++        </optional>
++        <optional>
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
++        </optional>
++        <optional>
++          <attribute name="secure" rha:description="SSH connection" />
++        </optional>
++        <optional>
++          <attribute name="ssh_options" rha:description="SSH options to use" />
++        </optional>
++        <optional>
++          <attribute name="verbose" rha:description="Verbose mode" />
++        </optional>
++        <optional>
++          <attribute name="debug" rha:description="Write debug information to given file" />
++        </optional>
++        <optional>
++          <attribute name="version" rha:description="Display version information and exit" />
++        </optional>
++        <optional>
++          <attribute name="help" rha:description="Display help and exit" />
++        </optional>
++        <optional>
++          <attribute name="separator" rha:description="Separator for CSV created by operation list" />
++        </optional>
++        <optional>
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++        </optional>
++        <optional>
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++        </optional>
++        <optional>
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++        </optional>
++        <optional>
++          <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
++        </optional>
++        <optional>
++          <attribute name="ssh_path" rha:description="Path to ssh binary" />
++        </optional>
++      </group>
++
++
++      <!-- fence_ilo_mp -->
++      <group rha:name="fence_ilo_mp" rha:description="Fence agent for HP iLO MP">
++        <optional>
++          <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
++        </optional>
++        <optional>
++          <attribute name="action" rha:description="Fencing Action" />
++        </optional>
++        <optional>
++          <attribute name="cmd_prompt" rha:description="Force Python regex for command prompt" />
++        </optional>
++        <optional>
++          <attribute name="identity_file" rha:description="Identity file for ssh" />
++        </optional>
++        <optional>
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
++        </optional>
++        <optional>
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
++        </optional>
++        <optional>
++          <attribute name="login" rha:description="Login Name" />
++        </optional>
++        <optional>
++          <attribute name="passwd" rha:description="Login password or passphrase" />
++        </optional>
++        <optional>
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++        </optional>
++        <optional>
++          <attribute name="secure" rha:description="SSH connection" />
++        </optional>
++        <optional>
++          <attribute name="ssh_options" rha:description="SSH options to use" />
++        </optional>
++        <optional>
++          <attribute name="verbose" rha:description="Verbose mode" />
++        </optional>
++        <optional>
++          <attribute name="debug" rha:description="Write debug information to given file" />
++        </optional>
++        <optional>
++          <attribute name="version" rha:description="Display version information and exit" />
++        </optional>
++        <optional>
++          <attribute name="help" rha:description="Display help and exit" />
++        </optional>
++        <optional>
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++        </optional>
++        <optional>
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++        </optional>
++        <optional>
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++        </optional>
++        <optional>
++          <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
++        </optional>
++        <optional>
++          <attribute name="ssh_path" rha:description="Path to ssh binary" />
++        </optional>
++        <optional>
++          <attribute name="telnet_path" rha:description="Path to telnet binary" />
++        </optional>
++      </group>
++
++
++      <!-- fence_ilo_ssh -->
++      <group rha:name="fence_ilo_ssh" rha:description="Fence agent for HP iLO over SSH">
++        <optional>
++          <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
++        </optional>
++        <optional>
++          <attribute name="action" rha:description="Fencing Action" />
++        </optional>
++        <optional>
++          <attribute name="cmd_prompt" rha:description="Force Python regex for command prompt" />
++        </optional>
++        <optional>
++          <attribute name="identity_file" rha:description="Identity file for ssh" />
++        </optional>
++        <optional>
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
++        </optional>
++        <optional>
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
++        </optional>
++        <optional>
++          <attribute name="login" rha:description="Login Name" />
++        </optional>
++        <optional>
++          <attribute name="method" rha:description="Method to fence (onoff|cycle)" />
++        </optional>
++        <optional>
++          <attribute name="passwd" rha:description="Login password or passphrase" />
++        </optional>
++        <optional>
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++        </optional>
++        <optional>
++          <attribute name="secure" rha:description="SSH connection" />
++        </optional>
++        <optional>
++          <attribute name="ssh_options" rha:description="SSH options to use" />
++        </optional>
++        <optional>
++          <attribute name="verbose" rha:description="Verbose mode" />
++        </optional>
++        <optional>
++          <attribute name="debug" rha:description="Write debug information to given file" />
++        </optional>
++        <optional>
++          <attribute name="version" rha:description="Display version information and exit" />
++        </optional>
++        <optional>
++          <attribute name="help" rha:description="Display help and exit" />
++        </optional>
++        <optional>
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++        </optional>
++        <optional>
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++        </optional>
++        <optional>
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++        </optional>
++        <optional>
++          <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
++        </optional>
++        <optional>
++          <attribute name="ssh_path" rha:description="Path to ssh binary" />
++        </optional>
++        <optional>
++          <attribute name="telnet_path" rha:description="Path to telnet binary" />
++        </optional>
++      </group>
++
++
++      <!-- fence_imm -->
++      <group rha:name="fence_imm" rha:description="Fence agent for IPMI">
++        <optional>
++          <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
++        </optional>
++        <optional>
++          <attribute name="action" rha:description="Fencing Action" />
++        </optional>
++        <optional>
++          <attribute name="auth" rha:description="IPMI Lan Auth type." />
++        </optional>
++        <optional>
++          <attribute name="cipher" rha:description="Ciphersuite to use (same as ipmitool -C parameter)" />
++        </optional>
++        <optional>
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
++        </optional>
++        <optional>
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
++        </optional>
++        <optional>
++          <attribute name="lanplus" rha:description="Use Lanplus to improve security of connection" />
++        </optional>
++        <optional>
++          <attribute name="login" rha:description="Login Name" />
++        </optional>
++        <optional>
++          <attribute name="method" rha:description="Method to fence (onoff|cycle)" />
+         </optional>
+         <optional>
+-          <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
++          <attribute name="passwd" rha:description="Login password or passphrase" />
+         </optional>
+-      </group>
+-
+-
+-      <!-- fence_imm -->
+-      <group rha:name="fence_imm" rha:description="Fence agent for IPMI over LAN">
+         <optional>
+-          <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="auth" rha:description="IPMI Lan Auth type (md5, password, or none)" />
++          <attribute name="privlvl" rha:description="Privilege level on IPMI device" />
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IPMI Lan IP to talk to" />
++          <attribute name="verbose" rha:description="Verbose mode" />
+         </optional>
+         <optional>
+-          <attribute name="passwd" rha:description="Password (if required) to control power on IPMI device" />
++          <attribute name="debug" rha:description="Write debug information to given file" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password (if required)" />
++          <attribute name="version" rha:description="Display version information and exit" />
+         </optional>
+         <optional>
+-          <attribute name="lanplus" rha:description="Use Lanplus to improve security of connection" />
++          <attribute name="help" rha:description="Display help and exit" />
+         </optional>
+         <optional>
+-          <attribute name="login" rha:description="Username/Login (if required) to control power on IPMI device" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
+-          <attribute name="action" rha:description="Operation to perform. Valid operations: on, off, reboot, status, list, diag, monitor or metadata" />
++          <attribute name="ipmitool_path" rha:description="Path to ipmitool binary" />
+         </optional>
+         <optional>
+-          <attribute name="timeout" rha:description="Timeout (sec) for IPMI operation" />
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+-          <attribute name="cipher" rha:description="Ciphersuite to use (same as ipmitool -C parameter)" />
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="method" rha:description="Method to fence (onoff or cycle)" />
++          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="power_wait" rha:description="Wait X seconds after on/off operation" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+         </optional>
+         <optional>
+-          <attribute name="privlvl" rha:description="Privilege level on IPMI device" />
++          <attribute name="sudo" rha:description="Use sudo (without password) when calling 3rd party sotfware." />
+         </optional>
+         <optional>
+-          <attribute name="verbose" rha:description="Verbose mode" />
++          <attribute name="sudo_path" rha:description="Path to sudo binary" />
+         </optional>
+       </group>
+ 
+@@ -4102,34 +4788,31 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+-        </optional>
+-        <optional>
+-          <attribute name="login" rha:description="Login Name" />
++          <attribute name="community" rha:description="Set the community string" />
+         </optional>
+         <optional>
+-          <attribute name="passwd" rha:description="Login password or passphrase" />
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="port" rha:description="Physical plug number or name of virtual machine" />
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_version" rha:description="Specifies SNMP version to use (1,2c,3)" />
++          <attribute name="login" rha:description="Login Name" />
+         </optional>
+         <optional>
+-          <attribute name="community" rha:description="Set the community string" />
++          <attribute name="passwd" rha:description="Login password or passphrase" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_auth_prot" rha:description="Set authentication protocol (MD5|SHA)" />
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_sec_level" rha:description="Set security level (noAuthNoPriv|authNoPriv|authPriv)" />
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_priv_prot" rha:description="Set privacy protocol (DES|AES)" />
++          <attribute name="snmp_auth_prot" rha:description="Set authentication protocol (MD5|SHA)" />
+         </optional>
+         <optional>
+           <attribute name="snmp_priv_passwd" rha:description="Set privacy protocol password" />
+@@ -4138,13 +4821,16 @@
+           <attribute name="snmp_priv_passwd_script" rha:description="Script to run to retrieve privacy password" />
+         </optional>
+         <optional>
+-          <attribute name="udpport" rha:description="UDP/TCP port to use for connection with device" />
++          <attribute name="snmp_priv_prot" rha:description="Set privacy protocol (DES|AES)" />
+         </optional>
+         <optional>
+-          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++          <attribute name="snmp_sec_level" rha:description="Set security level (noAuthNoPriv|authNoPriv|authPriv)" />
+         </optional>
+         <optional>
+-          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++          <attribute name="snmp_version" rha:description="Specifies SNMP version to use (1,2c,3)" />
++        </optional>
++        <optional>
++          <attribute name="udpport" rha:description="UDP/TCP port to use for connection with device" />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+@@ -4162,19 +4848,19 @@
+           <attribute name="separator" rha:description="Separator for CSV created by operation list" />
+         </optional>
+         <optional>
+-          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
+-          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+-          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
+           <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+           <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+@@ -4191,34 +4877,31 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+-        </optional>
+-        <optional>
+-          <attribute name="login" rha:description="Login Name" />
++          <attribute name="community" rha:description="Set the community string" />
+         </optional>
+         <optional>
+-          <attribute name="passwd" rha:description="Login password or passphrase" />
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="port" rha:description="Physical plug number or name of virtual machine" />
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_version" rha:description="Specifies SNMP version to use (1,2c,3)" />
++          <attribute name="login" rha:description="Login Name" />
+         </optional>
+         <optional>
+-          <attribute name="community" rha:description="Set the community string" />
++          <attribute name="passwd" rha:description="Login password or passphrase" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_auth_prot" rha:description="Set authentication protocol (MD5|SHA)" />
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_sec_level" rha:description="Set security level (noAuthNoPriv|authNoPriv|authPriv)" />
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
+         </optional>
+         <optional>
+-          <attribute name="snmp_priv_prot" rha:description="Set privacy protocol (DES|AES)" />
++          <attribute name="snmp_auth_prot" rha:description="Set authentication protocol (MD5|SHA)" />
+         </optional>
+         <optional>
+           <attribute name="snmp_priv_passwd" rha:description="Set privacy protocol password" />
+@@ -4227,13 +4910,16 @@
+           <attribute name="snmp_priv_passwd_script" rha:description="Script to run to retrieve privacy password" />
+         </optional>
+         <optional>
+-          <attribute name="udpport" rha:description="UDP/TCP port to use for connection with device" />
++          <attribute name="snmp_priv_prot" rha:description="Set privacy protocol (DES|AES)" />
+         </optional>
+         <optional>
+-          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++          <attribute name="snmp_sec_level" rha:description="Set security level (noAuthNoPriv|authNoPriv|authPriv)" />
+         </optional>
+         <optional>
+-          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++          <attribute name="snmp_version" rha:description="Specifies SNMP version to use (1,2c,3)" />
++        </optional>
++        <optional>
++          <attribute name="udpport" rha:description="UDP/TCP port to use for connection with device" />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+@@ -4251,19 +4937,19 @@
+           <attribute name="separator" rha:description="Separator for CSV created by operation list" />
+         </optional>
+         <optional>
+-          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
+-          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+-          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
+           <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+           <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+@@ -4272,45 +4958,45 @@
+ 
+ 
+       <!-- fence_ipmilan -->
+-      <group rha:name="fence_ipmilan" rha:description="Fence agent for IPMI over LAN">
++      <group rha:name="fence_ipmilan" rha:description="Fence agent for IPMI">
+         <optional>
+           <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
+         </optional>
+         <optional>
+-          <attribute name="auth" rha:description="IPMI Lan Auth type (md5, password, or none)" />
++          <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IPMI Lan IP to talk to" />
++          <attribute name="auth" rha:description="IPMI Lan Auth type." />
+         </optional>
+         <optional>
+-          <attribute name="passwd" rha:description="Password (if required) to control power on IPMI device" />
++          <attribute name="cipher" rha:description="Ciphersuite to use (same as ipmitool -C parameter)" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password (if required)" />
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="lanplus" rha:description="Use Lanplus to improve security of connection" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="login" rha:description="Username/Login (if required) to control power on IPMI device" />
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+-          <attribute name="action" rha:description="Operation to perform. Valid operations: on, off, reboot, status, list, diag, monitor or metadata" />
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
+         </optional>
+         <optional>
+-          <attribute name="timeout" rha:description="Timeout (sec) for IPMI operation" />
++          <attribute name="lanplus" rha:description="Use Lanplus to improve security of connection" />
+         </optional>
+         <optional>
+-          <attribute name="cipher" rha:description="Ciphersuite to use (same as ipmitool -C parameter)" />
++          <attribute name="login" rha:description="Login Name" />
+         </optional>
+         <optional>
+-          <attribute name="method" rha:description="Method to fence (onoff or cycle)" />
++          <attribute name="method" rha:description="Method to fence (onoff|cycle)" />
+         </optional>
+         <optional>
+-          <attribute name="power_wait" rha:description="Wait X seconds after on/off operation" />
++          <attribute name="passwd" rha:description="Login password or passphrase" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+           <attribute name="privlvl" rha:description="Privilege level on IPMI device" />
+@@ -4318,6 +5004,42 @@
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+         </optional>
++        <optional>
++          <attribute name="debug" rha:description="Write debug information to given file" />
++        </optional>
++        <optional>
++          <attribute name="version" rha:description="Display version information and exit" />
++        </optional>
++        <optional>
++          <attribute name="help" rha:description="Display help and exit" />
++        </optional>
++        <optional>
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++        </optional>
++        <optional>
++          <attribute name="ipmitool_path" rha:description="Path to ipmitool binary" />
++        </optional>
++        <optional>
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++        </optional>
++        <optional>
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++        </optional>
++        <optional>
++          <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
++        </optional>
++        <optional>
++          <attribute name="sudo" rha:description="Use sudo (without password) when calling 3rd party sotfware." />
++        </optional>
++        <optional>
++          <attribute name="sudo_path" rha:description="Path to sudo binary" />
++        </optional>
+       </group>
+ 
+ 
+@@ -4352,7 +5074,66 @@
+         </optional>
+       </group>
+ 
+-      <!-- No metadata for /usr/sbin/fence_kdump_send -->
++      <!-- Problem evaluating metadata for /usr/sbin/fence_kdump_send -->
++
++      <!-- fence_mpath -->
++      <group rha:name="fence_mpath" rha:description="Fence agent for multipath persistent reservation">
++        <optional>
++          <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
++        </optional>
++        <optional>
++          <attribute name="action" rha:description="Fencing Action" />
++        </optional>
++        <optional>
++          <attribute name="devices" rha:description="List of devices to use for current operation. Devices can be comma-separated list of device-mapper multipath devices (eg. /dev/dm-3). Each device must support SCSI-3 persistent reservations." />
++        </optional>
++        <optional>
++          <attribute name="key" rha:description="Key to use for the current operation. This key should be unique to a node and have to be written in /etc/multipath.conf. For the &quot;on&quot; action, the key specifies the key use to register the local node. For the &quot;off&quot; action, this key specifies the key to be removed from the device(s)." />
++        </optional>
++        <optional>
++          <attribute name="verbose" rha:description="Verbose mode" />
++        </optional>
++        <optional>
++          <attribute name="debug" rha:description="Write debug information to given file" />
++        </optional>
++        <optional>
++          <attribute name="version" rha:description="Display version information and exit" />
++        </optional>
++        <optional>
++          <attribute name="help" rha:description="Display help and exit" />
++        </optional>
++        <optional>
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++        </optional>
++        <optional>
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++        </optional>
++        <optional>
++          <attribute name="mpathpersist_path" rha:description="Path to mpathpersist binary" />
++        </optional>
++        <optional>
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++        </optional>
++        <optional>
++          <attribute name="store_path" rha:description="Path to directory where fence agent can store information" />
++        </optional>
++        <optional>
++          <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
++        </optional>
++        <optional>
++          <attribute name="sudo" rha:description="Use sudo (without password) when calling 3rd party sotfware." />
++        </optional>
++        <optional>
++          <attribute name="sudo_path" rha:description="Path to sudo binary" />
++        </optional>
++      </group>
++
+ 
+       <!-- fence_pcmk -->
+       <group rha:name="fence_pcmk" rha:description="Helper that presents a RHCS-style interface to stonith-ng for CMAN based clusters">
+@@ -4380,31 +5161,43 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++        </optional>
++        <optional>
+           <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
++        </optional>
++        <optional>
+           <attribute name="login" rha:description="Login Name" />
+         </optional>
+         <optional>
++          <attribute name="notls" rha:description="Disable TLS negotiation, force SSL 3.0" />
++        </optional>
++        <optional>
+           <attribute name="passwd" rha:description="Login password or passphrase" />
+         </optional>
+         <optional>
+           <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="ssl" rha:description="SSL connection" />
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
+         </optional>
+         <optional>
+-          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++          <attribute name="ssl" rha:description="SSL connection" />
+         </optional>
+         <optional>
+-          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++          <attribute name="ssl_insecure" rha:description="SSL connection without verifying fence device's certificate" />
+         </optional>
+         <optional>
+-          <attribute name="ipport" rha:description="TCP port to use for connection with device" />
++          <attribute name="ssl_secure" rha:description="SSL connection with verifying fence device's certificate" />
+         </optional>
+         <optional>
+-          <attribute name="port" rha:description="Physical plug number or name of virtual machine" />
++          <attribute name="use_cookies" rha:description="Reuse cookies for authentication" />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+@@ -4422,20 +5215,26 @@
+           <attribute name="separator" rha:description="Separator for CSV created by operation list" />
+         </optional>
+         <optional>
+-          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++        </optional>
++        <optional>
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+           <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+           <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+         </optional>
++        <optional>
++          <attribute name="gnutlscli_path" rha:description="Path to gnutls-cli binary" />
++        </optional>
+       </group>
+ 
+ 
+@@ -4448,28 +5247,34 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
++          <attribute name="cmd_prompt" rha:description="Force Python regex for command prompt" />
+         </optional>
+         <optional>
+-          <attribute name="login" rha:description="Login Name" />
++          <attribute name="identity_file" rha:description="Identity file for ssh" />
+         </optional>
+         <optional>
+-          <attribute name="passwd" rha:description="Login password or passphrase" />
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="cmd_prompt" rha:description="Force command prompt" />
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+-          <attribute name="secure" rha:description="SSH connection" />
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
+         </optional>
+         <optional>
+-          <attribute name="identity_file" rha:description="Identity file for ssh" />
++          <attribute name="login" rha:description="Login Name" />
++        </optional>
++        <optional>
++          <attribute name="passwd" rha:description="Login password or passphrase" />
++        </optional>
++        <optional>
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="ipport" rha:description="TCP port to use for connection with device" />
++          <attribute name="secure" rha:description="SSH connection" />
+         </optional>
+         <optional>
+           <attribute name="ssh_options" rha:description="SSH options to use" />
+@@ -4487,23 +5292,29 @@
+           <attribute name="help" rha:description="Display help and exit" />
+         </optional>
+         <optional>
+-          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
+-          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+-          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
+           <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+           <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+         </optional>
++        <optional>
++          <attribute name="ssh_path" rha:description="Path to ssh binary" />
++        </optional>
++        <optional>
++          <attribute name="telnet_path" rha:description="Path to telnet binary" />
++        </optional>
+       </group>
+ 
+ 
+@@ -4516,34 +5327,37 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
++          <attribute name="cmd_prompt" rha:description="Force Python regex for command prompt" />
+         </optional>
+         <optional>
+-          <attribute name="login" rha:description="Login Name" />
++          <attribute name="identity_file" rha:description="Identity file for ssh" />
++        </optional>
++        <optional>
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="passwd" rha:description="Login password or passphrase" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+-          <attribute name="secure" rha:description="SSH connection" />
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
+         </optional>
+         <optional>
+-          <attribute name="identity_file" rha:description="Identity file for ssh" />
++          <attribute name="login" rha:description="Login Name" />
+         </optional>
+         <optional>
+-          <attribute name="cmd_prompt" rha:description="Force command prompt" />
++          <attribute name="passwd" rha:description="Login password or passphrase" />
+         </optional>
+         <optional>
+-          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++          <attribute name="secure" rha:description="SSH connection" />
+         </optional>
+         <optional>
+-          <attribute name="ipport" rha:description="TCP port to use for connection with device" />
++          <attribute name="ssh_options" rha:description="SSH options to use" />
+         </optional>
+         <optional>
+           <attribute name="telnet_port" rha:description="TCP port to use for connection with device (default is 3172 for telnet)" />
+@@ -4561,25 +5375,28 @@
+           <attribute name="help" rha:description="Display help and exit" />
+         </optional>
+         <optional>
+-          <attribute name="separator" rha:description="Separator for CSV created by operation list" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++        </optional>
++        <optional>
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+           <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+-          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
++          <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="ssh_path" rha:description="Path to ssh binary" />
+         </optional>
+         <optional>
+-          <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
++          <attribute name="telnet_path" rha:description="Path to telnet binary" />
+         </optional>
+       </group>
+ 
+@@ -4593,25 +5410,31 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
++          <attribute name="cmd_prompt" rha:description="Force Python regex for command prompt" />
+         </optional>
+         <optional>
+-          <attribute name="login" rha:description="Login Name" />
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="passwd" rha:description="Login password or passphrase" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+-          <attribute name="cmd_prompt" rha:description="Force command prompt" />
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
+         </optional>
+         <optional>
+-          <attribute name="port" rha:description="Physical plug number or name of virtual machine" />
++          <attribute name="login" rha:description="Login Name" />
++        </optional>
++        <optional>
++          <attribute name="passwd" rha:description="Login password or passphrase" />
++        </optional>
++        <optional>
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="ipport" rha:description="TCP port to use for connection with device" />
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+@@ -4629,23 +5452,26 @@
+           <attribute name="separator" rha:description="Separator for CSV created by operation list" />
+         </optional>
+         <optional>
+-          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
+-          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+-          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
+           <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+           <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+         </optional>
++        <optional>
++          <attribute name="telnet_path" rha:description="Path to telnet binary" />
++        </optional>
+       </group>
+ 
+ 
+@@ -4665,7 +5491,7 @@
+         </optional>
+       </group>
+ 
+-      <!-- No metadata for /usr/sbin/fence_sanlockd -->
++      <!-- Problem evaluating metadata for /usr/sbin/fence_sanlockd -->
+ 
+       <!-- fence_scsi -->
+       <group rha:name="fence_scsi" rha:description="fence agent for SCSI-3 persistent reservations">
+@@ -4696,8 +5522,8 @@
+       </group>
+ 
+ 
+-      <!-- fence_virsh -->
+-      <group rha:name="fence_virsh" rha:description="Fence agent for virsh">
++      <!-- fence_tripplite_snmp -->
++      <group rha:name="fence_tripplite_snmp" rha:description="Fence agent for APC, Tripplite PDU over SNMP">
+         <optional>
+           <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
+         </optional>
+@@ -4705,6 +5531,15 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
++          <attribute name="community" rha:description="Set the community string" />
++        </optional>
++        <optional>
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++        </optional>
++        <optional>
+           <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+@@ -4717,25 +5552,28 @@
+           <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="secure" rha:description="SSH connection" />
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
+         </optional>
+         <optional>
+-          <attribute name="identity_file" rha:description="Identity file for ssh" />
++          <attribute name="snmp_auth_prot" rha:description="Set authentication protocol (MD5|SHA)" />
+         </optional>
+         <optional>
+-          <attribute name="port" rha:description="Physical plug number or name of virtual machine" />
++          <attribute name="snmp_priv_passwd" rha:description="Set privacy protocol password" />
+         </optional>
+         <optional>
+-          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++          <attribute name="snmp_priv_passwd_script" rha:description="Script to run to retrieve privacy password" />
+         </optional>
+         <optional>
+-          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++          <attribute name="snmp_priv_prot" rha:description="Set privacy protocol (DES|AES)" />
++        </optional>
++        <optional>
++          <attribute name="snmp_sec_level" rha:description="Set security level (noAuthNoPriv|authNoPriv|authPriv)" />
+         </optional>
+         <optional>
+-          <attribute name="ipport" rha:description="TCP port to use for connection with device" />
++          <attribute name="snmp_version" rha:description="Specifies SNMP version to use (1,2c,3)" />
+         </optional>
+         <optional>
+-          <attribute name="ssh_options" rha:description="SSH options to use" />
++          <attribute name="udpport" rha:description="UDP/TCP port to use for connection with device" />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+@@ -4753,23 +5591,112 @@
+           <attribute name="separator" rha:description="Separator for CSV created by operation list" />
+         </optional>
+         <optional>
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++        </optional>
++        <optional>
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++        </optional>
++        <optional>
+           <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
++          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
++        </optional>
++        <optional>
+           <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
++          <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
++        </optional>
++      </group>
++
++
++      <!-- fence_virsh -->
++      <group rha:name="fence_virsh" rha:description="Fence agent for virsh">
++        <optional>
++          <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
++        </optional>
++        <optional>
++          <attribute name="action" rha:description="Fencing Action" />
++        </optional>
++        <optional>
++          <attribute name="cmd_prompt" rha:description="Force Python regex for command prompt" />
++        </optional>
++        <optional>
++          <attribute name="identity_file" rha:description="Identity file for ssh" />
++        </optional>
++        <optional>
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
++        </optional>
++        <optional>
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
++        </optional>
++        <optional>
++          <attribute name="login" rha:description="Login Name" />
++        </optional>
++        <optional>
++          <attribute name="passwd" rha:description="Login password or passphrase" />
++        </optional>
++        <optional>
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++        </optional>
++        <optional>
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
++        </optional>
++        <optional>
++          <attribute name="secure" rha:description="SSH connection" />
++        </optional>
++        <optional>
++          <attribute name="ssh_options" rha:description="SSH options to use" />
++        </optional>
++        <optional>
++          <attribute name="verbose" rha:description="Verbose mode" />
++        </optional>
++        <optional>
++          <attribute name="debug" rha:description="Write debug information to given file" />
++        </optional>
++        <optional>
++          <attribute name="version" rha:description="Display version information and exit" />
++        </optional>
++        <optional>
++          <attribute name="help" rha:description="Display help and exit" />
++        </optional>
++        <optional>
++          <attribute name="separator" rha:description="Separator for CSV created by operation list" />
++        </optional>
++        <optional>
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++        </optional>
++        <optional>
+           <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++        </optional>
++        <optional>
+           <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+           <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+         </optional>
++        <optional>
++          <attribute name="sudo" rha:description="Use sudo (without password) when calling 3rd party sotfware." />
++        </optional>
++        <optional>
++          <attribute name="ssh_path" rha:description="Path to ssh binary" />
++        </optional>
++        <optional>
++          <attribute name="sudo_path" rha:description="Path to sudo binary" />
++        </optional>
+       </group>
+ 
+ 
+@@ -4820,31 +5747,40 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
++          <attribute name="exec" rha:description="Command to execute" />
+         </optional>
+         <optional>
+-          <attribute name="login" rha:description="Login Name" />
++          <attribute name="identity_file" rha:description="Identity file for ssh" />
+         </optional>
+         <optional>
+-          <attribute name="passwd" rha:description="Login password or passphrase" />
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="port" rha:description="Physical plug number or name of virtual machine" />
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+-          <attribute name="exec" rha:description="Command to execute" />
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
+         </optional>
+         <optional>
+-          <attribute name="vmware_type" rha:description="Type of VMware to connect" />
++          <attribute name="login" rha:description="Login Name" />
++        </optional>
++        <optional>
++          <attribute name="passwd" rha:description="Login password or passphrase" />
++        </optional>
++        <optional>
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+           <attribute name="secure" rha:description="SSH connection" />
+         </optional>
+         <optional>
+-          <attribute name="identity_file" rha:description="Identity file for ssh" />
++          <attribute name="ssh_options" rha:description="SSH options to use" />
++        </optional>
++        <optional>
++          <attribute name="vmware_type" rha:description="Type of VMware to connect" />
+         </optional>
+         <optional>
+           <attribute name="vmware_datacenter" rha:description="Show only machines in specified datacenter" />
+@@ -4862,26 +5798,26 @@
+           <attribute name="help" rha:description="Display help and exit" />
+         </optional>
+         <optional>
+-          <attribute name="separator" rha:description="Separator for CSV created by operation list" />
+-        </optional>
+-        <optional>
+-          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
+-          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+-          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
+           <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+           <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+         </optional>
++        <optional>
++          <attribute name="ssh_path" rha:description="Path to ssh binary" />
++        </optional>
+       </group>
+ 
+ 
+@@ -4894,28 +5830,43 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++        </optional>
++        <optional>
+           <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
++        </optional>
++        <optional>
+           <attribute name="login" rha:description="Login Name" />
+         </optional>
+         <optional>
++          <attribute name="notls" rha:description="Disable TLS negotiation, force SSL 3.0" />
++        </optional>
++        <optional>
+           <attribute name="passwd" rha:description="Login password or passphrase" />
+         </optional>
+         <optional>
+           <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
++        </optional>
++        <optional>
+           <attribute name="ssl" rha:description="SSL connection" />
+         </optional>
+         <optional>
+-          <attribute name="port" rha:description="Physical plug number or name of virtual machine" />
++          <attribute name="ssl_insecure" rha:description="SSL connection without verifying fence device's certificate" />
+         </optional>
+         <optional>
+-          <attribute name="uuid" rha:description="The UUID of the virtual machine to fence." />
++          <attribute name="ssl_secure" rha:description="SSL connection with verifying fence device's certificate" />
+         </optional>
+         <optional>
+-          <attribute name="ipport" rha:description="TCP port to use for connection with device" />
++          <attribute name="uuid" rha:description="The UUID of the virtual machine to fence." />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+@@ -4933,23 +5884,26 @@
+           <attribute name="separator" rha:description="Separator for CSV created by operation list" />
+         </optional>
+         <optional>
+-          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
+-          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+-          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
+           <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+           <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+         </optional>
++        <optional>
++          <attribute name="gnutlscli_path" rha:description="Path to gnutls-cli binary" />
++        </optional>
+       </group>
+ 
+ 
+@@ -4962,37 +5916,40 @@
+           <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+-          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
++          <attribute name="cmd_prompt" rha:description="Force Python regex for command prompt" />
+         </optional>
+         <optional>
+-          <attribute name="login" rha:description="Login Name" />
++          <attribute name="identity_file" rha:description="Identity file for ssh" />
+         </optional>
+         <optional>
+-          <attribute name="passwd" rha:description="Login password or passphrase" />
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="passwd_script" rha:description="Script to retrieve password" />
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
+         </optional>
+         <optional>
+-          <attribute name="cmd_prompt" rha:description="Force command prompt" />
++          <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+-          <attribute name="secure" rha:description="SSH connection" />
++          <attribute name="ipport" rha:description="TCP/UDP port to use for connection with device" />
+         </optional>
+         <optional>
+-          <attribute name="identity_file" rha:description="Identity file for ssh" />
++          <attribute name="login" rha:description="Login Name" />
+         </optional>
+         <optional>
+-          <attribute name="port" rha:description="Physical plug number or name of virtual machine" />
++          <attribute name="passwd" rha:description="Login password or passphrase" />
+         </optional>
+         <optional>
+-          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++          <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
+-          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++          <attribute name="port" rha:description="Physical plug number, name of virtual machine or UUID" />
+         </optional>
+         <optional>
+-          <attribute name="ipport" rha:description="TCP port to use for connection with device" />
++          <attribute name="secure" rha:description="SSH connection" />
++        </optional>
++        <optional>
++          <attribute name="ssh_options" rha:description="SSH options to use" />
+         </optional>
+         <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+@@ -5010,23 +5967,29 @@
+           <attribute name="separator" rha:description="Separator for CSV created by operation list" />
+         </optional>
+         <optional>
+-          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
+-          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
+         </optional>
+         <optional>
+-          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
+         </optional>
+         <optional>
+           <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
+         </optional>
+         <optional>
+-          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
+         </optional>
+         <optional>
+           <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
+         </optional>
++        <optional>
++          <attribute name="ssh_path" rha:description="Path to ssh binary" />
++        </optional>
++        <optional>
++          <attribute name="telnet_path" rha:description="Path to telnet binary" />
++        </optional>
+       </group>
+ 
+ 

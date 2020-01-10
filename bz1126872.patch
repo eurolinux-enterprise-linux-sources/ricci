@@ -1,0 +1,105 @@
+From f77f119c282d388843ea60269f9a01954a27de57 Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Mon, 2 Mar 2015 17:48:20 -0600
+Subject: [PATCH 06/10] Prevent traceback when listing services/resources with
+ xml comments
+
+---
+ ricci/ccs/ccs | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/ricci/ccs/ccs b/ricci/ccs/ccs
+index b2f5fc7..6e6a11c 100755
+--- a/ricci/ccs/ccs
++++ b/ricci/ccs/ccs
+@@ -755,6 +755,10 @@ def print_services_map(node,level):
+     
+     if node.nodeType == minidom.Node.TEXT_NODE:
+         return
++
++    if node.nodeType == minidom.Node.COMMENT_NODE:
++        return
++
+     for i in range(num_spaces):
+         prefix = " " + prefix
+ 
+-- 
+2.1.0
+
+From ad37da64a4cab60ae1cc99749eb25e5837f58b8b Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Tue, 3 Mar 2015 15:40:57 -0600
+Subject: [PATCH 09/10] More fixes for comments in cluster.conf file
+
+---
+ ricci/ccs/ccs | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/ricci/ccs/ccs b/ricci/ccs/ccs
+index 6cbbe8c..2d991f9 100755
+--- a/ricci/ccs/ccs
++++ b/ricci/ccs/ccs
+@@ -1622,7 +1622,7 @@ def add_resource(type, options):
+ 
+     if resname != False:
+         for resource in resources.childNodes:
+-            if resource.nodeType == minidom.Node.TEXT_NODE:
++            if resource.nodeType == minidom.Node.TEXT_NODE or resource.nodeType == minidom.Node.COMMENT_NODE:
+                 continue
+             if resource.getAttribute("name") == resname:
+                 print "Duplicate name: %s" % resname
+@@ -1657,7 +1657,7 @@ def remove_resource(type, options):
+         resource_options[attr] = val
+ 
+     for resource in resources.childNodes:
+-        if resource.nodeType == minidom.Node.TEXT_NODE:
++        if resource.nodeType == minidom.Node.TEXT_NODE or resource.nodeType == minidom.Node.COMMENT_NODE:
+             continue
+         if resource.tagName == type:
+             resourceMatch = False
+@@ -1796,7 +1796,7 @@ def add_vm(vmname, options):
+     # Verify name is unique, if no name then we don't search for duplicates
+     if rm != False:
+         for vm in rm.childNodes:
+-            if vm.nodeType == minidom.Node.TEXT_NODE:
++            if vm.nodeType == minidom.Node.TEXT_NODE or vm.nodeType == minidom.Node.COMMENT_NODE:
+                 continue
+             if vm.getAttribute("name") == vmname:
+                 print "Duplicate name: %s" % vmname
+@@ -2263,7 +2263,7 @@ def remove_logging_daemon(options):
+         logger_options[attr] = val
+ 
+     for logger in logging.childNodes:
+-        if logger.nodeType == minidom.Node.TEXT_NODE:
++        if logger.nodeType == minidom.Node.TEXT_NODE or resource.nodeType == minidom.Node.COMMENT_NODE:
+             continue
+         loggerMatch = False
+         for option,val in logger_options.iteritems():
+-- 
+2.1.0
+
+From 90497b00444a3624fe4a0fded942c4c2ede1f276 Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Tue, 3 Mar 2015 16:00:14 -0600
+Subject: [PATCH 10/10] Fixed check when looking for COMMENT_NODE
+
+---
+ ricci/ccs/ccs | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ricci/ccs/ccs b/ricci/ccs/ccs
+index 2d991f9..8bab523 100755
+--- a/ricci/ccs/ccs
++++ b/ricci/ccs/ccs
+@@ -2263,7 +2263,7 @@ def remove_logging_daemon(options):
+         logger_options[attr] = val
+ 
+     for logger in logging.childNodes:
+-        if logger.nodeType == minidom.Node.TEXT_NODE or resource.nodeType == minidom.Node.COMMENT_NODE:
++        if logger.nodeType == minidom.Node.TEXT_NODE or logger.nodeType == minidom.Node.COMMENT_NODE:
+             continue
+         loggerMatch = False
+         for option,val in logger_options.iteritems():
+-- 
+2.1.0
+

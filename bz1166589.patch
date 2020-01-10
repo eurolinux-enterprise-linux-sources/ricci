@@ -1,0 +1,39 @@
+From 59cc5048c97ce3f7a75a5b6399be184959089249 Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Tue, 3 Mar 2015 15:40:03 -0600
+Subject: [PATCH 08/10] Only activate once per ccs run
+
+---
+ ricci/ccs/ccs | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/ricci/ccs/ccs b/ricci/ccs/ccs
+index 9cd8072..6cbbe8c 100755
+--- a/ricci/ccs/ccs
++++ b/ricci/ccs/ccs
+@@ -278,6 +278,9 @@ def main(argv):
+     if not hostname and not filename:
+         hostname = "localhost"
+ 
++    # hold on w/ possible activation unless "activate" required and "sync" not
++    temp_activate, activate = activate, not(sync) and activate
++
+     if (getconf): get_cluster_conf()
+     if (sendconf): send_cluster_conf()
+     if (checkconf): check_cluster_conf()
+@@ -343,9 +346,11 @@ def main(argv):
+     if (setaltmulticast): set_multicast(True, options)
+     if (exp): expert_mode(tag, options)
+     if (exprm): expert_mode_remove(location)
+-    if (sync): sync_cluster_conf()
+     if (getclusterschema): get_cluster_schema()
+ 
++    activate = temp_activate  # activation allowed now (at most once per run)
++    if (sync): sync_cluster_conf()
++
+ def usage():
+     print """Usage: ccs [OPTION]...
+ Cluster configuration system.
+-- 
+2.1.0
+

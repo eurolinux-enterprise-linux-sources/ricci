@@ -10,7 +10,7 @@
 
 Name: ricci
 Version: 0.16.2
-Release: 75%{?dist}.2
+Release: 81%{?dist}
 License: GPLv2
 URL: http://sources.redhat.com/cluster/conga/
 Group: System Environment/Base
@@ -89,10 +89,19 @@ Patch69: bz1075716.patch
 Patch70: bz1076713.patch
 Patch71: bz1044122.patch
 Patch72: bz1055424.patch
-Patch73: bz1187745.patch
-Patch74: bz1156157.patch
-Patch75: bz1156157-2.patch
-Patch76: bz1156157-3.patch
+Patch73: bz1156157.patch
+Patch74: bz1126876.patch
+Patch75: bz1125954.patch
+Patch76: bz1125957.patch
+Patch77: bz1079032.patch
+Patch78: bz1126872.patch
+Patch79: bz1084991.patch
+Patch80: bz1166589.patch
+Patch81: bz1156157-2.patch
+Patch82: bz1187745.patch
+Patch83: bz1210679.patch
+Patch84: bz1079032-2.patch
+Patch85: bz1156157-3.patch
 
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -187,11 +196,19 @@ Requires(postun): initscripts
 %patch70 -p2 -b .bz1076713
 %patch71 -p1 -b .bz1044122
 %patch72 -p1 -b .bz1055424
-%patch73 -p1 -b .bz1187745
-%patch74 -p2 -b .bz1156157
-%patch75 -p2 -b .bz1156157-2
-%patch76 -p2 -b .bz1156157-3
-
+%patch73 -p2 -b .bz1156157
+%patch74 -p2 -b .bz1126876
+%patch75 -p2 -b .bz1125954
+%patch76 -p2 -b .bz1125957
+%patch77 -p2 -b .bz1079032
+%patch78 -p2 -b .bz1126872
+%patch79 -p2 -b .bz1084991
+%patch80 -p2 -b .bz1166589
+%patch81 -p2 -b .bz1156157-2
+%patch82 -p1 -b .bz1187745
+%patch83 -p1 -b .bz1210679
+%patch84 -p2 -b .bz1079032-2
+%patch85 -p2 -b .bz1156157-3
 
 %build
 %configure --arch=%{_arch} --docdir=%{_docdir}
@@ -299,14 +316,39 @@ The Red Hat Cluster Configuration System
 %{_datadir}/ccs/empty_cluster.conf
 
 %changelog
-* Thu May 28 2015 Chris Feist <cfeist@redhat.com> - 0.16.2-75.2
-- ricci: disable SSLv2/SSLv3 by default, added '-x' option to enable SSLv2/3
-- Resolves: rhbz#1222411
+* Wed Apr 21 2015 Chris Feist <cfeist@redhat.com> - 0.16.2-81
+- ricci: fixed issue with '-x' option not being recognized
+- Resolves: rhbz#1156157
 
-* Tue Mar 10 2015 Jan Pokorný <jpokorny@redhat.com> - 0.16.2-75.1
+* Tue Apr 21 2015 Chris Feist <cfeist@redhat.com> - 0.16.2-80
+- ccs: Don't allow adding duplicate actions for the same resource
+- Resolves: rhbz#1079032
+
+* Wed Apr 15 2015 Jan Pokorný <jpokorny@redhat.com> - 0.16.2-79
+- ccs: sync cluster.rng schema with latest updates from cluster packages
+  (last-minute revamp)
+- Resolves: rhbz#1210679
+
+* Thu Mar 05 2015 Jan Pokorný <jpokorny@redhat.com> - 0.16.2-78
 - ricci: fix modules cannot return values due to bug in Module::empty_response
          (introduced with rhbz#1044122 fix)
-- Resolves: rhbz#1199561 (Z-stream of 1187745)
+- Resolves: rhbz#1187745
+
+* Tue Mar 03 2015 Chris Feist <cfeist@redhat.com> - 0.16.2-77
+- ricci: disable SSLv2/SSLv3 by default, added '-x' option to enable SSLv2/3
+- ccs: Added ability to add actions to vm services
+       (and other resources/services)
+- ccs: Show error when a user is already authenticated and uses a bad
+       password
+- ccs: Fixed error when piping output of ccs (specifically --getschema)
+- ccs: Using --setconf without hostname no longer produces a traceback
+- ccs: comments in cluster.conf should no longer produce a traceback when
+       listing services
+- ccs: ccs should no longer produce anything if cluster.conf doesn't
+       exist on remote node
+- ccs: ccs no longer triggers activation more than once in one command
+- Resolves: rhbz#1156157 rhbz#1126876 rhbz#1125954 rhbz#1125957 rhbz#1079032
+  rhbz#1126872 rhbz#1084991 rhbz#1166589
 
 * Tue Jul 15 2014 Jan Pokorny <jpokorny@redhat.com> - 0.16.2-75
 - ccs: sync cluster.rng schema with latest updates from cluster packages
