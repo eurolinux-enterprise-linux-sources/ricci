@@ -1,0 +1,71 @@
+From 45058528b8d4332277c01ebccd5b028211f82f97 Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Fri, 12 Oct 2012 14:42:45 -0500
+Subject: [PATCH 2/3] Set proper ccs_sync exit status
+
+- When using a bad option return '2'
+- When using a bad hostname return '1'
+
+Resolves: rhbz#818335
+---
+ ricci/ccs_sync/ricci_conf.c | 14 ++++++--------
+ 1 file changed, 6 insertions(+), 8 deletions(-)
+
+diff --git a/ricci/ccs_sync/ricci_conf.c b/ricci/ccs_sync/ricci_conf.c
+index ad00195..f7e1070 100644
+--- a/ricci/ccs_sync/ricci_conf.c
++++ b/ricci/ccs_sync/ricci_conf.c
+@@ -39,7 +39,7 @@
+ #define RICCI_NSS_CERT_DIR	"/var/lib/ricci/certs/"
+ #define CLUSTER_CONF_PATH	"/etc/cluster/cluster.conf"
+ 
+-static void print_help(char const * const *argv);
++static void print_help(char const * const *argv, int exit_status);
+ static void print_version(void);
+ static int string_compare(void *l, void *r);
+ static void hash_dtor(void *param __notused, void *data);
+@@ -126,12 +126,10 @@ int main(int argc, const char const * const *argv) {
+ 				exit(0);
+ 
+ 			case 'h':
+-				print_help(argv);
+-				exit(0);
++				print_help(argv,0);
+ 
+ 			default:
+-				print_help(argv);
+-				exit(1);
++				print_help(argv,2);
+ 		}
+ 	}
+ 
+@@ -356,7 +354,7 @@ oom1:
+ 	free(c);
+ oom0:
+ 	fprintf(stderr, "Out of memory for %s\n", name);
+-	return;
++	exit(1);
+ }
+ 
+ static int sync_cluster_conf(xmlDocPtr conf_xml, hash_t *nodes) {
+@@ -417,7 +415,7 @@ static int sync_cluster_conf(xmlDocPtr conf_xml, hash_t *nodes) {
+ 	return (error_occurred);
+ }
+ 
+-static void print_help(char const * const *argv) {
++static void print_help(char const * const *argv, int exit_status) {
+ 	fprintf(stderr,
+ "Usage: %s [options] [<host0> [... <hostN>]]\n\
+    -f <cluster_conf>            Path to the cluster.conf file to propagate.\n\
+@@ -427,7 +425,7 @@ static void print_help(char const * const *argv) {
+    -p <port number>             Connect to ricci on the specified port.\n\
+    -w                           Exit with failure status if any warnings are issued.\n\
+    -v                           Print version information.\n", argv[0]);
+-	exit(0);
++	exit(exit_status);
+ }
+ 
+ static void print_version(void) {
+-- 
+1.7.11.4
+

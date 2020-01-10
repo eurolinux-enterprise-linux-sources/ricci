@@ -1,0 +1,236 @@
+#!/bin/sh
+#
+# Copyright (C) 2005-2009 Red Hat, Inc.
+#
+# This program is Free Software.  You may modify and/or redistribute it under
+# the terms of the GNU General Public License version 2.
+#
+# description:  Starts and stops Red Hat Cluster and Storage Remote \
+#               Configuration Interface (ricci)
+# chkconfig: - 99 01
+#
+
+# Source function library
+. /etc/init.d/functions
+
+# Grab the network config file
+. /etc/sysconfig/network
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+export PATH
+
+ID="ricci"
+RICCID="ricci"
+PIDFILE="/var/run/ricci.pid"
+LOCKFILE="/var/lock/subsys/ricci"
+RUNASUSER="ricci"
+
+SSL_PUBKEY="/var/lib/ricci/certs/cacert.pem"
+SSL_PRIVKEY="/var/lib/ricci/certs/privkey.pem"
+NSS_CERTS_DIR="/var/lib/ricci/certs"
+NSS_PKCS12="/var/lib/ricci/certs/server.p12"
+
+
+#
+# Only root wants to run this...
+#
+[ `id -u` = 0 ] || exit 4
+
+#
+# If we're not configured, then don't start anything.
+#
+[ "${NETWORKING}" = "yes" ] || exit 1
+
+ssl_certs_ok()
+{
+	if [ ! -f "$SSL_PRIVKEY" ] ; then
+		return 1
+	fi
+	if [ ! -f "$SSL_PUBKEY" ] ; then
+		return 2
+	fi
+	return 0
+}
+
+nss_certs_ok()
+{
+	test -f "$NSS_PKCS12"
+	return $?
+}
+
+generate_ssl_certs()
+{
+	rm -f "$SSL_PUBKEY" "$SSL_PRIVKEY"
+	echo -n "generating SSL certificates...  "
+	/usr/bin/openssl genrsa -out "$SSL_PRIVKEY" 2048 >&/dev/null &&
+	/usr/bin/openssl req -new -x509 -key "$SSL_PRIVKEY" -out "$SSL_PUBKEY" -days 1825 -config /var/lib/ricci/certs/cacert.config &&
+	/bin/chown $RUNASUSER:$RUNASUSER "$SSL_PRIVKEY" "$SSL_PUBKEY" &&
+	/bin/chmod 600 "$SSL_PRIVKEY" &&
+	/bin/chmod 644 "$SSL_PUBKEY"
+	ret=$?
+	echo "done"
+	return $ret
+}
+
+generate_nss_certs()
+{
+	echo -n "Generating NSS database...  "
+	openssl pkcs12 -export -in "$SSL_PUBKEY" -inkey "$SSL_PRIVKEY" -out "$NSS_PKCS12" -name "ricci private key" -passout pass: >&/dev/null
+	certutil -N -d "$NSS_CERTS_DIR" -f /dev/zero
+	pk12util -i "$NSS_PKCS12" -d "$NSS_CERTS_DIR" -w /dev/zero >/dev/null
+	chmod 600 $NSS_CERTS_DIR/{cert8.db,key3.db,secmod.db}
+	chown ricci:ricci $NSS_CERTS_DIR/{cert8.db,key3.db,secmod.db} "$NSS_PKCS12"
+	ret=$?
+	echo "done"
+	return $ret
+}
+
+check_ricci_lockfiles() {
+	ricci_status >& /dev/null
+	ret=$?
+	if [ "$ret" -eq 1 ] || [ "$ret" -eq 2 ]; then
+		# stale pid and/or lockfile
+		rm -f -- "$PIDFILE" "$LOCKFILE"
+	fi
+}
+
+ricci_status() {
+	if [ -f "$PIDFILE" ]; then
+		status -p "$PIDFILE" "$RICCID"
+		ricci_up=$?
+	else
+		status "$RICCID"
+		ricci_up=$?
+	fi
+	return $ricci_up
+}
+
+ricci_stop() {
+	ricci_status >& /dev/null
+	ret=$?
+
+	if [ "$ret" -ne 0 ]; then
+		# already stopped - no error
+		check_ricci_lockfiles
+		return 0
+	fi
+
+	killproc "$RICCID" SIGTERM
+
+	ricci_status >& /dev/null
+	ret=$?
+
+	max_wait=10
+	cur_wait=0
+	while [ "$ret" -eq 0 ] && [ $cur_wait -lt $max_wait ]; do
+		sleep 1
+		cur_wait=`expr $cur_wait + 1`
+        ricci_status >& /dev/null
+		ret=$?
+    done
+
+	ricci_status >& /dev/null
+	ret=$?
+
+	if [ "$ret" -ne 0 ]; then
+		rm -f -- "$PIDFILE" "$LOCKFILE"
+		return 0
+	fi
+
+	return 1
+}
+
+case $1 in
+	start)
+		service messagebus status >&/dev/null
+		if [ "$?" -ne 0 ]; then
+			service messagebus start
+			service messagebus status >&/dev/null
+			if [ "$?" -ne 0 ]; then
+				/usr/bin/logger -t "$RICCID" -- "messagebus startup failed"
+				failure "not starting $RICCID"
+				exit 1
+			fi
+		fi
+
+		service oddjobd status >&/dev/null
+		if [ "$?" -ne 0 ]; then
+			service oddjobd start
+			service oddjobd status >&/dev/null
+			if [ "$?" -ne 0 ]; then
+				/usr/bin/logger -t "$RICCID" -- "oddjob startup failed"
+				failure "not starting $RICCID"
+				exit 1
+			fi
+		fi
+
+		service saslauthd start >&/dev/null
+
+		ssl_certs_ok
+		if [ "$?" -ne 0 ] ; then
+			generate_ssl_certs
+		fi
+		nss_certs_ok
+		if [ "$?" -ne 0 ] ; then
+			generate_nss_certs
+		fi
+
+		check_ricci_lockfiles
+		echo -n $"Starting $ID: "
+		daemon "$RICCID" -u "$RUNASUSER"
+		echo
+		ret=$?
+
+		if [ "$ret" -eq 0 ]; then
+			touch -- "$LOCKFILE"
+			/usr/bin/logger -t $RICCID -- "startup succeeded"
+		else
+			/usr/bin/logger -t $RICCID -- "startup failed"
+		fi
+	;;
+
+	restart)
+		$0 stop
+		$0 start
+		ret=$?
+	;;
+
+	status)
+		ricci_status
+		ret=$?
+	;;
+
+	stop)
+		echo -n "Shutting down $ID: "
+		ricci_stop
+		ret=$?
+		if [ "$ret" -eq 0 ]; then
+			/usr/bin/logger -t "$RICCID" -- "shutdown succeeded"
+		else
+			/usr/bin/logger -t "$RICCID" -- "shutdown failed"
+		fi
+		echo
+	;;
+
+	condrestart)
+		if [ -f "$PIDFILE" ]; then
+			$0 restart
+			ret=$?
+		fi
+	;;
+
+	try-restart)
+		ret=3
+	;;
+
+	reload)
+		ret=3
+	;;
+
+	*)
+		echo "Usage: $0 {start|stop|status|restart|condrestart|reload}"
+		ret=3
+	;;
+esac
+
+exit $ret

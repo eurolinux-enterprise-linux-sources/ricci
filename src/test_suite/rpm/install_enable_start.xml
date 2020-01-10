@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<ricci version="1.0" function="process_batch" async="false">
+<batch>
+
+<module name="rpm">
+<request sequence="1254" API_version="1.0">
+<function_call name="install">
+  <var mutable="false" name="rpms" type="list_xml">
+    <rpm name="httpd"/>
+  </var>
+  <var mutable="false" name="sets" type="list_xml">
+  </var>
+</function_call>
+</request>
+</module>
+
+<module name="service">
+<request sequence="1254" API_version="1.0">
+<function_call name="enable">
+  <var mutable="false" name="services" type="list_xml">
+    <service name="httpd"/>
+  </var>
+</function_call>
+</request>
+</module>
+
+<module name="service">
+<request sequence="1254" API_version="1.0">
+<function_call name="start">
+  <var mutable="false" name="services" type="list_xml">
+    <service name="httpd"/>
+  </var>
+</function_call>
+</request>
+</module>
+
+</batch>
+</ricci>
+

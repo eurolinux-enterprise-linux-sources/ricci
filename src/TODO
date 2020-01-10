@@ -1,0 +1,21 @@
+General:
+	- Support IPv6
+	- Replace OpenSSL with NSS
+
+Variables:
+	- get rid of list_... in props
+	- Put variables in check
+	- Conditionals
+
+Modules:
+ - Storage
+	- add scan_scsi_bus()
+	- remove mirror copy progress from state_ind
+	- try to first umount all targets on mapper removal, remount on failure
+	- swap label on partitions
+	- hidden content to extended_partition_content ???
+	- striping
+	- mappings (logical to physical, and vice-versa)
+
+Cluster SNMP/CIM:
+	- traps/notification

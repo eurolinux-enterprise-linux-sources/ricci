@@ -1,0 +1,58 @@
+From 0fd3d55aba3d00119a2f65b13cffbaf6a45003a4 Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Thu, 8 Aug 2013 13:17:48 -0500
+Subject: [PATCH 4/5] Added --lsresourceopts alias to --lsserviceopts
+
+- Resolves: rhbz#877863
+---
+ ricci/ccs/ccs   | 6 ++++--
+ ricci/ccs/ccs.8 | 2 ++
+ 2 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/ricci/ccs/ccs b/ricci/ccs/ccs
+index bd77aa0..f9f6677 100755
+--- a/ricci/ccs/ccs
++++ b/ricci/ccs/ccs
+@@ -99,7 +99,7 @@ def main(argv):
+       "votes=", "rmfailoverdomainnode=", "setdlm", "rmheuristic", "startall", "stopall", "activate",
+       "setconf", "lsquorum", "lsfailoverdomain", "lsmisc", "checkconf", "exp=", "exprm=", "addunfenceinst=",
+       "rmunfenceinst=","addvm=","rmvm=", "lsfenceopts", "lsserviceopts", "getschema", "ignore", "debug",
+-      "setaltmulticast","addalt=", "rmalt="])
++      "setaltmulticast","addalt=", "rmalt=","lsresourceopts"])
+     except getopt.GetoptError:
+         usage()
+         sys.exit(2)
+@@ -216,7 +216,7 @@ def main(argv):
+         elif opt in ("--rmvm"):
+             removevm = True
+             name = arg
+-        elif opt in ("--lsserviceopts"):
++        elif opt in ("--lsserviceopts") or opt in ("--lsresourceopts"):
+             lsserviceopts = True
+             options = args
+         elif opt in ("--lsfenceopts"):
+@@ -422,6 +422,8 @@ Service Operations:
+                         List available services.  If a service type is
+                         specified, then list options for the specified
+                         service type
++      --lsresourceopts [service type]
++      			An alias to --lsserviceopts
+       --lsservices      List currently configured services and resources in
+                         the cluster
+       --addresource <resource type> [resource options] ...
+diff --git a/ricci/ccs/ccs.8 b/ricci/ccs/ccs.8
+index 305f604..89b91e7 100644
+--- a/ricci/ccs/ccs.8
++++ b/ricci/ccs/ccs.8
+@@ -126,6 +126,8 @@ Remove node from failover domain
+ List available services.  If a service type is
+ specified, then list options for the specified
+ service type
++.IP "--lsresourceopts [service type]
++An alias to --lsserviceopts
+ .IP "--lsservices
+ List currently configured services and resources in
+ the cluster
+-- 
+1.8.3.1
+

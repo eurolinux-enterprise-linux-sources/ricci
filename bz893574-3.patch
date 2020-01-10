@@ -1,0 +1,61 @@
+From 3f92666b4792d87a8511294576232a4480972ce0 Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Wed, 25 Sep 2013 14:23:53 -0500
+Subject: [PATCH] Added --nounfence to usage/man page and auto nounfence for
+ fence_sanlock
+
+---
+ ricci/ccs/ccs   | 8 +++++---
+ ricci/ccs/ccs.8 | 8 ++++++--
+ 2 files changed, 11 insertions(+), 5 deletions(-)
+
+diff --git a/ricci/ccs/ccs b/ricci/ccs/ccs
+index f2d7570..7e8bd0c 100755
+--- a/ricci/ccs/ccs
++++ b/ricci/ccs/ccs
+@@ -393,10 +393,12 @@ Fencing Operations:
+                         Parameters'
+       --rmfencedev <fence device name>
+                         Remove fence device
+-      --addfenceinst <fence device name> <node> <method> [options]
++      --addfenceinst <fence device name> <node> <method> [options] [--nounfence]
+                         Add fence instance. Fence instance parameters can be
+                         found in online documentation in 'Fence Device
+-                        Parameters'
++                        Parameters'. Using --nounfence prevents ccs from automatically
++                        including an unfencing section for agents that require
++                        unfencing (ie. fence_scsi, fence_sanlock, etc.)
+       --rmfenceinst <fence device name> <node> <method>
+                         Remove all instances of the fence device listed from
+                         the given method and node
+@@ -2308,7 +2310,7 @@ emailAddress           = root@localhost
+ 
+ # This function returns true if the agent requires an unfence section
+ def need_unfence(agent):
+-    if agent == "fence_scsi":
++    if agent == "fence_scsi" or agent == "fence_sanlock":
+ 	return True
+     else:
+       	return False
+diff --git a/ricci/ccs/ccs.8 b/ricci/ccs/ccs.8
+index 89b91e7..f02a556 100644
+--- a/ricci/ccs/ccs.8
++++ b/ricci/ccs/ccs.8
+@@ -99,8 +99,12 @@ Remove a fence method from a specific node
+ Add fence device. Fence devices and parameters can be found in online documentation in 'Fence Device Parameters'
+ .IP "--rmfencedev <fence device name>
+ Remove fence device
+-.IP "--addfenceinst <fence device name> <node> <method> [options]
+-Add fence instance. Fence instance parameters can be found in online documentation in 'Fence Device Parameters'
++.IP "--addfenceinst <fence device name> <node> <method> [options] [--nounfence]
++Add fence instance. Fence instance parameters can be found in online documentation in 'Fence Device Parameters'.
++Using --nounfence prevents ccs from automatically
++including an unfencing section for agents that require
++unfencing (ie. fence_scsi, fence_sanlock, etc.)
++
+ .IP "--rmfenceinst <fence device name> <node> <method>
+ Remove all instances of the fence device listed from
+ the given method and node
+-- 
+1.8.3.1
+

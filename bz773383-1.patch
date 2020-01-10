@@ -1,0 +1,25 @@
+From 7239a07abc9b6d5030aa6e2218b2a79ab7902d32 Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Mon, 27 Feb 2012 18:17:18 -0600
+Subject: [PATCH] Re-worded message when password is not set.
+
+---
+ ricci/init.d/ricci |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/ricci/init.d/ricci b/ricci/init.d/ricci
+index b7815b0..790d9f5 100755
+--- a/ricci/init.d/ricci
++++ b/ricci/init.d/ricci
+@@ -177,7 +177,7 @@ case $1 in
+ 
+ 		passwd -S ricci | grep '(Password locked.)$' >& /dev/null
+ 		if [ "$?" -ne 1 ] ; then
+-		  	/usr/bin/logger -t "$RICCID" -- "ricci user password is not set, no clients cannot connect"
++		  	/usr/bin/logger -t "$RICCID" -- "ricci user password is not set, clients will be unable to connect"
+ 		fi
+ 
+ 		check_ricci_lockfiles
+-- 
+1.7.7.6
+

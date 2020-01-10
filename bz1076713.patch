@@ -1,0 +1,120 @@
+From 631b17aab8f44396c4cf373bc4466bbfcaab6563 Mon Sep 17 00:00:00 2001
+From: Jan Pokorny <jpokorny@redhat.com>
+Date: Tue, 18 Oct 2011 15:50:17 +0200
+Subject: [PATCH] common/Module.cpp: handle stdin polling more clearly
+
+E.g., there is no need to "try" anything, when we can be sure about
+the situation (timeout will get us out of the loop anyway).
+
+The fix also gives more reasonable error message when the input XML
+is malformed/not in the expected form ("invalid input" instead of
+"stdin error: Success").
+
+The test is included, just "cd test/module_poll && make check".
+
+[
+ EDIT: see full upstream patch
+ https://git.fedorahosted.org/cgit/conga.git/commit/?id=631b17aab8f44396c4cf373bc4466bbfcaab6563
+ that includes also a unit test
+]
+
+Signed-off-by: Jan Pokorny <jpokorny@redhat.com>
+---
+
+diff --git a/ricci/common/Module.cpp b/ricci/common/Module.cpp
+index c21d806..140942e 100644
+--- a/ricci/common/Module.cpp
++++ b/ricci/common/Module.cpp
+@@ -1,5 +1,5 @@
+ /*
+-** Copyright (C) Red Hat, Inc. 2006-2009
++** Copyright 2014 Red Hat, Inc.
+ **
+ ** This program is free software; you can redistribute it and/or modify it
+ ** under the terms of the GNU General Public License version 2 as
+@@ -260,22 +260,18 @@ __stdin_out_module_driver(Module& module)
+ 		poll_data.revents = 0;
+ 
+ 		// wait for events
++		//
++		// Modules are expected to be activated via oddjobd which uses pipes
++		// for passing argument lists (default stdin method which we also use)
++		// and for stdout/stderr capturing.
++		// Thus, when we poll stdin, we effectively poll a pipe (see [1]).
++		// Still, we make effort to handle polling direct terminal input
++		// and input via file redirection as well.
++		//
++		// [1] http://www.greenend.org.uk/rjk/2001/06/poll.html
+ 		int ret = poll(&poll_data, 1, 500);
+ 
+ 		if (ret == 0) {
+-			/*
+-			** We may be done if the total input length is a multiple of
+-			** the buffer size.
+-			*/
+-			if (data.length() > 0) {
+-				try {
+-					XMLObject request = parseXML(data);
+-					XMLObject response = module.process(request);
+-					cout << generateXML(response) << endl;
+-					return 0;
+-				} catch ( ... ) { }
+-			}
+-			// continue waiting
+ 			continue;
+ 		} else if (ret == -1) {
+ 			if (errno == EINTR)
+@@ -293,26 +289,36 @@ __stdin_out_module_driver(Module& module)
+ 			if (ret < 0)
+ 				throw String("error reading stdin: ") + String(strerror(-ret));
+ 
+-			if (ret > 0) {
+-				data.append(buff, ret);
+-				memset(buff, 0, sizeof(buff));
+-			}
+-
+-			if ((size_t) ret < sizeof(buff)) {
+-				try {
+-					XMLObject request = parseXML(data);
+-					XMLObject response = module.process(request);
+-					cout << generateXML(response) << endl;
+-					return 0;
+-				} catch ( ... ) { }
+-			}
++			if (ret == 0)
++				// EOF; branch typical for input file redirection, but there
++				// is no guarantee it cannot occur also with a pipe (see [1])
++				break;
++
++			// at this point, we have successfully read some data;
++			// we restart the loop to avoid finishing with POLLHUP handling
++			// (below) prematurely when polling a pipe (cf. executils.cpp)
++			data.append(buff, ret);
+ 			continue;
+ 		}
+ 
+-		if (poll_data.revents & (POLLERR | POLLHUP | POLLNVAL))
++		if (poll_data.revents & POLLHUP)
++			// analogous to POLLIN + EOF; typical for piped input (see [1])
++			break;
++
++		if (poll_data.revents & (POLLERR | POLLNVAL))
+ 			throw String("stdin error: ") + String(strerror(errno));
+ 	}
+ 
++	if (data.length() > 0) {
++		try {
++			XMLObject request = parseXML(data);
++			XMLObject response = module.process(request);
++			cout << generateXML(response) << endl;
++			return 0;
++		} catch ( ... ) { }
++	}
++
++	// timeout passed AND/OR (no input read OR not a valid request)
+ 	throw String("invalid input");
+ }
+ 
+-- 
+1.8.5.3
+

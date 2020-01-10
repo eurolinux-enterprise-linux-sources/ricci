@@ -1,0 +1,411 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Storage Module</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.2  (Linux)">
+	<META NAME="CREATED" CONTENT="20060410;13011800">
+	<META NAME="CHANGED" CONTENT="20060712;12410300">
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<P>Storage module manages all aspects of storage. Supports partition
+tables, LVM, software raid, ATA-raid, multipath, iSCSI targets,
+dm-crypt, md-crypt, filesystems, their properties, mounts,
+...<BR>Currently, as of version 1.0, it supports LVM, partition
+tables, software RAID, ext2/3, swap, GFS and mountpoints.</P>
+<P>Module name: “storage”
+</P>
+<P>Module version: 1.0</P>
+<P>See <A HREF="modules_common.html">Modules - Common API</A> for
+general module description.
+</P>
+<P><BR><BR>
+</P>
+<P><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>Storage module has
+six objects defined, and they describe all aspects of storage. </FONT></FONT>
+</P>
+<P><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>There are three main
+objects:</FONT></FONT></P>
+<UL>
+	<LI><P><A HREF="storage-mappers.html"><FONT FACE="Nimbus Roman No9 L">mappers</FONT></A>
+	<FONT FACE="Nimbus Roman No9 L">map source BDs to target BDs (Volume
+	Group, Partition Table, Raids, multipath, ...)</FONT></P>
+	<LI><P><FONT FACE="Nimbus Roman No9 L">targets are <A HREF="storage-bds.html">block
+	devices</A> exported by the mapper (Logical Volume, partition, Raid
+	Volumes, ...)</FONT></P>
+	<LI><P><FONT FACE="Nimbus Roman No9 L">BD <A HREF="storage-content.html">content</A>
+	is data that lives on target</FONT></P>
+</UL>
+<P>There are also:</P>
+<UL>
+	<LI><P><A HREF="storage-mapper_template.html">mapper templates</A>,
+	used to create new mappers</P>
+	<LI><P><A HREF="storage-bd_template.html">block device templates</A>,
+	user to create new block devices</P>
+	<LI><P><A HREF="storage-content_template.html">content templates</A>,
+	used to replace existing content of block devices</P>
+</UL>
+<P><BR><BR>
+</P>
+<P>All functions might fail with generic error (-1), see <A HREF="modules_common.html">Modules
+- Common API</A> for error description, or one of Storage Module
+Specific:
+</P>
+<UL>
+	<LI><P>1 – mid-air collision<BR>Every object has a state indicator
+	associated with it. Before anything is committed to disk, storage is
+	probed and local state indicator is calculated. Local indicator is
+	compared with the one committed by client, if different, mid-air
+	error is raised. This prevents accidental data destruction.
+	</P>
+	<LI><P>2 – validation error<BR>Every property has constraints
+	associated with it. If property is modified, and it is not within
+	valid constraints, validation error is returned, before anything is
+	committed to disk.
+	</P>
+	<LI><P>3 – umount error<BR>It will happen in the case of umount
+	failure.
+	</P>
+	<LI><P>4 – clvmd not running<BR>Clustered Volume Groups need clvmd
+	daemon running, and yet clvmd is not running. <BR>Storage module
+	will try to start it. On failure, this error will be raised. <BR>User
+	should either start clvmd, or mark VG non-clustered. <BR>In order to
+	start clvmd: <BR>1. lvm2-cluster needs to be installed<BR>2. cluster
+	infrastructure needs to be started<BR>3. clvmd should be started
+	(service clvmd start)</P>
+	<LI><P>5 – cluster not quorate<BR>LVM is configured to use cluster
+	locking mechanism, but cluster is not quorate. That would cause LVM
+	operations to hang until quorum is regained. User should make
+	cluster quorate before continuing.
+	</P>
+	<LI><P>6 – cluster locking not enabled<BR>LVM is not configured to use cluster
+	locking mechanism, but some volumes are marked clustered.
+	User should enable cluster locking.
+	</P>
+	<LI><P>7 – cluster not running on node<BR>LVM is configured to use cluster
+	locking mechanism, but cluster is not running on local node.
+	</P>
+</UL>
+<P><BR><BR>
+</P>
+<P>Functions:
+</P>
+<UL>
+	<LI><P>APIs</P>
+	<UL>
+		<P>Get supported API versions. See <A HREF="modules_common.html">Modules
+		- Common API</A> for description.
+		</P>
+	</UL>
+	<LI><P>report</P>
+</UL>
+<UL>
+	<UL>
+		<P>Assemble all info into a single report.
+		</P>
+	</UL>
+</UL>
+<UL>
+	<UL>
+		<P>No input variables.
+		</P>
+		<P ALIGN=LEFT>Output variables:<BR>- “mapper_templates”
+		(list_xml) – list of <A HREF="storage-mapper_template.html">&lt;mapper_template/&gt;</A>s,
+		if any, see get_mapper_templates function<BR>- “mapper_ids”
+		(list_xml) – list of IDs in format &lt;mapper_id
+		mapper_type=”type” mapper_id=”ID”/&gt;<BR>- “mappers”
+		(list_xml) – list of all <A HREF="storage-mappers.html">&lt;mapper/&gt;</A>s
+		on the system</P>
+	</UL>
+</UL>
+<UL>
+	<UL>
+		<P>On failure: <BR>- No special errors defined, only generic ones
+		might get returned.
+		</P>
+	</UL>
+</UL>
+<UL>
+	<LI><P>get_mapper_templates</P>
+</UL>
+<UL>
+	<UL>
+		<P ALIGN=LEFT>Retrieve all <A HREF="storage-mapper_template.html">mapper
+		templates</A> on the system. If “mapper_type” is specified,
+		retrieve mapper templates of specified type only.
+		</P>
+		<P>Input variables: <BR>- “mapper_type” (string) – optional,
+		if specified, retrieve mapper templates of specified type</P>
+		<P ALIGN=LEFT>Output variables: <BR>- “mapper_templates”
+		(list_xml) – list of <A HREF="storage-mapper_template.html">&lt;mapper_template/&gt;</A>s,
+		if any</P>
+	</UL>
+</UL>
+<UL>
+	<UL>
+		<P>On failure: <BR>- No special errors defined, only generic ones
+		might get returned</P>
+	</UL>
+	<LI><P ALIGN=LEFT>get_mapper_ids</P>
+</UL>
+<UL>
+	<UL>
+		<P ALIGN=LEFT>Retrieve “mapper_id”s of all mappers on the
+		system. If “mapper_type” is specified, retrieve “mapper_id”s
+		of specified type only. <BR>Mapper id can be used to retrieve
+		mapper using “get_mappers” function.
+		</P>
+		<P>Input variables: <BR>- “mapper_type” (string) – optional,
+		if specified, retrieve IDs of mappers of specified type, otherwise,
+		return all mapper_ids</P>
+		<P ALIGN=LEFT>Output variables: <BR>- “mapper_ids” (list_xml) –
+		list of IDs in format &lt;mapper_id mapper_type=”type”
+		mapper_id=”ID”/&gt;</P>
+	</UL>
+</UL>
+<UL>
+	<UL>
+		<P ALIGN=LEFT>On failure: <BR>- No special errors defined, only
+		generic ones might get returned</P>
+	</UL>
+	<LI><P ALIGN=LEFT>get_mappers</P>
+</UL>
+<UL>
+	<UL>
+		<P ALIGN=LEFT>Retrieve all mappers on the system. “mapper_type”
+		and “mapper_id” can be used to limit the scope of search.
+		</P>
+		<P>Input variables: <BR>- “mapper_type” (string) – optional,
+		if specified, retrieve IDs of mappers of specified type<BR>-
+		“mapper_id” (string) – optional, if specified, retrieve only
+		mapper with specified ID</P>
+		<P ALIGN=LEFT>Output variables: <BR>- “mappers” (list_xml) –
+		list of <A HREF="storage-mappers.html">&lt;mapper/&gt;</A>s
+		matching search criteria</P>
+	</UL>
+</UL>
+<UL>
+	<UL>
+		<P ALIGN=LEFT>On failure: <BR>- No special errors defined, only
+		generic ones might get returned</P>
+	</UL>
+	<LI><P ALIGN=LEFT>create_mapper</P>
+</UL>
+<UL>
+	<UL>
+		<P ALIGN=LEFT>Create a new mapper. <BR>Mappers are created by
+		submitting <A HREF="storage-mapper_template.html">&lt;mapper_template/&gt;</A>
+		using this function. Available mapper templates are retrieved using
+		“get_mapper_templates” function.</P>
+		<P>Input variables: <BR>- “mapper” (xml) – modified
+		<A HREF="storage-mapper_template.html">&lt;mapper_template/&gt;</A>
+		by which a new mapper will be created</P>
+		<P ALIGN=LEFT>Output variables: <BR>- “mapper” (xml) – newly
+		created <A HREF="storage-mappers.html">&lt;mapper/&gt;</A></P>
+	</UL>
+</UL>
+<UL>
+	<UL>
+		<P ALIGN=LEFT>On failure: <BR>- Any of errors specified above</P>
+	</UL>
+	<LI><P ALIGN=LEFT>modify_mapper</P>
+</UL>
+<UL>
+	<UL>
+		<P ALIGN=LEFT>Modify properties of already existing mapper.
+		</P>
+		<P>Input variables: <BR>- “mapper” (xml) – modified <A HREF="storage-mappers.html">&lt;mapper/&gt;</A>
+		to be changed on disk</P>
+	</UL>
+</UL>
+<UL>
+	<UL>
+		<P ALIGN=LEFT>Output variables: <BR>- “mapper” (xml) –
+		<A HREF="storage-mappers.html">&lt;mapper/&gt;</A> with committed
+		changes</P>
+		<P ALIGN=LEFT>On failure: <BR>- Any of errors specified above</P>
+	</UL>
+	<LI><P ALIGN=LEFT>add_mapper_sources</P>
+</UL>
+<UL>
+	<UL>
+		<P ALIGN=LEFT>Add new sources to mapper. <BR>Source addition
+		procedure: <BR>1 – retrieve mapper<BR>2 – extract one or more
+		block devices from &lt;new_sources/&gt; tag <BR>3 – submit block
+		devices, from 2, and mapper attributes, using this function</P>
+		<P ALIGN=LEFT>Input variables: <BR>- “bds” (list_xml) – list
+		of <A HREF="storage-bds.html">&lt;block_device/&gt;</A>s, from
+		mapper's &lt;new_sources/&gt; tag, to be added as sources<BR>-
+		“mapper_type” (string) – type of mapper to which new sources
+		are to be added<BR>- “mapper_id” (string) – ID of mapper to
+		which new sources are to be added<BR>- “mapper_state_ind”
+		(string) – state indicator of mapper to which new sources are to
+		be added</P>
+	</UL>
+</UL>
+<UL>
+	<UL>
+		<P ALIGN=LEFT>Output variables: <BR>- “mapper” (xml) –
+		<A HREF="storage-mappers.html">&lt;mapper/&gt;</A> with new sources
+		added
+		</P>
+		<P ALIGN=LEFT>On failure: <BR>- Any of errors specified above</P>
+	</UL>
+	<LI><P ALIGN=LEFT>remove_mapper_source</P>
+</UL>
+<UL>
+	<UL>
+		<P ALIGN=LEFT>Remove source from mapper. <BR>Source removal
+		procedure: <BR>1 – retrieve mapper<BR>2 – extract block
+		device, which has alternative content, from &lt;sources/&gt; tag
+		 <BR>3 – submit block
+		device, from 2, and mapper attributes, using this function</P>
+		<P ALIGN=LEFT>Input variables: <BR>- “bd” (xml) –
+		<A HREF="storage-bds.html">&lt;block_device/&gt;</A>, from
+		mapper's &lt;sources/&gt; tag, to be removed<BR>-
+		“mapper_type” (string) – type of mapper from which source
+		is to be removed<BR>- “mapper_id” (string) – ID of mapper from
+		which source is to be removed<BR>- “mapper_state_ind”
+		(string) – state indicator of mapper from which source is to
+		be removed</P>
+	</UL>
+</UL>
+<UL>
+	<UL>
+		<P ALIGN=LEFT>Output variables: <BR>- “mapper” (xml) –
+		<A HREF="storage-mappers.html">&lt;mapper/&gt;</A> with source
+		removed
+		</P>
+		<P ALIGN=LEFT>On failure: <BR>- Any of errors specified above</P>
+	</UL>
+	<LI><P ALIGN=LEFT>remove_mapper</P>
+</UL>
+<UL>
+	<UL>
+		<P ALIGN=LEFT>Remove mapper. Be warned that all targets will be
+		removed, including their content. <BR>Mapper is removable if its
+		“removable” property is “true”.</P>
+		<P>Input variables: <BR>- “mapper” (xml) – mapper to be
+		removed</P>
+	</UL>
+</UL>
+<UL>
+	<UL>
+		<P ALIGN=LEFT>No output variables</P>
+		<P ALIGN=LEFT>On failure: <BR>- Any of errors specified above,
+		especially unmount error if content of one of targets fails to
+		unmount</P>
+	</UL>
+	<LI><P ALIGN=LEFT>create_bd</P>
+</UL>
+<UL>
+	<UL>
+		<P ALIGN=LEFT>Create new block device. <BR>Block devices are
+		created by submitting <A HREF="storage-bd_template.html">&lt;block_device_template/&gt;</A>
+		from &lt;new_targets/&gt; of <A HREF="storage-mappers.html">&lt;mapper/&gt;</A>,
+		using this function. <BR><A HREF="storage-bd_template.html">&lt;block_device_template/&gt;</A>'s
+		properties and content can be modified before submission.
+		</P>
+		<P>Input variables: <BR>- “bd” (xml) – modified
+		<A HREF="storage-bd_template.html">&lt;block_device_template/&gt;</A>
+		by which a new block device will be created</P>
+		<P ALIGN=LEFT>Output variables: <BR>- “bd” (xml) – newly
+		created <A HREF="storage-bds.html">&lt;block_device/&gt;</A><BR>-
+		“mapper” (xml) – mapper with new target added</P>
+	</UL>
+</UL>
+<UL>
+	<UL>
+		<P ALIGN=LEFT>On failure: <BR>- Any of errors specified above</P>
+	</UL>
+	<LI><P ALIGN=LEFT>get_bd</P>
+</UL>
+<UL>
+	<UL>
+		<P ALIGN=LEFT>Get a block device by its path. <BR>Block devices can
+		also be retrieved by extraction of <A HREF="storage-bds.html">&lt;block_device/&gt;</A>
+		from <A HREF="storage-mappers.html">&lt;mapper/&gt;</A>.
+		</P>
+		<P>Input variables: <BR>- “path” (string) – path to retrieve
+		block device for</P>
+		<P ALIGN=LEFT>Output variables: <BR>- “bd” (xml) –
+		<A HREF="storage-bds.html">&lt;block_device/&gt;</A> residing on
+		“path”</P>
+	</UL>
+</UL>
+<UL>
+	<UL>
+		<P ALIGN=LEFT>On failure: <BR>- Any of errors specified above</P>
+	</UL>
+	<LI><P ALIGN=LEFT>modify_bd</P>
+</UL>
+<UL>
+	<UL>
+		<P ALIGN=LEFT>Modify properties of block device, its content, or
+		replace content. <BR>See <A HREF="storage-bds.html">&lt;block_device/&gt;</A>
+		and <A HREF="storage-content.html">&lt;content/&gt;</A> for more
+		info.
+		</P>
+		<P>Input variables: <BR>- “bd” (xml) – modified
+		<A HREF="storage-bds.html">&lt;block_device/&gt;</A> to be changed
+		on disk</P>
+	</UL>
+</UL>
+<UL>
+	<UL>
+		<P ALIGN=LEFT>Output variables: <BR>- “bd” (xml) – modified
+		<A HREF="storage-bds.html">&lt;block_device/&gt;</A>
+		</P>
+		<P ALIGN=LEFT>On failure: <BR>- Any of errors specified above,
+		especially unmount error if content fails to unmount</P>
+	</UL>
+	<LI><P ALIGN=LEFT>remove_bd</P>
+	<UL>
+		<P ALIGN=LEFT>Remove block device. Be warned that its content will
+		be removed as well, destroying data! <BR>Block device is removable
+		if its “removable” property is “true”.</P>
+	</UL>
+</UL>
+<UL>
+	<UL>
+		<P>Input variables: <BR>- “bd” (xml) – <A HREF="storage-bds.html">&lt;block_device/&gt;</A>
+		to be removed</P>
+	</UL>
+</UL>
+<UL>
+	<UL>
+		<P ALIGN=LEFT>Output variables: <BR>- “mapper” (xml) – block
+		device's <A HREF="storage-mappers.html">&lt;mapper/&gt;</A> with
+		target removed</P>
+		<P ALIGN=LEFT>On failure: <BR>- Any of errors specified above,
+		especially unmount error if content fails to unmount</P>
+	</UL>
+</UL>
+	<LI><P>enable_clustered_lvm</P>
+	<UL>
+		<P>Enable LVM's cluster locking.
+		It is an error to call this function if lvm2-cluster
+		is not installed.
+		</P>
+		<P>No input variables.
+		</P>
+		<P>No output variables.</P>
+		<P>On failure:<BR>- No special errors defined, only generic ones
+		might get returned.</P>
+	</UL>
+	<LI><P>disable_clustered_lvm</P>
+	<UL>
+		<P>Disable LVM's cluster locking.
+		It is an error to call this function if lvm2-cluster
+		is not installed.
+		</P>
+		<P>No input variables.
+		</P>
+		<P>No output variables.</P>
+		<P>On failure:<BR>- No special errors defined, only generic ones
+		might get returned.</P>
+	</UL>
+<P ALIGN=LEFT><BR><BR>
+</P>
+</BODY>
+</HTML>

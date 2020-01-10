@@ -1,0 +1,81 @@
+commit 595cf5982e29713ad761dfb2ddfdb52bf43dd7d1
+Author:     Chris Feist <cfeist@redhat.com>
+AuthorDate: Thu Sep 15 16:24:03 2011 -0500
+Commit:     Chris Feist <cfeist@redhat.com>
+CommitDate: Thu Sep 15 16:24:03 2011 -0500
+
+    Re-synced cluster.rng.
+
+diff --git a/ricci/ccs/cluster.rng.in b/ricci/ccs/cluster.rng.in
+index 5914e4c..064e366 100644
+--- a/ricci/ccs/cluster.rng.in
++++ b/ricci/ccs/cluster.rng.in
+@@ -7,6 +7,7 @@ xmlns:rha="http://redhat.com/~pkennedy/annotation_namespace/cluster_conf_annot_n
+ cluster
+ - cman
+ - totem
++- uidgid
+ - quorumd
+ - fence_daemon
+ - fence_xvmd
+@@ -169,6 +170,27 @@ To validate your cluster.conf against this schema, run:
+  </optional>
+ <!-- end cman block -->
+ 
++<!-- uidgid block -->
++ <optional>
++  <zeroOrMore>
++   <element name="uidgid" rha:description="Access control to corosync IPC">
++    <optional>
++     <attribute name="uid" rha:description="This is an unprivileged username,
++         as globally available to the system via /etc/passwd, including nis/ldap,
++         allowed to connect to corosync IPC. This value cannot be updated at runtime,
++         a full cman restart is required." rha:default="" rha:samble="userfoo"/>
++    </optional>
++    <optional>
++     <attribute name="gid" rha:description="This is an unprivileged group name,
++         as globally available to the system via /etc/group, including nis/ldap,
++         allowed to connect to corosync IPC. This value cannot be updated at runtime,
++         a full cman restart is required." rha:default="" rha:samble="groupfoo"/>
++    </optional>
++   </element>
++  </zeroOrMore>
++ </optional>
++<!-- end uidgid block -->
++
+ <!-- totem block -->
+  <optional>
+   <element name="totem" rha:description="OpenAIS msg transport
+@@ -235,7 +257,7 @@ To validate your cluster.conf against this schema, run:
+       rha:sample="5"/>
+    </optional>
+    <!-- FIXME: The following description was adapted from the man page.
+-   It may be tool long for the schema docuement. Consider cutting text
++   It may be tool long for the schema document. Consider cutting text
+    after the second sentence and referring the reader to the openais.conf
+    man page. -->
+    <optional>
+@@ -253,6 +275,13 @@ To validate your cluster.conf against this schema, run:
+         chosen." rha:sample="active"/>
+    </optional>
+    <optional>
++    <attribute name="rrp_problem_count_threshold"
++	rha:description="This specifies the number of times a problem is detected
++        with a link before setting the link faulty.  Once a link is set faulty, no
++        more data is transmitted upon it. Corosync default is 10, cman default is 3"
++        rha:default="3" rha:sample="5"/>
++   </optional>
++   <optional>
+     <attribute name="secauth" rha:description="This attribute specifies
+        that HMAC/SHA1 authentication should be used to authenticate all
+        messages. It further specifies that all data should be encrypted
+@@ -3601,6 +3630,9 @@ To validate your cluster.conf against this schema, run:
+           <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
+         </optional>
+         <optional>
++          <attribute name="privlvl" rha:description="Privilege level on IPMI device" />
++        </optional>
++        <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+         </optional>
+       </group>

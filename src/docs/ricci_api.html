@@ -1,0 +1,199 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Ricci</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.2  (Linux)">
+	<META NAME="CREATED" CONTENT="20060407;13582300">
+	<META NAME="CHANGED" CONTENT="20060609;11540700">
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<P>Ricci listens on port ??? 11111 ??? and only responds to clients
+that connect thru SSL and present SSL certificate. <BR>If presented
+certificate (or its signing CA) is stored in ricci's cert database,
+client is considered authenticated, otherwise, client can invoke only
+“authenticate” function (see bellow). Once authenticated,
+presented certificate is saved into cert database, and client has
+access to all functions.
+</P>
+<P><BR><BR>
+</P>
+<P>All messages are XML based. Client is greeted with hello message
+on connection establishment, then client submits request and waits
+for response. Client can make multiple requests in a single session.
+</P>
+<OL>
+	<LI><P ALIGN=LEFT>Hello message:</P>
+	<P ALIGN=LEFT>&lt;ricci authenticated=&quot;true/false&quot;
+	clusteralias=&quot;cluster alias&quot; clustername=&quot;cluster_name&quot;
+	hostname=&quot;hostname.domainname&quot; os=&quot;Red Hat Enterprise
+	Linux AS release 4 (Nahant Update 3)&quot; version=&quot;1.0&quot;/&gt;</P>
+	<P ALIGN=LEFT>Hello message contains protocol version number, host
+	information and “authenticated” attribute. <BR>If
+	“authenticated” attribute is “true” client is authenticated
+	and can proceed with further calls, otherwise, client can only
+	invoke “authenticate” function (see bellow). Once authenticated,
+	client can invoke all functions.
+	</P>
+	<LI><P>Request:
+	</P>
+	<P>Tag has to be “ricci”, and “version” and “function”
+	attributes have to be present. Functions, and their arguments are
+	described below.
+	</P>
+	<LI><P>Function response:
+	</P>
+	<P>&lt;ricci authenticated=&quot;true/false&quot; success=&quot;success
+	value – unsigned int&quot; version=&quot;1.0&quot;/&gt;</P>
+	<P>Function response has “ricci” tag, and “authenticated”,
+	“version” and “success” attributes.
+	</P>
+	<P>Ricci function call successfulness is stored in “success”
+	attr, and can be one of:</P>
+	<P>General return values:<BR>0 – function call succeeded<BR>1 –
+	missing “version” attribute<BR>2 – version not supported<BR>3
+	– missing “function” attribute<BR>4 – function is not
+	present in selected protocol version<BR>5 – not authenticated, and
+	function call requires it<BR>6 – internal error (should never
+	happen)</P>
+	<P>Function specific return values:<BR>10 – authentication failed
+	– see “authenticate” <BR>11 – missing &lt;batch/&gt; - see
+	“process_batch” <BR>12 – no such batch - see “batch_report”
+		</P>
+</OL>
+<P><BR><BR>
+</P>
+<P>Functions:</P>
+<UL>
+	<LI><P>authenticate</P>
+	<UL>
+		<P ALIGN=LEFT>&lt;ricci function=&quot;authenticate&quot;
+		password=&quot;root password&quot; version=&quot;1.0&quot;/&gt;</P>
+		<P ALIGN=LEFT>Authenticate using root password. If root password is
+		valid, client's SSL certificate will be saved into certs database.
+		<BR>Subsequent connections that present saved cert will be
+		auto-authenticated. <BR>If signing CA is listed in
+		/var/lib/ricci/certs/auth_CAs.pem, certificate is considered valid,
+		and client needs not call this function at all.
+		</P>
+		<P ALIGN=LEFT>Function takes only “password” argument,
+		specified as an attribute. It has to be a valid root password of
+		host ricci is running on. <BR>- If password is not valid, 10 is
+		returned. Connection is closed after third unsuccessful
+		authentication attempt. <BR>- If password is valid, client's
+		certificate is saved into cert database, and function returns 0.
+		Afterwards, client has access to all functions. If new connection
+		is initiated using the same certificate, client will have full
+		access without need to call “authenticate” function.
+		</P>
+		<P ALIGN=LEFT>This is the only function that can be invoked if
+		“authenticated” attribute of hello message is set to “false”.
+		<BR>Once authenticated, access is allowed to all functions.
+		</P>
+	</UL>
+	<LI><P ALIGN=LEFT>unauthenticate</P>
+	<UL>
+		<P ALIGN=LEFT>&lt;ricci function=&quot;unauthenticate&quot;
+		version=&quot;1.0&quot;/&gt;</P>
+		<P ALIGN=LEFT>Mark session as unauthenticated, and remove client's
+		SSL certificate from cert database. <BR>Access will be allowed to
+		“authenticate” function only. <BR>New connections, established
+		using current certificate, will not be auto-authenticated; client
+		will have to re-authenticate.
+		</P>
+		<P ALIGN=LEFT>Function takes no arguments. <BR>- Function should
+		always succeed and return 0.
+		</P>
+	</UL>
+	<LI><P>list_modules</P>
+	<UL>
+		<P ALIGN=LEFT>&lt;ricci function=&quot;list_modules&quot;
+		version=&quot;1.0&quot;/&gt;</P>
+		<P ALIGN=LEFT>Returns a list of installed <A HREF="modules.html">modules</A>,
+		attached to the response message, in format: <BR>&lt;module
+		name=”module1”/&gt;<BR>&lt;module name=”module2”/&gt;</P>
+		<P ALIGN=LEFT>Function takes no arguments. <BR>- Function should
+		always succeed and return 0.
+		</P>
+	</UL>
+	<LI><P>process_batch</P>
+	<UL>
+		<P ALIGN=LEFT><A NAME="line11"></A>&lt;ricci
+		function=&quot;process_batch&quot; async=&quot;true/false&quot;
+		version=&quot;1.0&quot;&gt;<BR>&lt;batch&gt;<BR>&lt;module
+		name=”module1”&gt;<BR>... module1 request ...<BR>&lt;/module&gt;<BR>&lt;module
+		name=”module2”&gt;<BR>... module2 request
+		...<BR>&lt;/module&gt;<BR>&lt;/batch&gt;<BR>&lt;/ricci&gt;</P>
+		<P ALIGN=LEFT>Processes batch request, see below for batch
+		description.
+		</P>
+		<P ALIGN=LEFT>Processing can be synchronous and asynchronous. If
+		synchronous, “process_batch” will return after the whole batch
+		is completed, returning final batch report. There is no way to
+		retrieve report again.
+		</P>
+		<P ALIGN=LEFT>If asynchronous, “process_batch” will return
+		immediately, returning initial batch report (“batch_id” can be
+		extracted from it). Batch report can be retrieved later, using
+		“batch_report” function. Since batch progress is updated for
+		multi-module request, asynchronous processing can be used to
+		implement progress bars.
+		</P>
+		<P ALIGN=LEFT>Function takes two arguments, async attribute
+		(defaults to “false”), and batch.
+		</P>
+		<P ALIGN=LEFT>- Function returns 11, if batch is missing. <BR>-
+		Otherwise it returns 0.
+		</P>
+	</UL>
+	<LI><P>batch_report</P>
+	<UL>
+		<P ALIGN=LEFT><A NAME="line111"></A>&lt;ricci
+		function=&quot;batch_report&quot; batch_id=”batch_id”
+		version=&quot;1.0&quot;/&gt;</P>
+		<P ALIGN=LEFT>Retrieve report of batch with id “batch_id”.
+		</P>
+		<P ALIGN=LEFT>Batch report is attached to the function response. If
+		batch is completed (status is either 0 or 4), report will be
+		removed, and won't be accessible any more; otherwise, it can be
+		retrieved again.
+		</P>
+		<P ALIGN=LEFT>Function takes one arguments, “batch_id”, whose
+		report is attached to the function response.
+		</P>
+		<P>- Function returns 12, if there is no batch with such
+		“batch_id”. <BR>- It returns 0 otherwise.
+		</P>
+	</UL>
+</UL>
+<P><BR><BR>
+</P>
+<P>Batch description:
+</P>
+<P>Batch is a list of module requests (see respective <A HREF="modules.html">module</A>
+description for request description). It has a “batch_id”
+attribute, by which a report can be retrieved. <BR>Modules are
+processed sequentially; if one of modules fails, further processing
+is aborted, and batch' status is set to 4 – request failure. If all
+modules complete successfully, batch' status is set to 0. <BR>Each
+module, and batch, has a status attribute, describing its progress.
+Status is updated after completion of each module.
+</P>
+<P ALIGN=LEFT>&lt;batch batch_id=&quot;10271302&quot;
+status=&quot;2&quot;&gt;<BR>&lt;module name=&quot;module1&quot;
+status=&quot;0&quot;&gt;<BR>... completed module request
+...<BR>&lt;/module&gt;<BR>&lt;module name=&quot;module2&quot;
+status=&quot;2&quot;/&gt;<BR>&lt;module name=&quot;module3&quot;
+status=&quot;1&quot;/&gt;<BR>&lt;/batch&gt;</P>
+<P>Status codes: <BR>0 - completed successfully (batch and module) <BR>1
+- scheduled (batch and module) <BR>2 - in progress (batch and module)
+<BR>3 - module failure (module only) <BR>4 - request failure (batch
+and module) <BR>5 - removed from scheduler (module only)
+</P>
+<P><BR><BR>
+</P>
+<P>Links:<BR><A HREF="modules.html">Modules<BR></A><A HREF="variables.html">Variables</A></P>
+<P><BR><BR>
+</P>
+</BODY>
+</HTML>

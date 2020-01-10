@@ -1,0 +1,66 @@
+From 48a86caec26efcae65696c00c446633df0f7cb2d Mon Sep 17 00:00:00 2001
+From: Ryan McCabe <rmccabe@redhat.com>
+Date: Fri, 29 Apr 2011 14:50:01 -0400
+Subject: [PATCH] Log exec path and arguments when fork()/execv()ing in ricci
+ and modcluster
+
+---
+ ricci/common/executils.cpp |   18 +++++++++++-------
+ 1 files changed, 11 insertions(+), 7 deletions(-)
+
+diff --git a/ricci/common/executils.cpp b/ricci/common/executils.cpp
+index 666fdb0..e894dcb 100644
+--- a/ricci/common/executils.cpp
++++ b/ricci/common/executils.cpp
+@@ -33,6 +33,7 @@
+ #include <signal.h>
+ #include <errno.h>
+ #include <fcntl.h>
++#include <syslog.h>
+ 
+ static void read_data(struct pollfd& poll_info, bool& fd_closed, String& data);
+ static void close_fd(int fd);
+@@ -61,10 +62,15 @@ execute(const String& path,
+ 	if (argv == NULL)
+ 		return 3;
+ 
++	String comm(path);
++
++	// get status
+ 	try {
+ 		argv[0] = (char *) path.c_str();
+-		for (unsigned int i = 0 ; i < args.size() ; i++)
++		for (unsigned int i = 0 ; i < args.size() ; i++) {
+ 			argv[i + 1] = (char *) args[i].c_str();
++			comm += " " + args[i];
++		}
+ 		argv[size - 1] = NULL;
+ 	} catch (...) {
+ 		free(argv);
+@@ -132,6 +138,10 @@ execute(const String& path,
+ 		sigfillset(&set);
+ 		sigprocmask(SIG_UNBLOCK, &set, NULL);
+ 
++		openlog("ricci", LOG_PID | LOG_NDELAY, LOG_DEBUG);
++		syslog(LOG_NOTICE, "Executing '%s'", comm.c_str());
++		closelog();
++
+ 		execv(path.c_str(), argv);
+ 		_exit(1);
+ 	}
+@@ -204,12 +214,6 @@ execute(const String& path,
+ 		}
+ 	}
+ 
+-	// command
+-	//String comm(path);
+-	//for (unsigned int i = 0 ; i < args.size() ; i++)
+-	//	comm += " " + args[i];
+-
+-	// get status
+ 	int ret;
+ 	do {
+ 		ret = waitpid(pid, &status, 0);
+-- 
+1.7.7.6
+

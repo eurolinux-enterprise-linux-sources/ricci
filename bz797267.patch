@@ -1,0 +1,333 @@
+diff -ur a/common/XML.cpp b/common/XML.cpp
+--- a/common/XML.cpp	2010-01-15 01:32:04.000000000 -0500
++++ b/common/XML.cpp	2012-02-27 15:01:16.554690221 -0500
+@@ -1,5 +1,5 @@
+ /*
+-** Copyright (C) Red Hat, Inc. 2005-2009
++** Copyright (C) Red Hat, Inc. 2005-2012
+ **
+ ** This program is free software; you can redistribute it and/or modify it
+ ** under the terms of the GNU General Public License version 2 as
+@@ -38,52 +38,65 @@
+ 
+ XMLObject::XMLObject(const String& elem_name) :
+ 	_tag(elem_name)
+-{}
++{
++	_node_type = XML_ELEMENT_NODE;
++}
+ 
+ XMLObject::~XMLObject()
+ {}
+ 
++
++// Compare attributes against a different XMLObject
++// Make a copy of the right side's attrs and remove
++// any duplicates found.
++//
++// If the list is nonempty when we're done, the lists
++// differ.
+ bool
+-XMLObject::operator== (const XMLObject& obj) const
++XMLObject::compare_attrs(const XMLObject& other) const
+ {
+-	if (children() != obj.children())
+-		return false;
+-	if (tag() != obj.tag())
+-		return false;
+-	if (attrs() != obj.attrs())
++	const std::map<String, String>& left = attrs();
++	const std::map<String, String>& right = other.attrs();
++
++	if (left.size() != right.size())
+ 		return false;
++
++	for (map<String, String>::const_iterator x = left.begin();
++		x != left.end(); x++) {
++
++		map<String, String>::const_iterator y = right.find(x->first);
++
++		/* not present */
++		if (y == right.end())
++			return false;
++
++		if (x->second != y->second)
++			return false;
++	}
++
+ 	return true;
+ }
+ 
+ bool
+-XMLObject::has_attr(const String& attr_name) const
++XMLObject::operator== (const XMLObject& obj) const
+ {
+-	return _attrs.find(attr_name) != _attrs.end();
+-}
++	if (tag() != obj.tag()) {
++		return false;
++	}
+ 
+-String
+-XMLObject::set_attr(const String& attr_name, const String& value)
+-{
+-	String ret = _attrs[attr_name];
+-	_attrs[attr_name] = value;
+-	return ret;
+-}
++	if (compare_attrs(obj) != true) {
++		return false;
++	}
+ 
+-String
+-XMLObject::get_attr(const String& attr_name) const
+-{
+-	map<String, String>::const_iterator iter = _attrs.find(attr_name);
+-	if (iter == _attrs.end())
+-		return "";
+-	else
+-		return iter->second;
++	if (children() != obj.children())
++		return false;
++	return true;
+ }
+ 
+-XMLObject&
+-XMLObject::add_child(const XMLObject& child)
++bool
++XMLObject::operator!= (const XMLObject& obj) const
+ {
+-	_kids.push_back(child);
+-	return _kids.back();
++	return !(operator==(obj));
+ }
+ 
+ bool
+@@ -101,30 +114,36 @@
+ void
+ XMLObject::generate_xml(String& xml, const String& indent) const
+ {
+-	xml += indent + "<" + _tag;
+-	for (map<String, String>::const_iterator
+-		iter = attrs().begin() ;
+-		iter != attrs().end() ;
+-		iter++)
+-	{
+-		const String& name = iter->first;
+-		const String value = escape_chars(iter->second);
+-		xml += " " + name + "=\"" + value + "\"";
+-	}
+-
+-	if (children().empty())
+-		xml += "/>\n";
+-	else {
+-		xml += ">\n";
+-		for (list<XMLObject>::const_iterator
+-				iter = children().begin() ;
+-				iter != children().end() ;
+-				iter++)
++	if (_node_type == XML_ELEMENT_NODE) {
++		xml += indent + "<" + _tag;
++		for (map<String, String>::const_iterator
++			iter = attrs().begin() ;
++			iter != attrs().end() ;
++			iter++)
+ 		{
+-			iter->generate_xml(xml, indent + "\t");
++			const String& name = iter->first;
++			const String value = escape_chars(iter->second);
++			xml += " " + name + "=\"" + value + "\"";
+ 		}
+ 
+-		xml += indent + "</" + _tag + ">\n";
++		if (children().empty())
++			xml += "/>\n";
++		else {
++			xml += ">\n";
++
++			for (list<XMLObject>::const_iterator
++				 iter = children().begin() ;
++				 iter != children().end() ;
++				 iter++)
++			{
++				iter->generate_xml(xml, indent + "\t");
++			}
++			xml += indent + "</" + _tag + ">\n";
++		}
++	} else if (_node_type == XML_COMMENT_NODE) {
++		xml += indent + "<!-- " + _text + " -->\n";
++	} else if (_node_type == XML_TEXT_NODE) {
++		xml += _text;
+ 	}
+ }
+ 
+@@ -138,6 +157,24 @@
+ 		if (curr_node->type == XML_ELEMENT_NODE) {
+ 			XMLObject me((const char *) curr_node->name);
+ 
++			if (curr_node->nsDef) {
++				const struct _xmlNs *cur_def;
++
++				for (cur_def = curr_node->nsDef ;
++					 cur_def != NULL ;
++					 cur_def = cur_def->next)
++				{
++					if (cur_def->prefix) {
++						me.set_attr("xmlns:" +
++									String((const char *) cur_def->prefix),
++							String((const char *) cur_def->href));
++					} else {
++						me.set_attr("xmlns",
++							String((const char *) cur_def->href));
++					}
++				}
++			}
++
+ 			// attrs
+ 			for (xmlAttr* curr_attr = curr_node->properties ;
+ 					curr_attr ;
+@@ -146,12 +183,16 @@
+ 				if (curr_attr->type == XML_ATTRIBUTE_NODE) {
+ 					const xmlChar *name = curr_attr->name;
+ 					const xmlChar *value = xmlGetProp(curr_node, name);
++					String prefix = "";
+ 
+ 					if (!value)
+ 						throw String("xmlGetProp() returned NULL");
+ 
++					if (curr_attr->ns)
++						prefix = (const char *) curr_attr->ns->prefix + String(":");
++
+ 					try {
+-						const String name_str((const char *) name);
++						const String name_str = prefix + String((const char *) name);
+ 						const String value_str =
+ 							invert_chars((const char *) value);
+ 
+@@ -167,6 +208,38 @@
+ 			// kids
+ 			_parseXML(me, curr_node->children);
+ 			parent.add_child(me);
++		} else if ((curr_node->type == XML_COMMENT_NODE || curr_node->type == XML_TEXT_NODE)
++					&& !xmlIsBlankNode(curr_node))
++		{
++			xmlChar *node_content = xmlNodeGetContent(curr_node);
++
++			if (node_content) {
++				char *tp = (char *) node_content;
++				size_t content_len = strlen(tp);
++				char *text_start;
++				char *text_end;
++
++				if (content_len > 0)
++					text_end = &tp[content_len - 1];
++				else
++					text_end = tp;
++
++				while (isspace(*tp))
++					tp++;
++				text_start = tp;
++
++				while (text_end > text_start && isspace(*text_end))
++					text_end--;
++				*(text_end + 1) = '\0';
++
++				String text((const char *) text_start);
++				xmlFree((void *) node_content);
++
++				XMLObject me("DUMMY");
++				me.set_node_type(curr_node->type);
++				me.set_text(text);
++				parent.add_child(me);
++			}
+ 		}
+ 	}
+ }
+@@ -202,6 +275,7 @@
+ 	}
+ }
+ 
++
+ String
+ generateXML(const XMLObject& obj)
+ {
+diff -ur a/include/XML.h b/include/XML.h
+--- a/include/XML.h	2010-01-15 01:32:04.000000000 -0500
++++ b/include/XML.h	2012-02-27 15:00:38.388822629 -0500
+@@ -1,5 +1,5 @@
+ /*
+-** Copyright (C) Red Hat, Inc. 2005-2009
++** Copyright (C) Red Hat, Inc. 2005-2011
+ **
+ ** This program is free software; you can redistribute it and/or modify it
+ ** under the terms of the GNU General Public License version 2 as
+@@ -33,37 +33,61 @@
+ 		XMLObject(const String& elem_name = "TagName");
+ 		virtual ~XMLObject();
+ 
++		bool operator== (const XMLObject&) const;
++		bool operator!= (const XMLObject&) const;
++
++
+ 		String tag() const {
+ 			return _tag;
+ 		};
+ 
+-		// attributes
+-		bool has_attr(const String& attr_name) const;
++		/* attributes */
++
++		bool has_attr(const String& attr_name) const {
++			return _attrs.find(attr_name) != _attrs.end();
++		}
+ 
+-		// return old value
+-		String set_attr(const String& attr_name, const String& value);
++		String get_attr(const String& attr_name) const {
++			std::map<String, String>::const_iterator iter = _attrs.find(attr_name);
++			return (iter == _attrs.end()) ? "" : iter->second;
++		}
+ 
+-		String get_attr(const String& attr_name) const;
++		void set_attr(const String& attr_name, const String& value) {
++			_attrs[attr_name] = value;
++		}
+ 
+ 		const std::map<String, String>& attrs() const {
+ 			return _attrs;
+ 		}
+ 
+-		// kids
+-		XMLObject& add_child(const XMLObject& child);
++		/* kids */
++
++		void add_child(const XMLObject& child) {
++			_kids.push_back(child);
++		}
++
+ 		bool remove_child(const XMLObject& child);
+ 
++		void set_node_type(int node_type) {
++			_node_type = node_type;
++		}
++
++		void set_text(String& text) {
++			_text = text;
++		}
++
+ 		const std::list<XMLObject>& children() const {
+ 			return _kids;
+ 		}
+ 
+-		bool operator== (const XMLObject&) const;
+-
+ 	private:
++		int _node_type;
+ 		String _tag;
++		String _text;
+ 		std::list<XMLObject> _kids;
+ 		std::map<String, String> _attrs;
+ 		void generate_xml(String& xml, const String& indent) const;
++		bool compare_attrs(const XMLObject& other) const;
+ 	friend String generateXML(const XMLObject& obj);
+ };

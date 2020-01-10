@@ -1,0 +1,193 @@
+--- ricci-0.16.2/include/Module.h.bz1044122	2010-01-15 07:32:04.000000000 +0100
++++ ricci-0.16.2/include/Module.h	2014-07-03 15:06:54.281256454 +0200
+@@ -1,5 +1,5 @@
+ /*
+-** Copyright (C) Red Hat, Inc. 2006-2009
++** Copyright 2014 Red Hat, Inc.
+ **
+ ** This program is free software; you can redistribute it and/or modify it
+ ** under the terms of the GNU General Public License version 2 as
+@@ -44,6 +44,7 @@
+ {
+ 	public:
+ 		virtual ~Module();
++		static std::pair<XMLObject, XMLObject> empty_response(const String& version, const String& seq_tag, const String& fcn_name);
+ 		virtual XMLObject process(const XMLObject& request);
+ 
+ 	protected:
+--- ricci-0.16.2/common/Module.cpp.bz1044122	2014-07-03 15:06:54.280256455 +0200
++++ ricci-0.16.2/common/Module.cpp	2014-07-03 15:06:54.282256452 +0200
+@@ -74,6 +74,20 @@
+ Module::~Module()
+ {}
+ 
++pair<XMLObject, XMLObject>
++Module::empty_response(const String& version, const String& seq_tag, const String& fcn_name)
++{
++	XMLObject response(RESPONSE_TAG);
++	response.set_attr(MOD_VERSION_TAG, version);
++	response.set_attr(SEQUENCE_TAG, seq_tag);
++
++	XMLObject func_resp_xml(FUNC_RESPONSE_TAG);
++	func_resp_xml.set_attr("function_name", fcn_name);
++
++	response.add_child(func_resp_xml);
++	return pair<XMLObject, XMLObject>(response, func_resp_xml);
++}
++
+ XMLObject
+ Module::process(const XMLObject& request)
+ {
+@@ -103,12 +117,11 @@
+ 		}
+ 
+ 		// construct response xml
+-		XMLObject response(RESPONSE_TAG);
+-		response.set_attr(MOD_VERSION_TAG, version);
+-		response.set_attr(SEQUENCE_TAG, request.get_attr(SEQUENCE_TAG));
+-
+-		XMLObject func_resp_xml(FUNC_RESPONSE_TAG);
+-		func_resp_xml.set_attr("function_name", fcn_name);
++		pair<XMLObject, XMLObject> empty = empty_response(version,
++								  request.get_attr(SEQUENCE_TAG),
++								  fcn_name);
++		XMLObject& response = empty.first;
++		XMLObject& func_resp_xml = empty.second;
+ 
+ 		try {
+ 			map<String, Variable> in_vars = extract_vars(func_xml);
+@@ -135,7 +148,6 @@
+ 			func_resp_xml.add_child(Variable("error_description",
+ 				String("No description")).xml());
+ 		}
+-		response.add_child(func_resp_xml);
+ 		return response;
+ 	} catch ( APIerror e ) {
+ 		XMLObject err_resp("API_error");
+--- ricci-0.16.2/ricci/RicciWorker.cpp.bz1044122	2010-01-15 07:32:04.000000000 +0100
++++ ricci-0.16.2/ricci/RicciWorker.cpp	2014-07-03 23:26:32.144666898 +0200
+@@ -1,5 +1,5 @@
+ /*
+-** Copyright (C) Red Hat, Inc. 2005-2009
++** Copyright 2014 Red Hat, Inc.
+ **
+ ** This program is free software; you can redistribute it and/or modify it
+ ** under the terms of the GNU General Public License version 2 as
+@@ -159,31 +159,46 @@
+ void
+ ProcessWorker::process()
+ {
++	/* reboot module is special; here we handle reboot faster than task
++	   progress committed to disk, more specifically we unbend the bended
++	   mid-state st_removed, which can also indicate successful reboot */
++	String module_name(_report.get_attr("name"));
++	if (module_name == "reboot" && _state == st_removed
++	    || _report.children().empty())
++		_state = st_done;
++
+ 	if (completed())
+ 		return;
+-	else
+-		_state = st_prog;
+ 
+-	if (_report.children().empty()) {
+-		_state = st_done;
+-		return;
+-	}
++	_state = st_prog;
+ 
+-	String module_name(_report.get_attr("name"));
+ 	XMLObject module_header("module");
+ 	module_header.set_attr("name", module_name);
+ 
+ 	try {
+ 		XMLObject request = _report.children().front();
+-		XMLObject mod_resp;
++		XMLObject tmp_resp, mod_resp;
+ 
+ 		if (module_name == "reboot") {
++			/* as per above comment, temporarily set "bended"
++			   mid-state ("removed from schedule") and commit it
++			   to disk;  cf. reboot loop problem (rhbz#1044122) */
++			pair<XMLObject, XMLObject> empty = _rm.empty_response(
++								"1.0",
++								request.get_attr(SEQUENCE_TAG),
++								"reboot_now");
++			tmp_resp = empty.first;
++			module_header.add_child(tmp_resp);
++			_report = module_header;
++			_state = st_removed;
++			_batch.save();
++
+ 			mod_resp = _rm.process(request);
+ 			if (_rm.block() && check_response(mod_resp)) {
+ 				if (mod_resp.tag() == "internal_error")
+ 					throw int();
+-				module_header.add_child(mod_resp);
+-				_report = module_header;
++				_report.remove_child(tmp_resp);
++				_report.add_child(mod_resp);
+ 				_state = st_done;
+ 				_batch.save();
+ 
+--- ricci-0.16.2/ricci/Ricci.cpp.bz1044122	2010-01-15 07:32:04.000000000 +0100
++++ ricci-0.16.2/ricci/Ricci.cpp	2014-07-04 14:19:37.909160260 +0200
+@@ -1,5 +1,5 @@
+ /*
+-** Copyright (C) Red Hat, Inc. 2005-2009
++** Copyright 2014 Red Hat, Inc.
+ **
+ ** This program is free software; you can redistribute it and/or modify it
+ ** under the terms of the GNU General Public License version 2 as
+@@ -40,6 +40,8 @@
+ #include <fcntl.h>
+ #include <errno.h>
+ #include <dirent.h>
++#include <syslog.h>
++#include <time.h>
+ 
+ extern "C" {
+ 	#include "sys_util.h"
+@@ -444,16 +446,40 @@
+ 	}
+ 
+ 	struct dirent *file_entry;
++	struct stat statbuf;
++	time_t expiration_boundary = time(NULL);
++#define EXPIRATION (70*60)  // one hour is reasonable, 70 minutes ~ time shifts
++	expiration_boundary = (expiration_boundary < EXPIRATION)
++		? 0
++		: expiration_boundary - EXPIRATION;
++	openlog("ricci", LOG_PID | LOG_NDELAY, LOG_DEBUG);
+ 	while ((file_entry = readdir(dir))) {
+ 		try {
+ 			String name(file_entry->d_name);
++			String fullname = String(QUEUE_DIR_PATH) + name;
+ 			// check name
+ 			if (name.find_first_not_of("0123456789") == name.npos) {
+-				// start worker
+-				start_worker(String(QUEUE_DIR_PATH) + name);
++				// prune if stale enough (as per EXPIRATION)
++				if (!stat(fullname.c_str(), &statbuf)
++				  && statbuf.st_mtime <= expiration_boundary) {
++					long long b_id = utils::to_long(name);
++					Batch batch(b_id);
++					if (batch.done())
++						// do not report + destructor
++						// takes care of removal
++						continue;
++					syslog(LOG_NOTICE,
++					       "Prunning stale unfinished batch '%s'",
++					       name.c_str());
++					unlink(fullname.c_str());
++					continue;
++				}
++				// start worker when dealing with a fresh batch
++				start_worker(fullname);
+ 			}
+ 		} catch ( ... ) {}
+ 	}
++	closelog();
+ 	closedir(dir);
+ }
+ 

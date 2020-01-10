@@ -1,0 +1,49 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Reboot Module</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.2  (Linux)">
+	<META NAME="CREATED" CONTENT="20060410;13011800">
+	<META NAME="CHANGED" CONTENT="20060411;16472900">
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<P>Reboot module allows system reboot.
+</P>
+<P>Module name: “reboot”
+</P>
+<P>Module version: 1.0</P>
+<P>See <A HREF="modules_common.html">Modules - Common API</A> for
+general module description.
+</P>
+<P>Functions:
+</P>
+<UL>
+	<LI><P>APIs</P>
+	<UL>
+		<P>Get supported API versions. See <A HREF="modules_common.html">Modules
+		- Common API</A> for description.</P>
+	</UL>
+</UL>
+<UL>
+	<LI><P>reboot_now</P>
+	<UL>
+		<P ALIGN=LEFT>Reboot managed system. Function will not return until
+		reboot has been performed. <BR>It is useful for reboot after kernel
+		update: <BR>Create batch that will update kernel, then reboot.
+		Execute it asynchronously, retrieving batch status periodically
+		(there will be a period when ricci will not be responding). When
+		batch reports successful completion, kernel has been upgraded, and
+		it is in use (system has been rebooted).
+		</P>
+		<P>No input variables.</P>
+		<P ALIGN=LEFT>No output variables.
+		</P>
+		<P ALIGN=LEFT>On failure:<BR>- No special errors defined, only
+		generic ones might get returned.</P>
+	</UL>
+</UL>
+<P ALIGN=LEFT><BR><BR>
+</P>
+</BODY>
+</HTML>

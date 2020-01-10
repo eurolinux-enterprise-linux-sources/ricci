@@ -1,0 +1,25 @@
+From df48deccd31816585975e28e229b43c91c25631c Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Thu, 22 Mar 2012 15:36:40 -0500
+Subject: [PATCH] Updated password check to work with other languages.
+
+---
+ ricci/init.d/ricci |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/ricci/init.d/ricci b/ricci/init.d/ricci
+index 790d9f5..5662b16 100755
+--- a/ricci/init.d/ricci
++++ b/ricci/init.d/ricci
+@@ -175,7 +175,7 @@ case $1 in
+ 			generate_nss_certs
+ 		fi
+ 
+-		passwd -S ricci | grep '(Password locked.)$' >& /dev/null
++		LANG=C passwd -S ricci | grep '(Password locked.)$' >& /dev/null
+ 		if [ "$?" -ne 1 ] ; then
+ 		  	/usr/bin/logger -t "$RICCID" -- "ricci user password is not set, clients will be unable to connect"
+ 		fi
+-- 
+1.7.7.6
+

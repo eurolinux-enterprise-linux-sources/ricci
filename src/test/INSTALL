@@ -1,0 +1,18 @@
+
+Simple website used to test ricci's storage module
+
+
+1. Copy this website to /var/www/cgi-bin
+
+2. Generate SSL key and certificate:
+	openssl genrsa -out privkey.pem 2048
+	openssl req -new -x509 -key privkey.pem -out cacert.pem -days 1825
+	and move them to /usr/share/ricci-storage-web/certs/
+
+3. chmod a+x /var/www/cgi-bin/ricci-storage-web
+
+4. start httpd
+
+5. install ricci and ricci-modstorage on hosts to be managed
+
+6. goto http://localhost/cgi-bin/ricci-storage-web

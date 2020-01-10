@@ -1,0 +1,62 @@
+From 84582caa9f843e7f4794248dfbb1ebc033dd8009 Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Tue, 11 Dec 2012 14:03:22 -0600
+Subject: [PATCH] Synced cluster scehma for RHEL 6.4
+
+Resolves: rhbz#878108
+---
+ ricci/ccs/cluster.rng.in | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/ricci/ccs/cluster.rng.in b/ricci/ccs/cluster.rng.in
+index c8a5e66..f34f571 100644
+--- a/ricci/ccs/cluster.rng.in
++++ b/ricci/ccs/cluster.rng.in
+@@ -4574,6 +4574,24 @@ To validate your cluster.conf against this schema, run:
+       </group>
+ 
+ 
++      <!-- fence_sanlock -->
++      <group rha:name="fence_sanlock" rha:description="Fence agent for watchdog and shared storage">
++        <optional>
++          <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
++        </optional>
++        <optional>
++          <attribute name="action" rha:description="Fencing Action" />
++        </optional>
++        <optional>
++          <attribute name="path" rha:description="Path to sanlock shared storage" />
++        </optional>
++        <optional>
++          <attribute name="host_id" rha:description="Host id for sanlock (1-128)" />
++        </optional>
++      </group>
++
++      <!-- No metadata for /usr/sbin/fence_sanlockd -->
++
+       <!-- fence_scsi -->
+       <group rha:name="fence_scsi" rha:description="fence agent for SCSI-3 persistent reservations">
+         <optional>
+@@ -4704,6 +4722,9 @@ To validate your cluster.conf against this schema, run:
+           <attribute name="timeout" rha:description="Fencing timeout (in seconds; default=30)" />
+         </optional>
+         <optional>
++          <attribute name="delay" rha:description="Fencing delay (in seconds; default=0)" />
++        </optional>
++        <optional>
+           <attribute name="domain" rha:description="Virtual Machine (domain name) to fence (deprecated; use port)" />
+         </optional>
+       </group>
+@@ -4970,6 +4991,9 @@ To validate your cluster.conf against this schema, run:
+           <attribute name="timeout" rha:description="Fencing timeout (in seconds; default=30)" />
+         </optional>
+         <optional>
++          <attribute name="delay" rha:description="Fencing delay (in seconds; default=0)" />
++        </optional>
++        <optional>
+           <attribute name="domain" rha:description="Virtual Machine (domain name) to fence (deprecated; use port)" />
+         </optional>
+       </group>
+-- 
+1.7.11.7
+

@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<ricci version="1.0" function="process_batch" async="false">
+<batch>
+
+<module name="cluster">
+<request sequence="1254" API_version="1.0">
+<function_call name="fence_node">
+  <var mutable="false" name="nodename" type="string" value="blue"/>
+</function_call>
+</request>
+</module>
+
+</batch>
+</ricci>
+

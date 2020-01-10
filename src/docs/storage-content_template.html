@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Storage Module - Content Template</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.2  (Linux)">
+	<META NAME="CREATED" CONTENT="20060410;13011800">
+	<META NAME="CHANGED" CONTENT="20060412;13445200">
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<P>&lt;content_template/&gt; is used for replacement of <A HREF="storage-content.html">&lt;content/&gt;</A>
+on some <A HREF="storage-bds.html">&lt;block_device/&gt;</A>.
+</P>
+<P>There are three types of content templates:</P>
+<UL>
+	<LI><P>filesystem</P>
+	<LI><P>mapper source</P>
+	<LI><P>none</P>
+</UL>
+<P><BR><BR>
+</P>
+<P>Content is replaced, by some other content, by moving
+&lt;content_template/&gt; from &lt;available_contents/&gt; to
+&lt;new_content/&gt; of <A HREF="storage-content.html">&lt;content/&gt;</A>.
+It is module's responsibility to populate &lt;available_contents/&gt;
+with appropriate content_templates.
+</P>
+<P><BR><BR>
+</P>
+<P><B>Content Template XML description: </B>
+</P>
+<PRE><A NAME="line67"></A><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;content_template type=&quot;content type&quot; ... other content identifying attributes ...&gt;</FONT></FONT>
+   <FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;properties/&gt;<BR>&lt;/content&gt;</FONT></FONT>
+
+</PRE>
+<UL>
+	<LI><P>Every &lt;content_template/&gt; has a “type”. Type can be
+	one of:
+	</P>
+	<UL>
+		<LI><P>“filesystem” - in which case “fs_type” attribute
+		will be present. Currently supported filesystem types are: “swap”,
+		“extended_fs” and “gfs”</P>
+		<LI><P>“mapper_source” - in which case “mapper_type”
+		attribute will be present. They define <A HREF="storage-mappers.html">&lt;mapper/&gt;</A>
+		whose source this content is going to be.
+		</P>
+		<LI><P>“none” - meaning that current content will be destroyed.
+
+		</P>
+	</UL>
+	<LI><P><A NAME="line49"></A>&lt;properties/&gt; tag, which has
+	<A HREF="variables.html">variables</A> for children. Properties may
+	be different that properties of &lt;content/&gt; of the same type.
+	<BR>Some properties can be mutable. <BR>Contents have different set
+	of properties defined. <BR>Example of properties for Swap
+	Filesystem:
+	</P>
+	<UL>
+		<PRE STYLE="margin-bottom: 0.2in"><A NAME="line671"></A><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;properties&gt;</FONT></FONT></PRE>
+		<UL>
+			<PRE STYLE="margin-bottom: 0.2in"><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;true&quot; name=&quot;fstab&quot; type=&quot;boolean&quot; value=&quot;true&quot;/&gt;</FONT></FONT>
+<FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;true&quot; name=&quot;swapon&quot; type=&quot;boolean&quot; value=&quot;true&quot;/&gt;</FONT></FONT>
+<FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var illegal_chars=&quot;| \ /?.,&quot; max_length=&quot;16&quot; min_length=&quot;0&quot; mutable=&quot;true&quot; name=&quot;label&quot; reserved_words=&quot;&quot; type=&quot;string&quot; value=&quot;&quot;/&gt;</FONT></FONT></PRE>
+		</UL>
+		<PRE STYLE="margin-bottom: 0.2in"><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;/properties&gt;</FONT></FONT></PRE>
+	</UL>
+</UL>
+<PRE>
+</PRE>
+</BODY>
+</HTML>

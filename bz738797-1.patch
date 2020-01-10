@@ -1,0 +1,39 @@
+From 502f08ddd241055414c768e36b2671398861b483 Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Mon, 27 Feb 2012 18:20:06 -0600
+Subject: [PATCH] Removed extraneous 'on' in usage and man page.
+
+---
+ ricci/ccs/ccs   |    2 +-
+ ricci/ccs/ccs.8 |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/ricci/ccs/ccs b/ricci/ccs/ccs
+index b7969d2..813799f 100755
+--- a/ricci/ccs/ccs
++++ b/ricci/ccs/ccs
+@@ -341,7 +341,7 @@ Cluster Operations:
+       --getversion      Get the current cluster.conf version
+       --setversion <n>  Set the cluster.conf version
+       --incversion      Increment the cluster.conf version by 1
+-      --startall        Start *AND* enable cluster services on on reboot
++      --startall        Start *AND* enable cluster services on reboot
+                         for all nodes
+       --stopall         Stop *AND* disable cluster services on reboot
+                         for all nodes
+diff --git a/ricci/ccs/ccs.8 b/ricci/ccs/ccs.8
+index bc887fd..5c65970 100644
+--- a/ricci/ccs/ccs.8
++++ b/ricci/ccs/ccs.8
+@@ -59,7 +59,7 @@ Set the cluster.conf version
+ .IP "--incversion
+ Increment the cluster.conf version by 1
+ .IP "--startall
+-Start *AND* enable cluster services on on reboot on all nodes
++Start *AND* enable cluster services on reboot on all nodes
+ .IP "--stopall
+ Stop *AND* disable cluster services on reboot for all nodes
+ .IP "--start
+-- 
+1.7.7.6
+

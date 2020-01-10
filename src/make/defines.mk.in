@@ -1,0 +1,41 @@
+# default params:
+program-prefix	?=
+prefix			?= ${DESTDIR}/usr
+exec-prefix		?= ${DESTDIR}/usr
+bindir			?= ${exec-prefix}/bin
+sbindir			?= ${exec-prefix}/sbin
+sysconfdir		?= ${DESTDIR}/etc
+datadir			?= ${prefix}/share
+includedir		?= ${prefix}/include
+libdir			?= ${prefix}@@LIBDIR@@
+libexecdir		?= ${prefix}/libexec
+localstatedir	?= ${DESTDIR}/var
+sharedstatedir	?= ${prefix}/com
+mandir			?= ${datadir}/man
+infodir			?= ${datadir}/info
+docdir			?= ${datadir}/doc
+arch			?= @@ARCH@@
+pegasus_providers_dir	?= ${libdir}/Pegasus/providers
+
+INSTALL_DIR		= install -d
+INSTALL_FILE	= install -m 644
+INSTALL_BIN		= install
+INSTALL_LIB		= install
+
+PARANOID=0
+PEGASUS_PLATFORM ?= @@PEGASUS_PLATFORM@@
+
+INCLUDE			+= -I $(top_srcdir)/include \
+					`pkg-config --cflags libxml-2.0` \
+					`pkg-config --cflags openssl`
+CFLAGS			+= -Wall -Wno-unused -fPIC -O2 -g ${INCLUDE}
+CXXFLAGS		+= -Wall -Wno-unused -fPIC -O2 -g ${INCLUDE} -fpermissive
+LDFLAGS			+= -fPIC -lpthread \
+					`pkg-config --libs libxml-2.0` \
+					`pkg-config --libs openssl`
+
+CC				= gcc
+CXX				= g++
+LD				= g++
+RANLIB			?= ranlib
+

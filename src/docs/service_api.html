@@ -1,0 +1,150 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Service Module</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.2  (Linux)">
+	<META NAME="CREATED" CONTENT="20060410;13011800">
+	<META NAME="CHANGED" CONTENT="20060411;17340700">
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<P>Service module manages system-wide services. Allows service
+start/stop and scheduling services to start on boot (service and
+chkconfig frontend).</P>
+<P>Module name: “service”
+</P>
+<P>Module version: 1.0</P>
+<P>See <A HREF="modules_common.html">Modules - Common API</A> for
+general module description.
+</P>
+<P>Service module has a notion of service and set (set of services).
+Sets are here to simplify management of multiple services, eg cluster
+start/stop.
+</P>
+<P>&lt;service description=&quot;description&quot;
+enabled=&quot;true/false&quot; name=&quot;service name&quot;
+running=&quot;true/false&quot;/&gt;<BR>“enabled” - enabled on
+boot; “running” - currently running.</P>
+<P ALIGN=LEFT>&lt;set description=&quot;description&quot;
+enabled=&quot;true/false&quot; name=&quot;set name&quot;
+running=&quot;true/false&quot;/&gt;<BR>“enabled” - enabled on
+boot; “running” - currently running.</P>
+<P>There are couple of predefined service sets: <BR>- “Cluster
+Base” - base infrastructure of Red Hat Cluster Suite (currently
+ccsd, cman, fenced) <BR>- “Cluster Base - Gulm” - base
+infrastructure of Red Hat Cluster Suite using GULM lock manager
+(currently ccsd, lock_gulmd) <BR>- “Cluster Service
+Manager” - (currently rgmanager) <BR>- “Clustered Storage” -
+shared storage (currently clvmd, gfs)<BR>- “Linux Virtual Server”
+- (currently pulse, piranha-gui)</P>
+<P>Functions:
+</P>
+<UL>
+	<LI><P>APIs</P>
+	<UL>
+		<P>Get supported API versions. See <A HREF="modules_common.html">Modules
+		- Common API</A> for description.</P>
+	</UL>
+</UL>
+<UL>
+	<LI><P>list</P>
+	<UL>
+		<P ALIGN=LEFT>Retrieve list of services and sets.
+		</P>
+		<P>Input variables:<BR>- “description” (boolean) – optional,
+		defaults to false, fill in “description” attribute (slow)</P>
+		<P ALIGN=LEFT>Output variables:<BR>- “services” (list_xml) –
+		list of services and sets</P>
+		<P ALIGN=LEFT>On failure:<BR>- No special errors defined, only
+		generic ones might get returned.</P>
+	</UL>
+	<LI><P>query
+	</P>
+	<UL>
+		<P ALIGN=LEFT>Query services and sets by service/set name.
+		</P>
+		<P>Input variables: <BR>- “search” (list_xml) – list of
+		services and sets to query. Service format &lt;service name=”rpm
+		name”/&gt;; set format &lt;set name=”set name”/&gt;<BR>-
+		“description” (boolean) – optional, defaults to false, fill
+		in “description” attribute (slow)</P>
+		<P ALIGN=LEFT>Output variables: <BR>- “result” (list_xml) –
+		list of matching services and sets.
+		</P>
+		<P>On failure: <BR>- No special errors defined, only generic ones
+		might get returned.
+		</P>
+	</UL>
+	<LI><P>enable</P>
+	<UL>
+		<P ALIGN=LEFT>Enable services/sets to start at boot time. It is not
+		error to enable already enabled service/set.
+		</P>
+		<P>Input variables: <BR>- “services” (list_xml) – list of
+		services/sets to enable. For format see “query”.
+		</P>
+		<P>No output variables.
+		</P>
+		<P>On failure: <BR>- No special errors defined, only generic ones
+		might get returned.
+		</P>
+	</UL>
+	<LI><P>disable</P>
+	<UL>
+		<P ALIGN=LEFT>Disable services/sets startup at boot time. It is not
+		error to disable already disabled service/set.
+		</P>
+		<P>Input variables: <BR>- “services” (list_xml) – list of
+		services/sets to disable. For format see “query”.
+		</P>
+		<P>No output variables.
+		</P>
+		<P ALIGN=LEFT>On failure: <BR>- No special errors defined, only
+		generic ones might get returned.
+		</P>
+	</UL>
+	<LI><P>start</P>
+	<UL>
+		<P ALIGN=LEFT>Start services/sets. It is not error to start already
+		started service/set.
+		</P>
+		<P>Input variables: <BR>- “services” (list_xml) – list of
+		services/sets to start. For format see “query”.
+		</P>
+		<P>No output variables.
+		</P>
+		<P ALIGN=LEFT>On failure: <BR>- No special errors defined, only
+		generic ones might get returned.
+		</P>
+	</UL>
+	<LI><P>restart</P>
+	<UL>
+		<P ALIGN=LEFT>Restart services/sets.</P>
+		<P>Input variables: <BR>- “services” (list_xml) – list of
+		services/sets to restart. For format see “query”.
+		</P>
+		<P>No output variables.
+		</P>
+		<P ALIGN=LEFT>On failure: <BR>- No special errors defined, only
+		generic ones might get returned.
+		</P>
+	</UL>
+	<LI><P>stop</P>
+	<UL>
+		<P ALIGN=LEFT>Stop services/sets. It is not error to stop already
+		stopped services/sets.
+		</P>
+		<P>Input variables: <BR>- “services” (list_xml) – list of
+		services/sets to stop. For format see “query”.
+		</P>
+		<P>No output variables.
+		</P>
+		<P ALIGN=LEFT>On failure: <BR>- No special errors defined, only
+		generic ones might get returned.
+		</P>
+	</UL>
+</UL>
+<P ALIGN=LEFT><BR><BR>
+</P>
+</BODY>
+</HTML>

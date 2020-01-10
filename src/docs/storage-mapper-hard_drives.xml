@@ -1,0 +1,47 @@
+<mapper mapper_id="hard_drives:" mapper_type="hard_drives" state_ind="bakamacajadapanajafamaaanapaeaja">
+							<properties>
+								<var mutable="false" name="removable" type="boolean" value="false"/>
+							</properties>
+							<sources/>
+							<targets>
+								<block_device mapper_id="hard_drives:" mapper_type="hard_drives" path="/dev/hda" state_ind="bafadaaaiagapamaeadanadaiakamaea">
+									<properties>
+										<var mutable="false" name="model" type="string" value="unknown"/>
+
+										<var mutable="false" name="path" type="string" value="/dev/hda"/>
+										<var mutable="false" name="removable" type="boolean" value="false"/>
+										<var mutable="false" name="size" type="int" value="40020664320"/>
+										<var mutable="false" name="vendor" type="string" value="unknown"/>
+									</properties>
+									<content type="none">
+										<properties/>
+										<available_contents/>
+										<new_content/>
+
+									</content>
+								</block_device>
+								<block_device mapper_id="hard_drives:" mapper_type="hard_drives" path="/dev/sda" state_ind="jamaeaaapalaaagakamapanagamahada">
+									<properties>
+										<var mutable="false" name="model" type="string" value="ST380013AS"/>
+										<var mutable="false" name="path" type="string" value="/dev/sda"/>
+										<var mutable="false" name="removable" type="boolean" value="false"/>
+										<var mutable="false" name="scsi_bus" type="string" value="0:0:0:0"/>
+										<var mutable="false" name="scsi_id" type="string" value="0ATA_____ST380013AS______Linux_ATA-SCSI_simulator"/>
+
+										<var mutable="false" name="size" type="int" value="80026361856"/>
+										<var mutable="false" name="vendor" type="string" value="ATA"/>
+									</properties>
+									<content mapper_id="partition_table:/dev/sda" mapper_type="partition_table" type="mapper_source">
+										<properties>
+											<var mutable="false" name="disklabel" type="string" value="msdos"/>
+											<var mutable="false" name="path" type="string" value="/dev/sda"/>
+										</properties>
+										<available_contents/>
+
+										<new_content/>
+									</content>
+								</block_device>
+							</targets>
+							<new_sources/>
+							<new_targets/>
+						</mapper>

@@ -1,0 +1,15 @@
+1. generate SSL cert/key pair
+	./generate_certs.sh
+	this step needs to be performed only once
+	(cert can be used for multiple riccis - each requires authentication)
+2. modify ricci/authenticate.xml, writing root password of machine hosting ricci to 'password' attribute
+3. execute `./send_to_ricci ricci_hostname ricci/authenticate.xml`
+	from now on, you are authenticated to that ricci, and don't have to repeat authentication to it
+4. pick/modify one of XML files
+	check ../docs/ for API
+5. execute `./send_to_ricci ricci_hostname xml_file`
+	ricci's response will be printed to stdout
+
+...
+
+15. send ricci/unauthenticate.xml to unauthenticate from that ricci

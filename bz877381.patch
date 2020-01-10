@@ -1,0 +1,50 @@
+From 4465a53b8628b56b6ddb7e3153406c4f265e52fc Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Wed, 21 Nov 2012 14:02:29 -0600
+Subject: [PATCH] Better fix for large cluster.conf and fix for long values in
+ cluster.conf
+
+Patch from jpokorny@redhat.com
+---
+ ricci/common/File.cpp | 16 +++++++++++++---
+ 1 file changed, 13 insertions(+), 3 deletions(-)
+
+diff --git a/ricci/common/File.cpp b/ricci/common/File.cpp
+index 50ab78b..ff40d3f 100644
+--- a/ricci/common/File.cpp
++++ b/ricci/common/File.cpp
+@@ -138,18 +138,28 @@ File::read() const
+ {
+ 	MutexLocker l(*_mutex);
+ 
++	char *buff = NULL;
+ 	long len = size();
+-	char buff[len];
++
+ 	try {
++		buff = new char[len];
++
+ 		((fstream *) _pimpl->fs)->seekg(0, ios::beg);
+-		check_failed();
+ 		((fstream *) _pimpl->fs)->read(buff, len);
+ 		check_failed();
++		if (len != ((fstream *) _pimpl->fs)->gcount())
++			throw String("Read size mismatch: ") + _path;
+ 		String ret(buff, len);
++
+ 		::shred(buff, len);
++		delete[] buff;
++
+ 		return ret;
+ 	} catch ( ... ) {
+-		::shred(buff, len);
++		if (buff) {
++			::shred(buff, len);
++			delete[] buff;
++		}
+ 		throw;
+ 	}
+ }
+-- 
+1.7.11.7
+

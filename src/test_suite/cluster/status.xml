@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<ricci version="1.0" function="process_batch" async="false">
+<batch>
+
+<module name="cluster">
+<request sequence="1254" API_version="1.0">
+<function_call name="status"/>
+</request>
+</module>
+
+</batch>
+</ricci>
+

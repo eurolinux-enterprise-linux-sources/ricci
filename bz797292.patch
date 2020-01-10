@@ -1,0 +1,77 @@
+From e07f0589563eaeca3d1c87e377957bf9a791eeff Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Wed, 29 Feb 2012 16:28:49 -0600
+Subject: [PATCH] --createcluster now checks to see if the cluster exists
+ before overwriting
+
+Resolves: rhbz#797292
+---
+ ricci/ccs/Makefile           |    1 +
+ ricci/ccs/ccs                |   14 ++++++++++++++
+ ricci/ccs/empty_cluster.conf |   10 ++++++++++
+ 3 files changed, 25 insertions(+), 0 deletions(-)
+ create mode 100644 ricci/ccs/empty_cluster.conf
+
+diff --git a/ricci/ccs/Makefile b/ricci/ccs/Makefile
+index fb33bb5..59a5418 100644
+--- a/ricci/ccs/Makefile
++++ b/ricci/ccs/Makefile
+@@ -15,6 +15,7 @@ install:
+ 	install ccs ${DESTDIR}/${SBINDIR}/ccs
+ 	install -d ${DESTDIR}/usr/share/ccs/
+ 	install cluster.rng.in ${DESTDIR}/usr/share/ccs/cluster.rng
++	install empty_cluster.conf ${DESTDIR}/usr/share/ccs/cluster.rng
+ 	install -d ${DESTDIR}/${MANDIR}/man8
+ 	install ccs.8 ${DESTDIR}/${MANDIR}/man8
+ 
+diff --git a/ricci/ccs/ccs b/ricci/ccs/ccs
+index 813799f..f120e76 100755
+--- a/ricci/ccs/ccs
++++ b/ricci/ccs/ccs
+@@ -16,6 +16,7 @@ import tempfile
+ 
+ RICCI_PORT = 11111
+ CLUSTERRNG = "/usr/share/ccs/cluster.rng"
++EMPTYCLUSTERCONF = "/usr/share/ccs/empty_cluster.conf"
+ 
+ password = None
+ debug = False
+@@ -844,6 +845,19 @@ def empty_cluster_conf(name="cluster"):
+ 
+ def create_cluster(clustername):
+     xml = empty_cluster_conf(clustername)
++
++    f = open(EMPTYCLUSTERCONF, 'r')
++
++    # Verify that a config doesn't exist, and if it does warn the user
++    if verifyconf:
++        if usefile:
++            if os.path.exists(filename):
++                print "%s already exists, use '-i' to override." % filename
++                sys.exit(1)
++        elif get_cluster_conf_xml() != f.read():
++                print "cluster.conf already exists, use '-i' to override."
++                sys.exit(1)
++
+     # No need to increment on cluster.conf creation
+     set_cluster_conf(xml, False)
+ 
+diff --git a/ricci/ccs/empty_cluster.conf b/ricci/ccs/empty_cluster.conf
+new file mode 100644
+index 0000000..c4de799
+--- /dev/null
++++ b/ricci/ccs/empty_cluster.conf
+@@ -0,0 +1,10 @@
++<cluster config_version="1" name="cluster">  
++	  <fence_daemon/>  
++	  <clusternodes/>  
++	  <cman/>  
++	  <fencedevices/>  
++	  <rm>    
++		    <failoverdomains/>    
++		    <resources/>    
++	  </rm>  
++</cluster>
+-- 
+1.7.7.6
+

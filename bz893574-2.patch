@@ -1,0 +1,26 @@
+From 4a554296eb831c91bb0a4ca9d60875d7dffc650d Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Wed, 14 Aug 2013 00:13:23 -0500
+Subject: [PATCH] Check correct variable so we don't always add an unfence
+ section
+
+---
+ ricci/ccs/ccs | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ricci/ccs/ccs b/ricci/ccs/ccs
+index 2d18110..f2d7570 100755
+--- a/ricci/ccs/ccs
++++ b/ricci/ccs/ccs
+@@ -1038,7 +1038,7 @@ def add_fenceinst(name, options):
+ 
+     set_cluster_conf(dom.toxml())
+ 
+-    if need_unfence and not nounfence:
++    if unfence and not nounfence:
+       for o in options[:]:
+ 	if o.startswith("action="):
+ 	  options.remove(o)
+-- 
+1.8.3.1
+

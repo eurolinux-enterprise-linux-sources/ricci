@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Cluster Module</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.2  (Linux)">
+	<META NAME="CREATED" CONTENT="20060410;13011800">
+	<META NAME="CHANGED" CONTENT="20060620;15340700">
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<P>Cluster module manages Red Hat Cluster Suite.
+</P>
+<P>Module name: “cluster”
+</P>
+<P>Module version: 1.0</P>
+<P>See <A HREF="modules_common.html">Modules - Common API</A> for
+general module description.
+</P>
+<P>Functions:
+</P>
+<UL>
+	<LI><P>APIs</P>
+	<UL>
+		<P>Get supported API versions. See <A HREF="modules_common.html">Modules
+		- Common API</A> for description.</P>
+	</UL>
+	<LI><P>get_cluster.conf</P>
+	<UL>
+		<P>Retrieves cluster.conf.</P>
+		<P>No input variables.</P>
+		<P>Output variables:<BR>- “cluster.conf” (XML) – current
+		cluster.conf</P>
+		<P ALIGN=LEFT>On failure:<BR>- No special errors defined, only
+		generic ones might get returned.</P>
+	</UL>
+	<LI><P ALIGN=LEFT>set_cluster.conf</P>
+	<UL>
+		<P>Saves cluster.conf to proper location. If “propagate” is
+		“true”, cluster.conf will be propagated to the cluster.<BR>No
+		verification of cluster.conf is performed; propagation of invalid
+		cluster.conf might bring cluster to halt!!!</P>
+		<P ALIGN=LEFT>Input variables:<BR>- “cluster.conf” (XML) –
+		required<BR>- “propagate” (boolean) – optional, defaults to
+		“false”</P>
+		<P ALIGN=LEFT>No output variables.
+		</P>
+		<P ALIGN=LEFT>On failure:<BR>- No special errors defined, only
+		generic ones might get returned.</P>
+	</UL>
+	<LI><P>status</P>
+	<UL>
+		<P>Retrieve cluster status. If node is not configured to be a part
+		of cluster, empty &lt;cluster/&gt; tag will be returned.</P>
+		<P>No input variables.
+		</P>
+		<P>Output variables:<BR>- “status” (XML) – status of cluster,
+		nodes and services.<BR>eg: <BR>&lt;cluster minQuorum=&quot;1&quot;
+		name=&quot;113716905453&quot; alias=”My Cluster” quorate=&quot;true&quot;
+		votes=&quot;2&quot;&gt;<BR>&lt;node clustered=&quot;true&quot;
+		name=&quot;blue&quot; online=&quot;true&quot; uptime=&quot;336225&quot;
+		votes=&quot;1&quot;/&gt; - clustered – part of cluster?; online –
+		PC is up<BR>&lt;node clustered=&quot;true&quot; name=&quot;green&quot;
+		online=&quot;true&quot; uptime=&quot;331625&quot;
+		votes=&quot;1&quot;/&gt;<BR>&lt;service autostart=&quot;true&quot;
+		failed=&quot;false&quot; name=&quot;dsa&quot; nodename=&quot;green&quot;
+		running=&quot;true&quot; time_since_transition=&quot;12345&quot;/&gt;<BR>&lt;service
+		autostart=&quot;true&quot; failed=&quot;false&quot; name=&quot;new_serv&quot;
+		nodename=&quot;green&quot; running=&quot;true&quot;
+		time_since_transition=&quot;54321&quot;/&gt;<BR>&lt;/cluster&gt;</P>
+		<P ALIGN=LEFT>On failure:<BR>- No special errors defined, only
+		generic ones might get returned.</P>
+	</UL>
+	<LI><P>start_service</P>
+	<UL>
+		<P>Start service “servicename”. If “nodename” is specified,
+		service is started on that node, otherwise it will be started on a
+		node chosen by service manager. <BR>If service was not running, it
+		is started. If it was running, it is relocated to “nodename”.
+		</P>
+		<P>Input variables:<BR>- “servicename” (string) – name of
+		service to manipulate<BR>- “nodename” (string) – optional
+		name of node for service to start on / relocate to</P>
+		<P>No output variables.</P>
+		<P>On failure:<BR>- 1 – service manager is not running on this
+		managed system<BR>- generic ones</P>
+	</UL>
+	<LI><P>migrate_service</P>
+	<UL>
+		<P>Migrate the virtual service “servicename” to cluster node “nodename.” To migrate the virtual service, it must be started, and xend must be running and configured to allow live migration on both its current node and on “nodename.” If the service is not started, it will be started on “nodename.”
+		</P>
+		<P>Input variables:<BR>- “servicename” (string) – name of
+		the virtual service to migrate.<BR>- “nodename” (string) –
+		name of node to which the virtual service is to be migrated.</P>
+		<P>No output variables.</P>
+		<P>On failure:<BR>- 1 – service manager is not running on this
+		managed system<BR>- generic ones</P>
+	</UL>
+
+	<LI><P>stop_service</P>
+	<UL>
+		<P>Stop service “servicename”. It is not an error to stop
+		already stopped service.</P>
+		<P>Input variables:<BR>- “servicename” (string) – name of
+		service to stop</P>
+		<P>No output variables.</P>
+		<P>On failure:<BR>- 1 – service manager is not running on this
+		managed system<BR>- generic ones</P>
+	</UL>
+	<LI><P>restart_service</P>
+	<UL>
+		<P>Restart service “servicename” on node it is currently
+		running. If service is not running, it will be started on a node
+		chosen by service manager.
+		</P>
+		<P>Input variables:<BR>- “servicename” (string) – name of
+		service to manipulate</P>
+		<P>No output variables.</P>
+		<P>On failure:<BR>- 1 – service manager is not running on this
+		managed system<BR>- generic ones</P>
+	</UL>
+	<LI><P>start_node
+	</P>
+	<UL>
+		<P>Start cluster infrastructure on this node (also, enable daemons'
+		boot startup). <BR>It is not an error to start already started
+		node.</P>
+		<P>Input variables:<BR>- “cluster_startup” (boolean) –
+		optional, default “false”, cluster is starting up (wait for all
+		to come up, then start services – avoid fencing on startup)</P>
+		<P>No output variables.
+		</P>
+		<P>On failure:<BR>- No special errors defined, only generic ones
+		might get returned.</P>
+	</UL>
+	<LI><P>stop_node</P>
+	<UL>
+		<P>Stop cluster infrastructure on this node (also, disable daemons'
+		boot startup). <BR>It is not an error to stop already stopped node.
+				</P>
+		<P>Input variables:
+		<BR>- “cluster_shutdown” (boolean) –
+		optional, default “false”, cluster is shutting down (don't
+		bounce services around)
+		<BR>- “purge_conf” (boolean) –
+		optional, default “false”, delete cluster.conf; start_node() cannot be called any more, without calling set_cluster.conf() first
+		<P>No output variables.
+		</P>
+		<P>On failure:<BR>- No special errors defined, only generic ones
+		might get returned.
+		</P>
+	</UL>
+	<LI><P>fence_node</P>
+	<UL>
+		<P>Fence node “nodename”.
+		</P>
+		<P>Input variables:<BR>- nodename (string) – name of node to
+		fence</P>
+		<P>No output variables.</P>
+		<P>On failure:<BR>- No special errors defined, only generic ones
+		might get returned.</P>
+	</UL>
+</UL>
+<P><BR><BR>
+</P>
+</BODY>
+</HTML>

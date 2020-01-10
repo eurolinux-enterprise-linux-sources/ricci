@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Storage Module - Mapper Template</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.2  (Linux)">
+	<META NAME="CREATED" CONTENT="20060410;13011800">
+	<META NAME="CHANGED" CONTENT="20060412;14421600">
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<P>&lt;mapper_template/&gt; is used for creation of new <A HREF="storage-mappers.html">&lt;mapper/&gt;</A>s.
+Mapper templates are retrieved using “get_mapper_templates”
+<A HREF="storage_api.html">function</A>.
+</P>
+<P><BR><BR>
+</P>
+<P>New mappers are created by submitting &lt;mapper_template/&gt; to
+Storage Module using “create_mapper” <A HREF="storage_api.html">function</A>.
+<BR>Modify &lt;properties/&gt; tag, move at least “min_sources”
+&lt;block_device/&gt;s from &lt;new_sources/&gt; to &lt;sources/&gt;,submit
+&lt;mapper_template/&gt; using “create_mapper”, and new <A HREF="storage-mappers.html">&lt;mapper/&gt;</A>
+will be created.
+</P>
+<P><BR><BR>
+</P>
+<P><B>Mapper Template XML description:</B></P>
+<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;mapper mapper_type=&quot;mapper type&quot;&gt;</FONT></FONT>
+  <FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;properties/&gt;</FONT></FONT>
+  <FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;sources/&gt;</FONT></FONT>
+  <FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;new_sources/&gt;</FONT></FONT>
+<A NAME="line22"></A><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;/mapper&gt;</FONT></FONT>
+</PRE>
+<UL>
+	<LI><P>Every mapper template has “mapper_type” that represents a
+	type of mapper that can be created using this template.
+	</P>
+	<LI><P>&lt;properties/&gt; tag, which has <A HREF="variables.html">variables</A>
+	for children. <BR>Some properties can be mutable. <BR>Every
+	“mapper_type” template has different set of properties defined.
+	<BR>Every mapper template will have “<B>min_sources</B>” and
+	“<B>max_sources</B>” defined. <BR>Example of properties for
+	Partition Tables:
+	</P>
+	<UL>
+		<PRE STYLE="margin-bottom: 0.2in"><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;properties&gt;</FONT></FONT></PRE>
+		<UL>
+			<PRE STYLE="margin-bottom: 0.2in"><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;min_sources&quot; type=&quot;int&quot; value=&quot;1&quot;/&gt;</FONT></FONT>
+<FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;max_sources&quot; type=&quot;int&quot; value=&quot;1&quot;/&gt;</FONT></FONT>
+<FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;true&quot; name=&quot;label&quot; type=&quot;string_select&quot; valid_values=&quot;bsd;gpt;msdos;sun&quot; value=&quot;gpt&quot;/&gt;</FONT></FONT></PRE>
+		</UL>
+		<PRE STYLE="margin-bottom: 0.2in"><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;/properties&gt;</FONT></FONT></PRE>
+	</UL>
+	<LI><P>&lt;sources/&gt; tag, which is empty. Move &lt;block_device/&gt;s
+	from &lt;new_sources/&gt; to &lt;sources/&gt; tag, and those
+	&lt;block_device/&gt;s will be made sources of newly created mapper.
+		</P>
+	<LI><P>&lt;new_sources/&gt; tag, which has <A HREF="storage-bds.html">&lt;block_device/&gt;</A>s
+	for children. These block devices can become initial sources of
+	newly created mapper. Move at least “min_sources” of them to
+	&lt;sources/&gt;.
+	</P>
+</UL>
+<P><BR><BR>
+</P>
+</BODY>
+</HTML>

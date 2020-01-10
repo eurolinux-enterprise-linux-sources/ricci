@@ -1,0 +1,163 @@
+<?xml version="1.0" ?>
+<mapper mapper_id="partition_table:/dev/hda" mapper_type="partition_table" state_ind="baiapanapakaaajajajanaealapahama">
+							<properties>
+								<var mutable="false" name="disklabel" type="string" value="gpt"/>
+								<var mutable="false" name="removable" type="boolean" value="true"/>
+							</properties>
+							<sources>
+								<block_device mapper_id="hard_drives:" mapper_type="hard_drives" path="/dev/hda" state_ind="facaoamajakacaaadacapababacadana">
+									<properties>
+										<var mutable="false" name="model" type="string" value="unknown"/>
+
+										<var mutable="false" name="path" type="string" value="/dev/hda"/>
+										<var mutable="false" name="removable" type="boolean" value="false"/>
+										<var mutable="false" name="size" type="int" value="40020664320"/>
+										<var mutable="false" name="vendor" type="string" value="unknown"/>
+									</properties>
+									<content mapper_id="partition_table:/dev/hda" mapper_type="partition_table" type="mapper_source">
+										<properties>
+											<var mutable="false" name="disklabel" type="string" value="gpt"/>
+											<var mutable="false" name="path" type="string" value="/dev/hda"/>
+
+										</properties>
+										<available_contents/>
+										<new_content/>
+									</content>
+								</block_device>
+							</sources>
+							<targets>
+								<block_device mapper_id="partition_table:/dev/hda" mapper_type="partition_table" path="/dev/hda1" state_ind="baoaaamadagahadalajapaaabafajaba">
+									<properties>
+
+										<var mutable="false" name="bootable" type="boolean" value="false"/>
+										<var mutable="false" name="partition_begin" type="int" value="17825"/>
+										<var mutable="false" name="partition_num" type="int" value="1"/>
+										<var mutable="false" name="partition_type" type="string" value="primary"/>
+										<var mutable="false" name="path" type="string" value="/dev/hda1"/>
+										<var mutable="false" name="removable" type="boolean" value="true"/>
+										<var mutable="false" name="size" type="int" value="618642015"/>
+									</properties>
+									<content type="none">
+
+										<properties/>
+										<available_contents>
+											<content_template fs_type="extended_fs" type="filesystem">
+												<properties>
+													<var mutable="true" name="block_size" type="int_select" valid_values="1024;2048;4096" value="4096"/>
+													<var mutable="true" name="dir_index" type="boolean" value="true"/>
+													<var mutable="true" name="fstab" type="boolean" value="false"/>
+													<var mutable="true" name="has_journal" type="boolean" value="true"/>
+													<var illegal_chars="| \ /?.," max_length="16" min_length="0" mutable="true" name="label" reserved_words="" type="string" value=""/>
+
+													<var mutable="true" name="mount" type="boolean" value="false"/>
+													<var illegal_chars=";? *!" max_length="128" min_length="0" mutable="true" name="mountpoint" reserved_words="/;/boot;/dev/pts;/dev/shm;/proc;/sys;/usr;/music/remote;/music/local;/media/cdrecorder;/proc/bus/usb;/proc/sys/fs/binfmt_misc;/var/lib/nfs/rpc_pipefs;/home;/misc;/home/boston;/dev;/selinux" type="string" value=""/>
+												</properties>
+											</content_template>
+											<content_template fs_type="swap" type="filesystem">
+												<properties>
+													<var mutable="true" name="fstab" type="boolean" value="true"/>
+													<var illegal_chars="| \ /?.," max_length="16" min_length="0" mutable="true" name="label" reserved_words="" type="string" value=""/>
+													<var mutable="true" name="swapon" type="boolean" value="true"/>
+
+												</properties>
+											</content_template>
+											<content_template mapper_type="volume_group" type="mapper_source">
+												<properties>
+													<var mutable="true" name="vgname" type="string_select" valid_values="VG_main;" value="VG_main"/>
+												</properties>
+											</content_template>
+										</available_contents>
+										<new_content/>
+
+									</content>
+								</block_device>
+								<block_device mapper_id="partition_table:/dev/hda" mapper_type="partition_table" path="/dev/hda2" state_ind="daiaoafahaiaoahaiafamanaoanakafa">
+									<properties>
+										<var mutable="false" name="bootable" type="boolean" value="false"/>
+										<var mutable="false" name="partition_begin" type="int" value="618659840"/>
+										<var mutable="false" name="partition_num" type="int" value="2"/>
+										<var mutable="false" name="partition_type" type="string" value="primary"/>
+										<var mutable="false" name="path" type="string" value="/dev/hda2"/>
+
+										<var mutable="false" name="removable" type="boolean" value="true"/>
+										<var mutable="false" name="size" type="int" value="899678208"/>
+									</properties>
+									<content type="none">
+										<properties/>
+										<available_contents>
+											<content_template fs_type="extended_fs" type="filesystem">
+												<properties>
+													<var mutable="true" name="block_size" type="int_select" valid_values="1024;2048;4096" value="4096"/>
+
+													<var mutable="true" name="dir_index" type="boolean" value="true"/>
+													<var mutable="true" name="fstab" type="boolean" value="false"/>
+													<var mutable="true" name="has_journal" type="boolean" value="true"/>
+													<var illegal_chars="| \ /?.," max_length="16" min_length="0" mutable="true" name="label" reserved_words="" type="string" value=""/>
+													<var mutable="true" name="mount" type="boolean" value="false"/>
+													<var illegal_chars=";? *!" max_length="128" min_length="0" mutable="true" name="mountpoint" reserved_words="/;/boot;/dev/pts;/dev/shm;/proc;/sys;/usr;/music/remote;/music/local;/media/cdrecorder;/proc/bus/usb;/proc/sys/fs/binfmt_misc;/var/lib/nfs/rpc_pipefs;/home;/misc;/home/boston;/dev;/selinux" type="string" value=""/>
+												</properties>
+											</content_template>
+											<content_template fs_type="swap" type="filesystem">
+
+												<properties>
+													<var mutable="true" name="fstab" type="boolean" value="true"/>
+													<var illegal_chars="| \ /?.," max_length="16" min_length="0" mutable="true" name="label" reserved_words="" type="string" value=""/>
+													<var mutable="true" name="swapon" type="boolean" value="true"/>
+												</properties>
+											</content_template>
+											<content_template mapper_type="volume_group" type="mapper_source">
+												<properties>
+													<var mutable="true" name="vgname" type="string_select" valid_values="VG_main;" value="VG_main"/>
+
+												</properties>
+											</content_template>
+										</available_contents>
+										<new_content/>
+									</content>
+								</block_device>
+							</targets>
+							<new_sources/>
+							<new_targets>
+
+								<block_device_template mapper_id="partition_table:/dev/hda" mapper_state_ind="baiapanapakaaajajajanaealapahama" mapper_type="partition_table">
+									<properties>
+										<var mutable="false" name="partition_begin" type="int" value="1518338048"/>
+										<var mutable="false" name="partition_type" type="string" value="primary"/>
+										<var max="38501613568" min="2097152" mutable="true" name="size" step="2097152" type="int" value="38501613568"/>
+									</properties>
+									<content type="none">
+										<properties/>
+										<available_contents>
+
+											<content_template fs_type="extended_fs" type="filesystem">
+												<properties>
+													<var mutable="true" name="block_size" type="int_select" valid_values="1024;2048;4096" value="4096"/>
+													<var mutable="true" name="dir_index" type="boolean" value="true"/>
+													<var mutable="true" name="fstab" type="boolean" value="false"/>
+													<var mutable="true" name="has_journal" type="boolean" value="true"/>
+													<var illegal_chars="| \ /?.," max_length="16" min_length="0" mutable="true" name="label" reserved_words="" type="string" value=""/>
+													<var mutable="true" name="mount" type="boolean" value="false"/>
+													<var illegal_chars=";? *!" max_length="128" min_length="0" mutable="true" name="mountpoint" reserved_words="/;/boot;/dev/pts;/dev/shm;/proc;/sys;/usr;/music/remote;/music/local;/media/cdrecorder;/proc/bus/usb;/proc/sys/fs/binfmt_misc;/var/lib/nfs/rpc_pipefs;/home;/misc;/home/boston;/dev;/selinux" type="string" value=""/>
+
+												</properties>
+											</content_template>
+											<content_template fs_type="swap" type="filesystem">
+												<properties>
+													<var mutable="true" name="fstab" type="boolean" value="true"/>
+													<var illegal_chars="| \ /?.," max_length="16" min_length="0" mutable="true" name="label" reserved_words="" type="string" value=""/>
+													<var mutable="true" name="swapon" type="boolean" value="true"/>
+												</properties>
+											</content_template>
+
+											<content_template mapper_type="volume_group" type="mapper_source">
+												<properties>
+													<var mutable="true" name="vgname" type="string_select" valid_values="VG_main;" value="VG_main"/>
+												</properties>
+											</content_template>
+										</available_contents>
+										<new_content/>
+									</content>
+								</block_device_template>
+
+							</new_targets>
+						</mapper>

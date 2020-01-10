@@ -1,0 +1,25 @@
+From 2c8f29c7fad8a8e9de7c9b95ecddd957cc7d6829 Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Thu, 29 Nov 2012 15:56:16 -0600
+Subject: [PATCH] Reset stacksize to previous value before bz815752 fix
+
+---
+ ricci/common/Thread.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ricci/common/Thread.cpp b/ricci/common/Thread.cpp
+index 3520bf1..364c172 100644
+--- a/ricci/common/Thread.cpp
++++ b/ricci/common/Thread.cpp
+@@ -58,7 +58,7 @@ Thread::start()
+ 
+ 		pthread_attr_t a;
+ 		pthread_attr_init(&a);
+-		pthread_attr_setstacksize(&a, (1 << 20));
++		pthread_attr_setstacksize(&a, (1 << 18));
+ 		int ret = pthread_create(&_thread, &a, start_thread, this);
+ 		pthread_attr_destroy(&a);
+ 		if (ret == 0)
+-- 
+1.7.11.7
+

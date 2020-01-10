@@ -1,0 +1,70 @@
+#!/usr/bin/python
+
+import socket
+import sys, os
+import xml.dom
+import xml
+from xml.dom import minidom
+
+import sys
+sys.path.append('/var/lib/luci/Extensions')
+from conga_ssl import SSLSocket
+
+
+WRITE_TIMEOUT = 600
+READ_TIMEOUT = 600
+CONNECT_TIMEOUT = 4
+
+RICCI_PORT = 11111
+
+
+def send_to_ricci(hostname, msg):
+    ss = SSLSocket(hostname, RICCI_PORT, CONNECT_TIMEOUT)
+
+    res1 = ss.recv(READ_TIMEOUT)
+    ss.send(msg, WRITE_TIMEOUT)
+    res2 = ''
+    while True:
+        buff = ss.recv(READ_TIMEOUT)
+        if buff == '':
+            break
+        res2 += buff
+        try:
+            minidom.parseString(res2)
+            break
+        except:
+            pass
+    return res1, res2
+
+
+def main(argv):
+    certs_present = True
+    if os.access('cacert.pem', os.R_OK) == False:
+        print 'cannot find cacert.pem'
+        certs_present = False
+    if os.access('privkey.pem', os.R_OK) == False:
+        print 'cannot find privkey.pem'
+        certs_present = False
+
+    if len(argv) != 3 or not certs_present:
+        print 'sends <command_file> to ricci on <hostname>, and writes its response to stdout'
+        print '\t' + argv[0] + ' <hostname> <command_file>'
+        print '\t\thostname - host to send command to'
+        print '\t\txml_file - file with valid ricci request to be sent'
+        print '\t./ has to contain privkey.pem and cacert.pem'
+        sys.exit(1)
+
+    hostname = argv[1]
+    filename = argv[2]
+    res = send_to_ricci(hostname, open(filename).read(100000))
+    print res[1]
+    if res[1].find('success="5"') > -1:
+        print "not authenticated, send ricci/authenticate.xml with root password in it"
+
+
+
+
+# If called from the command line
+if __name__ == '__main__':
+    main(sys.argv)
+

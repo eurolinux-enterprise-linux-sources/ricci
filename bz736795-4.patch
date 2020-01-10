@@ -1,0 +1,50 @@
+From: Jan Pokorny <jpokorny@redhat.com>
+Date: Tue, 13 Sep 2011 21:12:15 +0200
+Subject: [PATCH 4/4] (bz736795) do not miss any data when "0 < read() <= sizeof(buf) && POLLHUP"
+
+... which could lead to another strange/bug-like behavior.
+
+See comprehensive in-code comments.
+
+Signed-off-by: Jan Pokorny <jpokorny@redhat.com>
+
+--- a/ricci/common/executils.cpp
++++ b/ricci/common/executils.cpp
+@@ -281,14 +281,33 @@
+ 				return;
+ 			}
+ 			data.append(data_in, ret);
+-			if (ret == sizeof(data_in))
+-				// shortcut to ensure that no data are missed when POLLIN|POLLHUP
+-				// and we haven't read all yet (POLLIN will remain set in such case)
+-				return;
+ 		} catch ( ... ) {
+ 			close_fd(fd);
+ 			fd_closed = true;
+ 		}
++		// At this point, we have successfully read some data.
++		// But in POLLIN|POLLHUP case, we cannot be sure whether we have already
++		// read all:
++		// a. ret == sizeof(data_in)
++		//    -> trivially, we have no idea whether we read all yet, need to continue
++		// b. 0 < ret < sizeof(data_in)
++		//    -> as per READ(3P) man page, it could have been the fact that current
++		//       read() was interrupted by signal (e.g., inevitable SIGCHLD) or
++		//       simply there were less bytes immediately available (not probable
++		//       in this context due to temporal order) that caused less bytes read
++		//       than was ready in the pipe (i.e., one cannot put equal sign
++		//       between "not a full buffer read" and "certain EOF ahead")
++		// thus in such case, we have to return right now and let subsequent poll
++		// or read (see comment for "ret == 0" branch above) decide
++		// (POLLIN will remain set if we have still something to read; apparently,
++		// POLLHUP will remain set until we close the descriptor).
++		//
++		// This way, we can be sure that we do not miss any data due to finishing
++		// with POLLHUP handling (below) prematurely.
++		// If we ignore POLLERR|POLLNVAL this time (unlikely), the right branch
++		// should be taken the next iteration (with POLLIN presumably cleared).
++		if (poll_info.revents & POLLHUP)
++			return;
+ 	}
+ 
+ 	if (poll_info.revents & (POLLERR | POLLHUP | POLLNVAL)) {

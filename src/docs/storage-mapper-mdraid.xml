@@ -1,0 +1,134 @@
+<?xml version="1.0" ?>
+<mapper mapper_id="mdraid:/dev/md1" mapper_type="mdraid" state_ind="panakaaaiapaoaaanajaoaaaealacaaa">
+							<properties>
+								<var mutable="true" name="active" type="boolean" value="true"/>
+								<var mutable="false" name="num_devices" type="int" value="3"/>
+								<var mutable="false" name="num_spares" type="int" value="0"/>
+								<var mutable="false" name="raid" type="string" value="/dev/md1"/>
+								<var mutable="false" name="raid_level" type="string" value="raid5"/>
+								<var mutable="false" name="removable" type="boolean" value="true"/>
+								<var mutable="false" name="uuid" type="string" value="59c7fd90:13aa0146:004c5b17:9edd2b3f"/>
+
+							</properties>
+							<sources>
+								<block_device mapper_id="partition_table:/dev/hda" mapper_type="partition_table" path="/dev/hda1" state_ind="jananalagalaaaeajakaladanapabaia">
+									<properties>
+										<var mutable="false" name="bootable" type="boolean" value="false"/>
+										<var mutable="false" name="partition_begin" type="int" value="17825"/>
+										<var mutable="false" name="partition_num" type="int" value="1"/>
+										<var mutable="false" name="partition_type" type="string" value="primary"/>
+										<var mutable="false" name="path" type="string" value="/dev/hda1"/>
+
+										<var mutable="false" name="removable" type="boolean" value="false"/>
+										<var mutable="false" name="size" type="int" value="618642015"/>
+									</properties>
+									<content mapper_id="mdraid:/dev/md1" mapper_type="mdraid" type="mapper_source">
+										<properties>
+											<var mutable="true" name="failed" type="boolean" value="false"/>
+											<var mutable="false" name="path" type="string" value="/dev/hda1"/>
+											<var mutable="false" name="raid" type="string" value="/dev/md1"/>
+											<var mutable="false" name="raid_level" type="string" value="raid5"/>
+
+											<var mutable="false" name="state" type="string" value="active"/>
+										</properties>
+										<available_contents/>
+										<new_content/>
+									</content>
+								</block_device>
+								<block_device mapper_id="partition_table:/dev/hda" mapper_type="partition_table" path="/dev/hda2" state_ind="aaaaoacaeafahagalapacajaoaeabapa">
+									<properties>
+										<var mutable="false" name="bootable" type="boolean" value="false"/>
+
+										<var mutable="false" name="partition_begin" type="int" value="618659840"/>
+										<var mutable="false" name="partition_num" type="int" value="2"/>
+										<var mutable="false" name="partition_type" type="string" value="primary"/>
+										<var mutable="false" name="path" type="string" value="/dev/hda2"/>
+										<var mutable="false" name="removable" type="boolean" value="false"/>
+										<var mutable="false" name="size" type="int" value="899678208"/>
+									</properties>
+									<content mapper_id="mdraid:/dev/md1" mapper_type="mdraid" type="mapper_source">
+										<properties>
+
+											<var mutable="true" name="failed" type="boolean" value="false"/>
+											<var mutable="false" name="path" type="string" value="/dev/hda2"/>
+											<var mutable="false" name="raid" type="string" value="/dev/md1"/>
+											<var mutable="false" name="raid_level" type="string" value="raid5"/>
+											<var mutable="false" name="state" type="string" value="active"/>
+										</properties>
+										<available_contents/>
+										<new_content/>
+									</content>
+
+								</block_device>
+								<block_device mapper_id="partition_table:/dev/hda" mapper_type="partition_table" path="/dev/hda3" state_ind="kamahacafaiaoababamakacafaoapaka">
+									<properties>
+										<var mutable="false" name="bootable" type="boolean" value="false"/>
+										<var mutable="false" name="partition_begin" type="int" value="1518338048"/>
+										<var mutable="false" name="partition_num" type="int" value="3"/>
+										<var mutable="false" name="partition_type" type="string" value="primary"/>
+										<var mutable="false" name="path" type="string" value="/dev/hda3"/>
+										<var mutable="false" name="removable" type="boolean" value="true"/>
+
+										<var mutable="false" name="size" type="int" value="501219328"/>
+									</properties>
+									<content mapper_id="mdraid:/dev/md1" mapper_type="mdraid" type="mapper_source">
+										<properties>
+											<var mutable="false" name="failed" type="boolean" value="false"/>
+											<var mutable="false" name="path" type="string" value="/dev/hda3"/>
+											<var mutable="false" name="raid" type="string" value="/dev/md1"/>
+											<var mutable="false" name="raid_level" type="string" value="raid5"/>
+											<var mutable="false" name="state" type="string" value="spare"/>
+
+										</properties>
+										<available_contents>
+											<content_template type="none">
+												<properties/>
+											</content_template>
+										</available_contents>
+										<new_content/>
+									</content>
+								</block_device>
+
+							</sources>
+							<targets>
+								<block_device mapper_id="mdraid:/dev/md1" mapper_type="mdraid" path="/dev/md1" state_ind="badahaiagafapakafalamadafakaiaga">
+									<properties>
+										<var mutable="false" name="path" type="string" value="/dev/md1"/>
+										<var mutable="false" name="raid_level" type="string" value="raid5"/>
+										<var mutable="false" name="removable" type="boolean" value="false"/>
+										<var mutable="false" name="size" type="int" value="1002307584"/>
+									</properties>
+
+									<content type="none">
+										<properties/>
+										<available_contents>
+											<content_template fs_type="extended_fs" type="filesystem">
+												<properties>
+													<var mutable="true" name="block_size" type="int_select" valid_values="1024;2048;4096" value="4096"/>
+													<var mutable="true" name="dir_index" type="boolean" value="true"/>
+													<var mutable="true" name="fstab" type="boolean" value="false"/>
+													<var mutable="true" name="has_journal" type="boolean" value="true"/>
+
+													<var illegal_chars="| \ /?.," max_length="16" min_length="0" mutable="true" name="label" reserved_words="" type="string" value=""/>
+													<var mutable="true" name="mount" type="boolean" value="false"/>
+													<var illegal_chars=";? *!" max_length="128" min_length="0" mutable="true" name="mountpoint" reserved_words="/;/boot;/dev/pts;/dev/shm;/proc;/sys;/usr;/music/remote;/music/local;/media/cdrecorder;/proc/bus/usb;/proc/sys/fs/binfmt_misc;/var/lib/nfs/rpc_pipefs;/home;/misc;/home/boston;/dev;/selinux" type="string" value=""/>
+												</properties>
+											</content_template>
+											<content_template fs_type="swap" type="filesystem">
+												<properties>
+													<var mutable="true" name="fstab" type="boolean" value="true"/>
+													<var illegal_chars="| \ /?.," max_length="16" min_length="0" mutable="true" name="label" reserved_words="" type="string" value=""/>
+
+													<var mutable="true" name="swapon" type="boolean" value="true"/>
+												</properties>
+											</content_template>
+										</available_contents>
+										<new_content/>
+									</content>
+								</block_device>
+							</targets>
+							<new_sources/>
+
+							<new_targets/>
+						</mapper>
+

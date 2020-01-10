@@ -1,0 +1,31 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Storage Module - Block Device Template</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.2  (Linux)">
+	<META NAME="CREATED" CONTENT="20060410;13011800">
+	<META NAME="CHANGED" CONTENT="20060412;18033500">
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<P>&lt;block_device_template/&gt; is used for creation of new
+<A HREF="storage-bds.html">&lt;block_device/&gt;</A>s. It can be
+found in <A HREF="storage-mappers.html">&lt;mapper/&gt;</A> under
+&lt;new_targets/&gt;.
+</P>
+<P><BR><BR>
+</P>
+<P>New block devices are created by submitting
+&lt;block_device_template/&gt; from &lt;new_targets/&gt; of <A HREF="storage-mappers.html">&lt;mapper/&gt;</A>
+to Storage Module using “create_bd” <A HREF="storage_api.html">function</A>.
+<BR>&lt;block_device_template/&gt;'s properties and content can be
+modified using the same rules before calling “create_bd”
+function.
+</P>
+<P><BR><BR>
+</P>
+<P><B>Block Device Template XML description:</B></P>
+<PRE><A NAME="line22"></A><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;block_device_template/&gt; has the same format as &lt;block_device/&gt;, except that it doesn't have “path” attribute. </FONT></FONT>
+<FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>Path of newly created block device can be extracted from return value of “create_bd” function. </FONT></FONT></PRE>
+</BODY>
+</HTML>

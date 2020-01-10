@@ -1,0 +1,20 @@
+#!/usr/bin/python
+
+
+import cgi
+
+from dispatcher import Dispatcher
+
+
+print "content-type: text/html\n\n"
+
+params = {}
+fieldStorage = cgi.FieldStorage()
+for key in fieldStorage.keys():
+    params[key] = fieldStorage[key].value
+
+
+print Dispatcher(params).get_html()
+
+
+

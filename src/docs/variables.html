@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Variables</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.2  (Linux)">
+	<META NAME="CREATED" CONTENT="20060410;13011800">
+	<META NAME="CHANGED" CONTENT="20060626;16203200">
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<P>&lt;var/&gt; represents a variable. <BR>It has “name”, “type”
+and “mutable” attributes. Optionally, dependent on “type”, it
+might have “value” attribute as well. If variable is “mutable”,
+it will have constraints (constraints depend on “type”). <BR>Besides
+constraints, conditionals can be present as well:<BR> - If a variable
+has an if_bool=”bool_var_name” attribute, it is to be used only if
+boolean variable named “bool_var_name” is set to “true”.<BR>
+- If a variable has an ifnot_bool=”bool_var_name” attribute, it is to
+be used only if boolean variable named “bool_var_name” is set to
+“false”.</P>
+<P>Types:
+</P>
+<UL>
+	<LI><P>int</P>
+	<UL>
+		<P>Integer will be the value of attribute “value”.
+		</P>
+		<P>If mutable=”true”, constraints:
+		</P>
+		<UL>
+			<P>min (attribute)</P>
+			<P>max (attribute)</P>
+			<P>step (attribute)</P>
+		</UL>
+	</UL>
+	<LI><P>int_select</P>
+	<UL>
+		<P>List of valid integer values. Current selection will be under
+		“value” attribute.</P>
+		<P>If mutable=”true”, valid values will be attached to &lt;var/&gt;
+		as &lt;listentry value=”...”/&gt;.</P>
+	</UL>
+	<LI><P>string</P>
+	<UL>
+		<P>String will be the value of attribute “value”.
+		</P>
+		<P>If mutable=”true”, constraints:
+		</P>
+		<UL>
+			<P>min_length (attribute)</P>
+			<P>max_length (attribute)</P>
+			<P>illegal_chars (attribute)</P>
+			<P>reserved_words (attribute) is a “;” separated list of
+			reserved words</P>
+		</UL>
+	</UL>
+	<LI><P>string_select</P>
+	<UL>
+		<P>List of valid string values. Current selection will be under
+		“value” attribute.</P>
+		<P>If mutable=”true”, valid values will be attached to &lt;var/&gt;
+		as &lt;listentry value=”...”/&gt;.</P>
+	</UL>
+	<LI><P>boolean</P>
+	<UL>
+		<P>Boolean will be the value of attribute “value”. It can be
+		one of “true” or “false”.</P>
+		<P>There is no constraints.
+		</P>
+	</UL>
+	<LI><P>xml</P>
+	<UL>
+		<P>XML will be attached to the &lt;var/&gt;.</P>
+		<P>There is no constraints.
+		</P>
+	</UL>
+	<LI><P>list_str</P>
+	<UL>
+		<P>List of string values. List elements will be attached to &lt;var/&gt;
+		as &lt;listentry value=”value”/&gt;</P>
+		<P>If mutable=”true”, constraints will be the same as for
+		“string” plus min_list_size and max_list_size</P>
+	</UL>
+	<LI><P>list_int</P>
+	<UL>
+		<P>List of integer values. List elements will be attached to &lt;var/&gt;
+		as &lt;listentry value=”value”/&gt;</P>
+		<P>If mutable=”true”, constraints will be the same as for “int”
+		plus min_list_size and max_list_size</P>
+	</UL>
+	<LI><P>list_xml</P>
+	<UL>
+		<P>List of XML values. List elements will be attached to &lt;var/&gt;.</P>
+		<P>If mutable=”true”, constraints will be min_list_size and
+		max_list_size</P>
+	</UL>
+	<LI><P>list_var</P>
+	<UL>
+		<P>List of variables. List elements will be attached to &lt;var/&gt;.
+				</P>
+		<P>If mutable=”true”, constraints will be min_list_size and
+		max_list_size</P>
+	</UL>
+</UL>
+<P><BR><BR>
+</P>
+</BODY>
+</HTML>

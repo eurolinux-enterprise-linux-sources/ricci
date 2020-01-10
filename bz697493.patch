@@ -1,0 +1,213 @@
+commit 7bd53347559064d30bafaf9371a6e676a98ec9f0
+Author:     Lon Hohberger <lhh@redhat.com>
+AuthorDate: Wed Sep 29 11:25:51 2010 -0400
+Commit:     Chris Feist <cfeist@redhat.com>
+CommitDate: Thu Jul 21 12:03:39 2011 -0500
+
+    Fix ipv6 support in ccs_sync
+    
+    Signed-off-by: Lon Hohberger <lhh@redhat.com>
+
+diff --git a/ricci/ccs_sync/Makefile b/ricci/ccs_sync/Makefile
+index 06adc34..382969e 100644
+--- a/ricci/ccs_sync/Makefile
++++ b/ricci/ccs_sync/Makefile
+@@ -25,7 +25,7 @@ OBJECTS = \
+ CC=gcc
+ INCLUDE = -I/usr/include/libxml2 -I/usr/include/nspr4 `nss-config --cflags`
+ CFLAGS = -O2 -Wall -Wextra -Wformat=2 -fstack-protector -Wshadow $(INCLUDE)
+-LDFLAGS = -lxml2 `nss-config --libs`
++LDFLAGS = -lxml2 `nss-config --libs` `nspr-config --libs`
+ 
+ all: ${TARGET}
+ 
+diff --git a/ricci/ccs_sync/ricci_conf.c b/ricci/ccs_sync/ricci_conf.c
+index c8a5501..6ffa85c 100644
+--- a/ricci/ccs_sync/ricci_conf.c
++++ b/ricci/ccs_sync/ricci_conf.c
+@@ -267,11 +267,36 @@ static int ricci_conn_cmp(void *l, void *r) {
+ 	return (-1);
+ }
+ 
++int get_addr_info(const char *name, PRUint16 port, PRNetAddr *addr_out)
++{
++	PRAddrInfo *pr_ai = NULL;
++	void *e = NULL;
++	PRNetAddr addr;
++	int ret = -1;
++
++	pr_ai = PR_GetAddrInfoByName(name, PR_AF_UNSPEC, PR_AI_ADDRCONFIG);
++	if (!pr_ai)
++		return -1;
++
++	ret = 1;
++	e = PR_EnumerateAddrInfo(0, pr_ai, port, &addr);
++	if (e)
++		ret = 0;
++
++	if (addr_out)
++		memcpy(addr_out, &addr, sizeof(*addr_out));
++
++	PR_FreeAddrInfo(pr_ai);
++	
++	return ret;
++}
++
+ static void ricci_conn_alloc(void *data, void *param) {
+ 	hash_t *conn_hash = (hash_t *) param;
+ 	const char *name = (const char *) data;
+ 	struct ricci_conn *c;
+ 	PRStatus status;
++	PRNetAddr addr;
+ 
+ 	if (name == NULL || conn_hash == NULL)
+ 		return;
+@@ -280,17 +305,13 @@ static void ricci_conn_alloc(void *data, void *param) {
+ 	if (c == NULL)
+ 		goto oom0;
+ 
+-	c->fd = get_ssl_socket(NULL, PR_TRUE);
+-	if (c->fd == NULL)
+-		goto oom1;
+-
+ 	c->hostname = strdup(name);
+ 	if (c->hostname == NULL)
+-		goto oom2;
++		goto oom1;
+ 
+ 	c->buf = malloc(DEFAULT_READBUF_LEN);
+ 	if (c->buf == NULL)
+-		goto oom3;
++		goto oom2;
+ 
+ 	c->bufsize = DEFAULT_READBUF_LEN;
+ 	c->port = ricci_port;
+@@ -298,7 +319,20 @@ static void ricci_conn_alloc(void *data, void *param) {
+ 
+ 	c->password_entered = 0;
+ 
+-	status = nss_connect(c->fd, c->hostname, c->port);
++	if (get_addr_info(c->hostname, c->port, &addr) != 0)
++		goto oom2;
++
++	c->pr_addr = calloc(1, sizeof(*c->pr_addr));
++	if (!c->pr_addr)
++		goto oom2;
++
++	memcpy(c->pr_addr, &addr, sizeof(*c->pr_addr));
++
++	c->fd = get_ssl_socket(NULL, PR_TRUE, c->pr_addr->raw.family);
++	if (c->fd == NULL)
++		goto oom3;
++
++	status = nss_connect_by_addr(c->fd, c->hostname, c->pr_addr);
+ 	if (status == PR_FAILURE) {
+ 		fprintf(stderr, "Unable to connect to %s\n", c->hostname);
+ 		ricci_conn_dtor(NULL, c);
+@@ -312,9 +346,11 @@ static void ricci_conn_alloc(void *data, void *param) {
+ 	return;
+ 
+ oom3:
+-	free(c->hostname);
+-oom2:
+ 	PR_Close(c->fd);
++oom2:
++	free(c->pr_addr);
++	free(c->hostname);
++	free(c->buf);
+ oom1:
+ 	free(c);
+ oom0:
+diff --git a/ricci/ccs_sync/ricci_net.h b/ricci/ccs_sync/ricci_net.h
+index 13e19f9..2fd24d9 100644
+--- a/ricci/ccs_sync/ricci_net.h
++++ b/ricci/ccs_sync/ricci_net.h
+@@ -27,6 +27,7 @@ enum {
+ 
+ struct ricci_conn {
+ 	PRFileDesc *fd;
++	PRNetAddr *pr_addr;
+ 	char *hostname;
+ 	char *cluster_name;
+ 	char *buf;
+diff --git a/ricci/ccs_sync/ricci_nss.c b/ricci/ccs_sync/ricci_nss.c
+index 36f151d..65e2ac4 100644
+--- a/ricci/ccs_sync/ricci_nss.c
++++ b/ricci/ccs_sync/ricci_nss.c
+@@ -114,14 +114,14 @@ PRStatus set_nss_sockopt_nonblock(PRFileDesc *sock, PRBool val) {
+ 	return (PR_SetSocketOption(sock, &sock_opt));
+ }
+ 
+-PRFileDesc *get_ssl_socket(const char *cert_nick, PRBool nonblocking) {
++PRFileDesc *get_ssl_socket(const char *cert_nick, PRBool nonblocking, PRUint16 af) {
+ 	PRFileDesc *tcp_sock;
+ 	PRFileDesc *ssl_sock;
+ 	PRSocketOptionData sock_opt;
+ 	PRStatus pr_status;
+ 	SECStatus sec_status;
+ 
+-	tcp_sock = PR_NewTCPSocket();
++	tcp_sock = PR_OpenTCPSocket(af);
+ 	if (tcp_sock == NULL)
+ 		return (NULL);
+ 
+@@ -176,6 +176,7 @@ PRFileDesc *get_ssl_socket(const char *cert_nick, PRBool nonblocking) {
+ 	return (ssl_sock);
+ }
+ 
++
+ PRStatus nss_connect(PRFileDesc *sock, const char *addr_str, uint16_t port) {
+ 	char buf[PR_NETDB_BUF_SIZE];
+ 	PRStatus pr_status;
+@@ -209,6 +210,30 @@ PRStatus nss_connect(PRFileDesc *sock, const char *addr_str, uint16_t port) {
+ 	return (PR_SUCCESS);
+ }
+ 
++
++PRStatus nss_connect_by_addr(PRFileDesc *sock, const char *addr_str,
++			     PRNetAddr *target)
++{
++	SECStatus sec_status;
++	PRStatus pr_status;
++
++	sec_status = SSL_SetURL(sock, addr_str);
++	if (sec_status != SECSuccess)
++		return (PR_FAILURE);
++
++	pr_status = PR_Connect(sock, target, PR_INTERVAL_NO_TIMEOUT);
++	if (pr_status != PR_SUCCESS) {
++		if (errno != EINPROGRESS)
++			return (pr_status);
++	}
++
++	sec_status = SSL_ResetHandshake(sock, PR_FALSE);
++	if (sec_status != SECSuccess)
++		return (PR_FAILURE);
++
++	return (PR_SUCCESS);
++}
++
+ int init_libnss_ssl(const char *cert_db_dir) {
+ 	SECStatus status;
+ 
+diff --git a/ricci/ccs_sync/ricci_nss.h b/ricci/ccs_sync/ricci_nss.h
+index 2b47d54..1bb9dd0 100644
+--- a/ricci/ccs_sync/ricci_nss.h
++++ b/ricci/ccs_sync/ricci_nss.h
+@@ -12,10 +12,13 @@
+ #define __RICCI_NSS_H
+ 
+ SECStatus nss_connect(  PRFileDesc *ssl_sock,
+-						const char *addr_str,
+-						uint16_t port);
++					const char *addr_str,
++					uint16_t port);
++SECStatus nss_connect_by_addr(  PRFileDesc *ssl_sock,
++					const char *addr_str,
++					PRNetAddr *addr);
+ 
+-PRFileDesc *get_ssl_socket(const char *cert_nick, PRBool nonblocking);
++PRFileDesc *get_ssl_socket(const char *cert_nick, PRBool nonblocking, PRUint16 af);
+ int init_libnss_ssl(const char *cert_db_dir);
+ int shutdown_libnss_ssl(void);
+ PRStatus set_nss_sockopt_nonblock(PRFileDesc *sock, PRBool val);

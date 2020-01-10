@@ -1,0 +1,16 @@
+
+2006-08-18  Stanko Kupcevic <kupcevic@redhat.com>
+  * Don't auto-start ricci after installation, do it manually
+  * storage module: use `pvdisplay -c` if `pvs` fails
+    (`pvs` will fail if one of hard drives is not readable,
+    while `pvdisplay -c` will give incomplete but usefull info)
+  * shred strings
+
+2006-07-17  Stanko Kupcevic <kupcevic@redhat.com>
+  * common/executils.cpp: clear stdout/stderr buffers before executing external commands
+
+2006-07-12  Stanko Kupcevic <kupcevic@redhat.com>
+  * ricci: unauthenticate() should always succeed
+  * storage module: remove snapshot_usage from state_ind (snapshot usage shouldn't affect state_ind)
+
+

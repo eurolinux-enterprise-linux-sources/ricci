@@ -1,0 +1,72 @@
+From e57f0bb682e12a21ac4be285f5fd9004a9029f9d Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Mon, 19 Nov 2012 17:31:39 -0600
+Subject: [PATCH] Synced schema for RHEL 6.4
+
+Resolves: rhbz#878108
+---
+ ricci/ccs/cluster.rng.in | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/ricci/ccs/cluster.rng.in b/ricci/ccs/cluster.rng.in
+index c1a2d50..8c51429 100644
+--- a/ricci/ccs/cluster.rng.in
++++ b/ricci/ccs/cluster.rng.in
+@@ -20,7 +20,7 @@ cluster
+ - rm
+ - clvmd
+ 
+-Element defnitions:
++Element definitions:
+ - Resource
+ - Fence
+ 
+@@ -1459,6 +1459,9 @@ To validate your cluster.conf against this schema, run:
+         <optional>
+           <attribute name="nfslock" rha:description="Enable NFS lock workarounds"/>
+         </optional>
++        <optional>
++          <attribute name="nfsrestart" rha:description="Enable NFS daemon and lockd workaround"/>
++        </optional>
+       </group>
+       </choice>
+       <optional>
+@@ -1513,6 +1516,9 @@ To validate your cluster.conf against this schema, run:
+           <attribute name="nfslock" rha:description="Enable NFS lock workarounds"/>
+         </optional>
+         <optional>
++          <attribute name="nfsrestart" rha:description="Enable NFS daemon and lockd workaround"/>
++        </optional>
++        <optional>
+           <attribute name="fsid" rha:description="NFS File system ID"/>
+         </optional>
+         <optional>
+@@ -1572,6 +1578,9 @@ To validate your cluster.conf against this schema, run:
+         <optional>
+           <attribute name="disable_rdisc" rha:description="Disable updating of routing using RDISC protocol"/>
+         </optional>
++        <optional>
++          <attribute name="prefer_interface" rha:description="Network interface"/>
++        </optional>
+       </group>
+       </choice>
+       <optional>
+@@ -2959,6 +2968,7 @@ To validate your cluster.conf against this schema, run:
+         </optional>
+       </group>
+ 
++      <!-- No metadata for /usr/sbin/fence_check -->
+ 
+       <!-- fence_cisco_mds -->
+       <group rha:name="fence_cisco_mds" rha:description="Fence agent for Cisco MDS">
+@@ -3811,6 +3821,7 @@ To validate your cluster.conf against this schema, run:
+       </group>
+ 
+       <!-- No metadata for /usr/sbin/fence_kdump_send -->
++      <!-- No metadata for /usr/sbin/fence_pcmk -->
+ 
+       <!-- fence_rhevm -->
+       <group rha:name="fence_rhevm" rha:description="Fence agent for RHEV-M REST API">
+-- 
+1.7.11.7
+

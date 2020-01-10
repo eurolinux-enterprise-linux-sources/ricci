@@ -1,0 +1,40 @@
+From d8b78c5590c7bb6d3a506e3c537cb4fb0248623e Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Fri, 12 Oct 2012 14:45:32 -0500
+Subject: [PATCH 3/3] Fixes issue with ricci/ccs_sync crashing with a large
+ cluster.conf file
+
+---
+ ricci/ccs_sync/ricci_net.c | 2 +-
+ ricci/common/Thread.cpp    | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/ricci/ccs_sync/ricci_net.c b/ricci/ccs_sync/ricci_net.c
+index 24bfa45..97a5f08 100644
+--- a/ricci/ccs_sync/ricci_net.c
++++ b/ricci/ccs_sync/ricci_net.c
+@@ -43,7 +43,7 @@ static int ricci_conn_flush_writebuf(struct ricci_conn *c) {
+ 	int ret;
+ 
+ 	do {
+-		ret = PR_Write(c->fd, &c->wbuf[c->wbuf_off], c->wbuflen);
++		ret = PR_Write(c->fd, &c->wbuf[c->wbuf_off], c->wbuflen - c->wbuf_off);
+ 		if (ret == 0)
+ 			return (-1);
+ 		if (ret < 0) {
+diff --git a/ricci/common/Thread.cpp b/ricci/common/Thread.cpp
+index 364c172..3520bf1 100644
+--- a/ricci/common/Thread.cpp
++++ b/ricci/common/Thread.cpp
+@@ -58,7 +58,7 @@ Thread::start()
+ 
+ 		pthread_attr_t a;
+ 		pthread_attr_init(&a);
+-		pthread_attr_setstacksize(&a, (1 << 18));
++		pthread_attr_setstacksize(&a, (1 << 20));
+ 		int ret = pthread_create(&_thread, &a, start_thread, this);
+ 		pthread_attr_destroy(&a);
+ 		if (ret == 0)
+-- 
+1.7.11.4
+

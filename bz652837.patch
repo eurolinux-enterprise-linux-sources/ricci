@@ -1,0 +1,34 @@
+commit 9986672db235ff9a861a0fd9cfdfc3540e9c16e8
+Author:     Ryan McCabe <rmccabe@redhat.com>
+AuthorDate: Fri Nov 12 17:16:23 2010 -0500
+Commit:     Chris Feist <cfeist@redhat.com>
+CommitDate: Thu Jan 20 16:04:23 2011 -0600
+
+    - Do not send non-SSL data to clients
+    - Bump the connection limit from 10 to 24
+    
+    BZ#652837
+
+diff --git a/ricci/ricci/ClientInstance.cpp b/ricci/ricci/ClientInstance.cpp
+index f70dd15..8e31649 100644
+--- a/ricci/ricci/ClientInstance.cpp
++++ b/ricci/ricci/ClientInstance.cpp
+@@ -39,7 +39,7 @@ using namespace std;
+ #define SEND_TIMEOUT		120	// seconds
+ #define RECEIVE_TIMEOUT		120	// seconds
+ 
+-#define MAXIMUM_CLIENTS		10
++#define MAXIMUM_CLIENTS		24
+ 
+ static int counter = 0;
+ static Mutex counter_mutex;
+@@ -64,9 +64,6 @@ ClientInstance::ClientInstance(	ClientSocket sock,
+ 	}
+ 
+ 	if (max_reached) {
+-		// socket is non-blocking, couple bytes should be able
+-		// to go out, if not, who cares
+-		sock.send("overload - come back later");
+ 		throw String("maximum number of clients reached");
+ 	}
+ }

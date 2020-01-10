@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# improve me
+
+
+MAKE_DEFINES=make/defines.mk
+
+
+
+echo "# generated automaticaly by ./configure" > $MAKE_DEFINES
+echo "# modify make/defines.mk.in for permanent changes" >> $MAKE_DEFINES
+echo >> $MAKE_DEFINES
+cat ../make/version.in >> $MAKE_DEFINES
+echo >> $MAKE_DEFINES
+echo "# priority: 1. make's params, 2. configure's params, 3. default params" >> $MAKE_DEFINES
+echo >> $MAKE_DEFINES
+echo >> $MAKE_DEFINES
+
+echo "# configure's params:" >> $MAKE_DEFINES
+for arg in $@
+do
+	var=`echo $arg | sed -e s,^--\\\\\(.*\\\\\)=\\\\\(.*\\\\\),\\\1\ ?=\ \\\2,`
+	var=`echo $var | sed -e s,?=\ /,?=\ \\${DESTDIR}/,`
+	echo $var >> $MAKE_DEFINES
+done
+
+LIBDIR_SED=\\/lib
+X86_64_TMP=`uname -a | grep x86_64`
+if [ "$X86_64_TMP" ]; then
+	LIBDIR_SED=\\/lib64
+fi
+
+ARCH=`uname -m`
+
+# DIRTY HACK: pegasus < 2.5 used ia64 include files on x86_64 platform
+# see modules/cluster/clumon/src/cim-provider/Makefile
+PEGASUS_PLATFORM=$ARCH
+if [ "$ARCH" = "x86_64" ] ; then
+	if [ ! -e /usr/include/Pegasus/Common/Platform_LINUX_X86_64_GNU.h ] ; then
+		PEGASUS_PLATFORM="ia64"
+	fi
+fi
+
+cat $MAKE_DEFINES.in \
+	| sed -e s,@@LIBDIR@@,$LIBDIR_SED,g \
+	| sed -e s,@@ARCH@@,$ARCH,g \
+	| sed -e s,@@PEGASUS_PLATFORM@@,$PEGASUS_PLATFORM,g \
+	>> $MAKE_DEFINES

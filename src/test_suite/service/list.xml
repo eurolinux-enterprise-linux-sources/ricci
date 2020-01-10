@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<ricci version="1.0" function="process_batch" async="false">
+<batch>
+
+<module name="service">
+<request sequence="12dsa" API_version="1.0">
+<function_call name="list">
+  <var mutable="false" name="description" type="boolean" value="true"/>
+</function_call>
+</request>
+</module>
+
+</batch>
+</ricci>

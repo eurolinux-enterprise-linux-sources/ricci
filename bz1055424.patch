@@ -1,0 +1,265 @@
+--- ricci-0.16.2/ccs/cluster.rng.in.orig	2014-07-15 16:07:00.286218252 +0200
++++ ricci-0.16.2/ccs/cluster.rng.in	2014-07-14 22:50:17.000000000 +0200
+@@ -460,11 +460,6 @@
+ 	startup fencing. fenced(8)"/>
+    </optional>
+ 
+-   <optional>
+-    <attribute name="skip_undefined" rha:description="Set to 1 to disable
+-	startup fencing of nodes with no fence methods defined.
+-	fenced(8)"/>
+-   </optional>
+   </element>
+  </optional>
+ <!-- end fence_daemon block -->
+@@ -890,6 +885,11 @@
+      <data type="integer"/>
+     </attribute>
+    </optional>
++   <optional>
++    <attribute name="reboot_on_pid_exhaustion" rha:description="Reboot the node immediately if fork() or pthread_create() fails due to PID exhaustion" rha:sample="">
++     <data type="integer"/>
++    </attribute>
++   </optional>
+    <interleave>
+    <optional>
+     <element name="failoverdomains" rha:description="Failover domain definitions.">
+@@ -1389,6 +1389,9 @@
+       <group>
+         <attribute name="name" rha:description="Name"/>
+         <optional>
++          <attribute name="httpd" rha:description="httpd binary"/>
++        </optional>
++        <optional>
+           <attribute name="server_root" rha:description="Initial ServerRoot"/>
+         </optional>
+         <optional>
+@@ -1430,6 +1433,47 @@
+   </define>
+ 
+ 
++  <define name="BIND-MOUNT">
++    <element name="bind-mount" rha:description="Defines a bind mount.">
++      <choice>
++      <group>
++        <!-- rgmanager specific stuff -->
++        <attribute name="ref" rha:description="Reference to existing bind-mount resource in the resources section."/>
++      </group>
++      <group>
++        <attribute name="name" rha:description="Bind Mount Name"/>
++        <attribute name="mountpoint" rha:description="Target mountpoint"/>
++        <attribute name="source" rha:description="Source of the bind mount"/>
++        <optional>
++          <attribute name="force_unmount" rha:description="Force Unmount"/>
++        </optional>
++      </group>
++      </choice>
++      <optional>
++        <attribute name="__independent_subtree" rha:description="Treat this and all children as an independent subtree."/>
++      </optional>
++      <optional>
++        <attribute name="__enforce_timeouts" rha:description="Consider a timeout for operations as fatal."/>
++      </optional>
++      <optional>
++        <attribute name="__max_failures" rha:description="Maximum number of failures before returning a failure to a status check."/>
++      </optional>
++      <optional>
++        <attribute name="__failure_expire_time" rha:description="Amount of time before a failure is forgotten."/>
++      </optional>
++      <optional>
++        <attribute name="__max_restarts" rha:description="Maximum number restarts for an independent subtree before giving up."/>
++      </optional>
++      <optional>
++        <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
++      </optional>
++      <optional>
++        <ref name="CHILDREN"/>
++      </optional>
++    </element>
++  </define>
++
++
+   <define name="CLUSTERFS">
+     <element name="clusterfs" rha:description="Defines a cluster file system mount.">
+       <choice>
+@@ -1462,6 +1506,9 @@
+         <optional>
+           <attribute name="nfsrestart" rha:description="Enable NFS daemon and lockd workaround"/>
+         </optional>
++        <optional>
++          <attribute name="use_findmnt" rha:description="Utilize findmnt to detect if and where filesystems are mounted"/>
++        </optional>
+       </group>
+       </choice>
+       <optional>
+@@ -1790,8 +1837,14 @@
+           <attribute name="force_unmount" rha:description="Force Unmount"/>
+         </optional>
+         <optional>
++          <attribute name="self_fence" rha:description="Seppuku Unmount"/>
++        </optional>
++        <optional>
+           <attribute name="options" rha:description="Mount Options"/>
+         </optional>
++        <optional>
++          <attribute name="use_findmnt" rha:description="Utilize findmnt to detect if and where filesystems are mounted"/>
++        </optional>
+       </group>
+       </choice>
+       <optional>
+@@ -1937,6 +1990,9 @@
+         <optional>
+           <attribute name="nfspath" rha:description="This is the path containing shared NFS recovery information, relative to the path parameter."/>
+         </optional>
++        <optional>
++          <attribute name="statdport" rha:description="This is the port where rpc.statd should listen on."/>
++        </optional>
+       </group>
+       </choice>
+       <optional>
+@@ -2175,6 +2231,9 @@
+           <attribute name="shutdown_wait" rha:description="Wait X seconds for correct end of service shutdown This option is ignored in current release."/>
+         </optional>
+         <optional>
++          <attribute name="startup_wait" rha:description="Wait X seconds for correct end of service startup."/>
++        </optional>
++        <optional>
+           <attribute name="service_name" rha:description="Inherit the service name."/>
+         </optional>
+       </group>
+@@ -2406,6 +2465,9 @@
+         <optional>
+           <attribute name="migration_uri" rha:description="Migration URI (normally automatic)."/>
+         </optional>
++        <optional>
++          <attribute name="no_kill" rha:description="Don't force kill vm on stop."/>
++        </optional>
+       </group>
+       </choice>
+       <optional>
+@@ -2441,6 +2503,7 @@
+         <ref name="SAPDATABASE"/>
+         <ref name="SAPINSTANCE"/>
+         <ref name="APACHE"/>
++        <ref name="BIND-MOUNT"/>
+         <ref name="CLUSTERFS"/>
+         <ref name="FS"/>
+         <ref name="IP"/>
+@@ -2536,6 +2599,9 @@
+           <attribute name="cmd_prompt" rha:description="Force command prompt" />
+         </optional>
+         <optional>
++          <attribute name="ssh_options" rha:description="SSH options to use" />
++        </optional>
++        <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+         </optional>
+         <optional>
+@@ -2830,14 +2896,11 @@
+ 
+ 
+       <!-- fence_brocade -->
+-      <group rha:name="fence_brocade" rha:description="Fence agent for Brocade over telnet">
++      <group rha:name="fence_brocade" rha:description="Fence agent for HP Brocade over telnet/ssh">
+         <optional>
+           <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
+         </optional>
+         <optional>
+-          <attribute name="action" rha:description="Fencing Action" />
+-        </optional>
+-        <optional>
+           <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+         </optional>
+         <optional>
+@@ -2850,11 +2913,62 @@
+           <attribute name="passwd_script" rha:description="Script to retrieve password" />
+         </optional>
+         <optional>
++          <attribute name="secure" rha:description="SSH connection" />
++        </optional>
++        <optional>
++          <attribute name="identity_file" rha:description="Identity file for ssh" />
++        </optional>
++        <optional>
++          <attribute name="cmd_prompt" rha:description="Force command prompt" />
++        </optional>
++        <optional>
++          <attribute name="inet4_only" rha:description="Forces agent to use IPv4 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="inet6_only" rha:description="Forces agent to use IPv6 addresses only" />
++        </optional>
++        <optional>
++          <attribute name="ipport" rha:description="TCP port to use for connection with device" />
++        </optional>
++        <optional>
++          <attribute name="action" rha:description="Fencing Action" />
++        </optional>
++        <optional>
+           <attribute name="port" rha:description="Physical plug number or name of virtual machine" />
+         </optional>
+         <optional>
++          <attribute name="verbose" rha:description="Verbose mode" />
++        </optional>
++        <optional>
++          <attribute name="debug" rha:description="Write debug information to given file" />
++        </optional>
++        <optional>
++          <attribute name="version" rha:description="Display version information and exit" />
++        </optional>
++        <optional>
+           <attribute name="help" rha:description="Display help and exit" />
+         </optional>
++        <optional>
++          <attribute name="separator" rha:description="Separator for CSV created by operation list" />
++        </optional>
++        <optional>
++          <attribute name="power_timeout" rha:description="Test X seconds for status change after ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="shell_timeout" rha:description="Wait X seconds for cmd prompt after issuing command" />
++        </optional>
++        <optional>
++          <attribute name="login_timeout" rha:description="Wait X seconds for cmd prompt after login" />
++        </optional>
++        <optional>
++          <attribute name="power_wait" rha:description="Wait X seconds after issuing ON/OFF" />
++        </optional>
++        <optional>
++          <attribute name="delay" rha:description="Wait X seconds before fencing is started" />
++        </optional>
++        <optional>
++          <attribute name="retry_on" rha:description="Count of attempts to retry power on" />
++        </optional>
+       </group>
+ 
+       <!-- No metadata for /usr/sbin/fence_check -->
+@@ -4358,6 +4472,9 @@
+           <attribute name="ipport" rha:description="TCP port to use for connection with device" />
+         </optional>
+         <optional>
++          <attribute name="ssh_options" rha:description="SSH options to use" />
++        </optional>
++        <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+         </optional>
+         <optional>
+@@ -4473,7 +4590,7 @@
+           <attribute name="option"/> <!-- deprecated; for compatibility.  use "action" -->
+         </optional>
+         <optional>
+-          <attribute name="io_fencing" rha:description="Fencing Action" />
++          <attribute name="action" rha:description="Fencing Action" />
+         </optional>
+         <optional>
+           <attribute name="ipaddr" rha:description="IP Address or Hostname" />
+@@ -4618,6 +4735,9 @@
+           <attribute name="ipport" rha:description="TCP port to use for connection with device" />
+         </optional>
+         <optional>
++          <attribute name="ssh_options" rha:description="SSH options to use" />
++        </optional>
++        <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+         </optional>
+         <optional>

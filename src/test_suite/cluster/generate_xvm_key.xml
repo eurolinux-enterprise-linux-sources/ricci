@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<ricci version="1.0" function="process_batch" async="false">
+<batch>
+
+<module name="cluster">
+<request sequence="1254" API_version="1.0">
+<function_call name="generate_xvm_key">
+	<var mutable="false" name="size" type="int" value="4096" />
+</function_call>
+</request>
+</module>
+
+</batch>
+</ricci>
+

@@ -1,0 +1,28 @@
+From 49d74284ac3d2b9052bc74bf42107587bfa3de0a Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Thu, 12 Jun 2014 19:56:10 -0500
+Subject: [PATCH 1/5] Don't leave tempfiles around from schema tests
+
+---
+ ricci/ccs/ccs | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/ricci/ccs/ccs b/ricci/ccs/ccs
+index 5406697..fe787da 100755
+--- a/ricci/ccs/ccs
++++ b/ricci/ccs/ccs
+@@ -2212,9 +2212,9 @@ def verify_cluster_conf(xml):
+         schema = get_cluster_schema(False)
+ 
+     schema = schema
+-    schemaFile = tempfile.NamedTemporaryFile(delete=False)
++    schemaFile = tempfile.NamedTemporaryFile('w+b', -1, ".ccs")
+     schemaFile.write(schema)
+-    schemaFile.close()
++    schemaFile.flush()
+ 
+     lint = subprocess.Popen(["/usr/bin/xmllint","--noout","--relaxng",
+         schemaFile.name, "-"], stdin=subprocess.PIPE,
+-- 
+1.9.3
+

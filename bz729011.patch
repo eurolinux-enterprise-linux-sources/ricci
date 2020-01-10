@@ -1,0 +1,26 @@
+From 9719140d8de12ba5f65f4f2cb18da6132a92a699 Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Tue, 7 Feb 2012 18:46:35 -0600
+Subject: [PATCH] Fixed ccs_sync to build with '-g' option.
+
+Resolves: rhbz#729011
+---
+ ricci/ccs_sync/Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/ricci/ccs_sync/Makefile b/ricci/ccs_sync/Makefile
+index 382969e..3971183 100644
+--- a/ricci/ccs_sync/Makefile
++++ b/ricci/ccs_sync/Makefile
+@@ -24,7 +24,7 @@ OBJECTS = \
+ 
+ CC=gcc
+ INCLUDE = -I/usr/include/libxml2 -I/usr/include/nspr4 `nss-config --cflags`
+-CFLAGS = -O2 -Wall -Wextra -Wformat=2 -fstack-protector -Wshadow $(INCLUDE)
++CFLAGS = -g -O2 -Wall -Wextra -Wformat=2 -fstack-protector -Wshadow $(INCLUDE)
+ LDFLAGS = -lxml2 `nss-config --libs` `nspr-config --libs`
+ 
+ all: ${TARGET}
+-- 
+1.7.7.6
+

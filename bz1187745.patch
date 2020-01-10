@@ -1,0 +1,157 @@
+--- a/include/XML.h.orig	2015-03-05 11:00:56.537452659 +0100
++++ b/include/XML.h	2015-03-05 11:12:15.572193426 +0100
+@@ -1,5 +1,5 @@
+ /*
+-** Copyright (C) Red Hat, Inc. 2005-2011
++** Copyright (C) Red Hat, Inc. 2015
+ **
+ ** This program is free software; you can redistribute it and/or modify it
+ ** under the terms of the GNU General Public License version 2 as
+@@ -62,8 +62,9 @@
+ 
+ 		/* kids */
+ 
+-		void add_child(const XMLObject& child) {
++		XMLObject* add_child(const XMLObject& child) {
+ 			_kids.push_back(child);
++			return &_kids.back();
+ 		}
+ 
+ 		bool remove_child(const XMLObject& child);
+--- a/include/Module.h.orig	2015-03-05 11:11:15.528127924 +0100
++++ b/include/Module.h	2015-03-05 11:11:34.961149123 +0100
+@@ -1,5 +1,5 @@
+ /*
+-** Copyright 2014 Red Hat, Inc.
++** Copyright 2015 Red Hat, Inc.
+ **
+ ** This program is free software; you can redistribute it and/or modify it
+ ** under the terms of the GNU General Public License version 2 as
+@@ -44,7 +44,8 @@
+ {
+ 	public:
+ 		virtual ~Module();
+-		static std::pair<XMLObject, XMLObject> empty_response(const String& version, const String& seq_tag, const String& fcn_name);
++		static XMLObject& empty_response(const String& version, const String& seq_tag, const String& fcn_name,
++						 XMLObject& response, XMLObject** func_response=NULL);
+ 		virtual XMLObject process(const XMLObject& request);
+ 
+ 	protected:
+--- a/common/Module.cpp.orig	2015-03-05 11:10:27.567075602 +0100
++++ b/common/Module.cpp	2015-03-05 11:11:45.278160378 +0100
+@@ -1,5 +1,5 @@
+ /*
+-** Copyright 2014 Red Hat, Inc.
++** Copyright 2015 Red Hat, Inc.
+ **
+ ** This program is free software; you can redistribute it and/or modify it
+ ** under the terms of the GNU General Public License version 2 as
+@@ -74,18 +74,22 @@
+ Module::~Module()
+ {}
+ 
+-pair<XMLObject, XMLObject>
+-Module::empty_response(const String& version, const String& seq_tag, const String& fcn_name)
++XMLObject&
++Module::empty_response(const String& version, const String& seq_tag, const String& fcn_name,
++		       XMLObject& response, XMLObject** func_response)
+ {
+-	XMLObject response(RESPONSE_TAG);
++	response = XMLObject(RESPONSE_TAG);
+ 	response.set_attr(MOD_VERSION_TAG, version);
+ 	response.set_attr(SEQUENCE_TAG, seq_tag);
+ 
+-	XMLObject func_resp_xml(FUNC_RESPONSE_TAG);
+-	func_resp_xml.set_attr("function_name", fcn_name);
++	XMLObject func_resp(FUNC_RESPONSE_TAG);
++	func_resp.set_attr("function_name", fcn_name);
+ 
+-	response.add_child(func_resp_xml);
+-	return pair<XMLObject, XMLObject>(response, func_resp_xml);
++	if (func_response)
++		*func_response = response.add_child(func_resp);
++	else
++		response.add_child(func_resp);
++	return response;
+ }
+ 
+ XMLObject
+@@ -117,11 +118,9 @@
+ 		}
+ 
+ 		// construct response xml
+-		pair<XMLObject, XMLObject> empty = empty_response(version,
+-								  request.get_attr(SEQUENCE_TAG),
+-								  fcn_name);
+-		XMLObject& response = empty.first;
+-		XMLObject& func_resp_xml = empty.second;
++		XMLObject response, *func_response = NULL;
++		empty_response(version, request.get_attr(SEQUENCE_TAG), fcn_name,
++			       response, &func_response);
+ 
+ 		try {
+ 			map<String, Variable> in_vars = extract_vars(func_xml);
+@@ -127,25 +127,25 @@
+ 			map<String, Variable> in_vars = extract_vars(func_xml);
+ 			map<String, Variable> out_vars = (fcns[fcn_name])(in_vars);
+ 
+-			insert_vars(out_vars, func_resp_xml);
+-			func_resp_xml.add_child(Variable("success", true).xml());
++			insert_vars(out_vars, *func_response);
++			func_response->add_child(Variable("success", true).xml());
+ 		} catch (Except e) {
+-			func_resp_xml.add_child(Variable("success", false).xml());
+-			func_resp_xml.add_child(Variable("error_code", e.code()).xml());
+-			func_resp_xml.add_child(Variable("error_description",
++			func_response->add_child(Variable("success", false).xml());
++			func_response->add_child(Variable("error_code", e.code()).xml());
++			func_response->add_child(Variable("error_description",
+ 				e.description()).xml());
+ 		} catch ( String e ) {
+-			func_resp_xml.add_child(Variable("success", false).xml());
+-			func_resp_xml.add_child(Variable("error_code",
++			func_response->add_child(Variable("success", false).xml());
++			func_response->add_child(Variable("error_code",
+ 				Except::generic_error).xml());
+-			func_resp_xml.add_child(Variable("error_description", e).xml());
++			func_response->add_child(Variable("error_description", e).xml());
+ 		} catch ( APIerror e ) {
+ 			throw;
+ 		} catch ( ... ) {
+-			func_resp_xml.add_child(Variable("success", false).xml());
+-			func_resp_xml.add_child(Variable("error_code",
++			func_response->add_child(Variable("success", false).xml());
++			func_response->add_child(Variable("error_code",
+ 				Except::generic_error).xml());
+-			func_resp_xml.add_child(Variable("error_description",
++			func_response->add_child(Variable("error_description",
+ 				String("No description")).xml());
+ 		}
+ 		return response;
+--- a/ricci/RicciWorker.cpp.orig	2015-03-05 11:07:55.321909516 +0100
++++ b/ricci/RicciWorker.cpp	2015-03-05 11:10:06.820052969 +0100
+@@ -1,5 +1,5 @@
+ /*
+-** Copyright 2014 Red Hat, Inc.
++** Copyright 2015 Red Hat, Inc.
+ **
+ ** This program is free software; you can redistribute it and/or modify it
+ ** under the terms of the GNU General Public License version 2 as
+@@ -183,12 +183,11 @@
+ 			/* as per above comment, temporarily set "bended"
+ 			   mid-state ("removed from schedule") and commit it
+ 			   to disk;  cf. reboot loop problem (rhbz#1044122) */
+-			pair<XMLObject, XMLObject> empty = _rm.empty_response(
+-								"1.0",
+-								request.get_attr(SEQUENCE_TAG),
+-								"reboot_now");
+-			tmp_resp = empty.first;
+-			module_header.add_child(tmp_resp);
++			XMLObject response;
++			module_header.add_child(_rm.empty_response("1.0",
++								   request.get_attr(SEQUENCE_TAG),
++								   "reboot_now",
++								   response));
+ 			_report = module_header;
+ 			_state = st_removed;
+ 			_batch.save();

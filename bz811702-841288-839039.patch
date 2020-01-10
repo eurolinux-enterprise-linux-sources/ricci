@@ -1,0 +1,46 @@
+From 1423bca33dc93f7bcc292247bc9d37d615f55109 Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Fri, 12 Oct 2012 14:03:05 -0500
+Subject: [PATCH 1/3] Several ccs fixes for RHEL6 release
+
+- Updated typo in error message
+- List multicast addresses with --lsmisc option
+- Fixed traceback when using --stopall
+
+Resolves: rhbz#811702 rhbz#841288 rhbz#839039
+---
+ ricci/ccs/ccs | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/ricci/ccs/ccs b/ricci/ccs/ccs
+index 3062f7c..60d4ebe 100755
+--- a/ricci/ccs/ccs
++++ b/ricci/ccs/ccs
+@@ -32,6 +32,7 @@ class StopNodeThread (threading.Thread):
+     def __init__ (self, host):
+         self.host = host
+         threading.Thread.__init__(self)
++        self.output = ""
+ 
+     def getoutput(self):
+         return self.output
+@@ -554,7 +555,7 @@ def start_node(node, inthread=False):
+                 sys.exit(1)
+ 
+         if var.getAttribute("value") == "false":
+-            myerr = "Unable to start %s, possibly do to lack of quorum, try --startall\n" % node
++            myerr = "Unable to start %s, possibly due to lack of quorum, try --startall\n" % node
+             myerr += "Error: " +error_description
+             if inthread:
+                 return myerr
+@@ -1825,6 +1826,7 @@ def list_misc():
+     list_tag(dom, "rm", "Resource Manager")
+     list_tag(dom, "cman", "CMAN")
+     list_tag(dom, "multicast", "Multicast")
++    list_tag(dom, "altmulticast", "Alt Multicast")
+     list_tag(dom, "fencedaemon", "Fence Daemon")
+     list_tag(dom, "logging", "Logging")
+     list_tag(dom, "logging_daemon", "  Logging Daemons")
+-- 
+1.7.11.4
+

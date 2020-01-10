@@ -1,0 +1,191 @@
+commit 51eaae38c310e24c2ec8ed2c42d63f42bab5ee43
+Author:     Chris Feist <cfeist@redhat.com>
+AuthorDate: Tue Mar 8 15:49:44 2011 -0600
+Commit:     Chris Feist <cfeist@redhat.com>
+CommitDate: Tue Mar 8 15:49:44 2011 -0600
+
+    Fixed issues with ccs_sync asking for passwords:
+    
+    - Control-C now works to get out of the program
+    - You can now pipe passwords into ccs_sync
+    - ccs_sync does not go in an endless loop if bad passwords are entered
+
+diff --git a/ricci/ccs_sync/ricci_conf.c b/ricci/ccs_sync/ricci_conf.c
+index 0120d34..c8a5501 100644
+--- a/ricci/ccs_sync/ricci_conf.c
++++ b/ricci/ccs_sync/ricci_conf.c
+@@ -1,11 +1,12 @@
+ /*
+-** Copyright (C) 2008-2009 Red Hat, Inc.
++** Copyright (C) 2008-2011 Red Hat, Inc.
+ **
+ ** This program is free software; you can redistribute it and/or modify
+ ** it under the terms of the GNU General Public License, version 2,
+ ** as published by the Free Software Foundation.
+ **
+ ** Author: Ryan McCabe <ryan@redhat.com>
++** Author: Chris Feist <cfeist@redhat.com>
+ */
+ 
+ #define _GNU_SOURCE
+@@ -295,6 +296,8 @@ static void ricci_conn_alloc(void *data, void *param) {
+ 	c->port = ricci_port;
+ 	time(&c->last_active);
+ 
++	c->password_entered = 0;
++
+ 	status = nss_connect(c->fd, c->hostname, c->port);
+ 	if (status == PR_FAILURE) {
+ 		fprintf(stderr, "Unable to connect to %s\n", c->hostname);
+diff --git a/ricci/ccs_sync/ricci_net.c b/ricci/ccs_sync/ricci_net.c
+index a59c064..24bfa45 100644
+--- a/ricci/ccs_sync/ricci_net.c
++++ b/ricci/ccs_sync/ricci_net.c
+@@ -1,11 +1,12 @@
+ /*
+-** Copyright (C) 2008-2009 Red Hat, Inc.
++** Copyright (C) 2008-2011 Red Hat, Inc.
+ **
+ ** This program is free software; you can redistribute it and/or modify
+ ** it under the terms of the GNU General Public License, version 2,
+ ** as published by the Free Software Foundation.
+ **
+ ** Author: Ryan McCabe <ryan@redhat.com>
++**         Chris Feist <cfeist@redhat.com>
+ */
+ 
+ #define _GNU_SOURCE
+@@ -15,6 +16,7 @@
+ #include <stdint.h>
+ #include <string.h>
+ #include <time.h>
++#include <termios.h>
+ 
+ #include <errno.h>
+ 
+@@ -202,21 +204,27 @@ static int ricci_conn_handler_want_send_auth(	struct ricci_conn *c,
+ 		char prompt[128];
+ 		char *auth_cmd = NULL;
+ 		int auth_cmd_len = 0;
+-		char *passwd;
++		char *passwd = NULL;
++		ssize_t passwd_len = 0;
++		size_t n = 0;
+ 
+ 		snprintf(prompt, sizeof(prompt),
+ 			"Enter the ricci password for %s: ", c->hostname);
+ 		printf("You have not authenticated to the ricci daemon on %s\n",
+ 			c->hostname);
+ 
+-		passwd = getpass(prompt);
+-		if (passwd == NULL || strlen(passwd) < 1) {
++		printf("Password: ");
++		passwd_len = custom_getpass(&passwd, &n, stdin);
++		printf("\n");
++		c->password_entered = 1;
++
++		if (passwd_len < 1) {
+ 			fprintf(stderr, "No password for %s was given\n", c->hostname);
+-			return (0);
++			exit (1);
+ 		}
+ 
+ 		auth_cmd_len = asprintf(&auth_cmd, ricci_auth_str, passwd);
+-		memset(passwd, 0, strlen(passwd));
++		free(passwd);
+ 		if (auth_cmd_len < 0 || auth_cmd == NULL) {
+ 			fprintf(stderr, "Out of memory for %s\n", c->hostname);
+ 			return (0);
+@@ -253,7 +261,14 @@ static int ricci_conn_handler_want_auth_resp(	struct ricci_conn *c,
+ 	if (ret == 1) {
+ 		c->state = RICCI_STATE_WANT_SET_CONF;
+ 		pd->in_flags |= PR_POLL_WRITE;
++		c->password_entered = 0;
+ 	} else if (ret == 0) {
++		/* If ccs_sync fails to authorize and a password has been
++		   entered, then we need to print an error message and exit */
++		if (c->password_entered) {
++			fprintf(stderr,"Incorrect ricci password for %s\n",c->hostname);
++			exit(1);
++		}
+ 		c->state = RICCI_STATE_WANT_SEND_AUTH;
+ 		pd->in_flags |= PR_POLL_WRITE;
+ 	}
+@@ -349,3 +364,53 @@ uint32_t ricci_clear_pollfd(PRPollDesc *pd, uint32_t target, uint32_t num_fd) {
+ 
+ 	return (num_fd);
+ }
++
++/*
++ * Use a custom_getpass script, since getpass has been deprecated
++ * this function is based on the getpass substitute recommended by gnu
++ * with the addition of the ability to detect when a a password is being
++ * piped in
++ */
++
++ssize_t custom_getpass (char **lineptr, size_t *n, FILE *stream) {
++	struct termios old, new;
++	int nread;
++	int piped = 0;
++
++	/* If stdin is a tty, then we have to turn echo off, etc.
++	   if stdin is not a tty, then we know that the input is piped
++	   in, and we don't need to turn echo off and tcgetattr will fail */
++	
++	if (!isatty(fileno(stream)))
++		piped = 1;
++
++	if (!piped) {
++		/* Turn echoing off and fail if we can't. */
++		if (tcgetattr (fileno (stream), &old) != 0) {
++			return -1;
++		}
++
++		new = old;
++		new.c_lflag &= ~ECHO;
++
++		if (tcsetattr (fileno (stream), TCSADRAIN, &new) != 0)
++			return -1;
++	}
++
++	/* Read the password. */
++	nread = getline (lineptr, n, stream);
++
++	/* Restore terminal. */
++	if (!piped)
++		(void) tcsetattr (fileno (stream), TCSADRAIN, &old);
++
++	/* Remove '\n' at the end of the string */
++	if (nread > 0) {
++		if ((*lineptr)[nread-1] == '\n') {
++			(*lineptr)[nread-1] = '\0';
++			nread = nread - 1;
++		}
++	}
++			
++	return nread;
++}
+diff --git a/ricci/ccs_sync/ricci_net.h b/ricci/ccs_sync/ricci_net.h
+index 033baed..13e19f9 100644
+--- a/ricci/ccs_sync/ricci_net.h
++++ b/ricci/ccs_sync/ricci_net.h
+@@ -6,6 +6,7 @@
+ ** as published by the Free Software Foundation.
+ **
+ ** Author: Ryan McCabe <ryan@redhat.com>
++** Author: Chris Feist <cfeist@redhat.com>
+ */
+ 
+ #ifndef __RICCI_NET_H
+@@ -41,9 +42,11 @@ struct ricci_conn {
+ 	int connected;
+ 	int auth;
+ 	int state;
++	int password_entered;
+ };
+ 
+ int ricci_conn_handler(struct ricci_conn *c, PRPollDesc *pd, xmlDocPtr doc);
+ uint32_t ricci_clear_pollfd(PRPollDesc *pd, uint32_t target, uint32_t num_fd);
++ssize_t custom_getpass (char **lineptr, size_t *n, FILE *stream);
+ 
+ #endif

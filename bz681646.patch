@@ -1,0 +1,307 @@
+commit 92e2847900384dd1efcc54fa0ea6316eefda0839
+Author:     Chris Feist <cfeist@redhat.com>
+AuthorDate: Thu Mar 10 15:11:51 2011 -0600
+Commit:     Chris Feist <cfeist@redhat.com>
+CommitDate: Thu Mar 10 15:14:10 2011 -0600
+
+    Added support for unfencing & removing multicast
+
+diff --git a/ricci/ccs/ccs b/ricci/ccs/ccs
+index 39e1042..f55ee48 100755
+--- a/ricci/ccs/ccs
++++ b/ricci/ccs/ccs
+@@ -59,6 +59,7 @@ def main(argv):
+     addmethod = removemethod = createcluster = False
+     addfencedev = removefencedev = False
+     addfenceinst = removefenceinst = False
++    addunfenceinst = removeunfenceinst = False
+     lsfencedev = lsfenceinst = False
+     addfailoverdomain = removefailoverdomain = False
+     lsfailoverdomain = addfailoverdomainnode = removefailoverdomainnode = False
+@@ -83,8 +84,10 @@ def main(argv):
+       "addfenceinst=", "rmfenceinst=", "lsfencedev", "lsfenceinst", "sync", "addfailoverdomain=",
+       "rmfailoverdomain=", "addservice=", "rmservice=", "addsubservice=", "rmsubservice=", "addresource=",
+       "rmresource=", "setquorumd","addheuristic","settotem", "setrm", "setcman", "setfencedaemon",
+-      "setlogging", "addlogger","rmlogger","setmulticast=","sync","addfailoverdomainnode=", "file=", "nodeid=",
+-      "votes=", "rmfailoverdomainnode=", "setdlm", "rmheuristic", "startall", "stopall", "activate", "setconf", "lsquorum", "lsfailoverdomain", "lsmisc", "checkconf", "exp=", "exprm="])
++      "setlogging", "addlogger","rmlogger","setmulticast","sync","addfailoverdomainnode=", "file=", "nodeid=",
++      "votes=", "rmfailoverdomainnode=", "setdlm", "rmheuristic", "startall", "stopall", "activate",
++      "setconf", "lsquorum", "lsfailoverdomain", "lsmisc", "checkconf", "exp=", "exprm=", "addunfenceinst=",
++      "rmunfenceinst="])
+     except getopt.GetoptError:
+         usage()
+         sys.exit(2)
+@@ -140,6 +143,14 @@ def main(argv):
+             removefenceinst = True
+             name = arg
+             options = args
++        elif opt in ("--addunfenceinst"):
++            addunfenceinst = True
++            name = arg
++            options = args
++        elif opt in ("--rmunfenceinst"):
++            removeunfenceinst = True
++            name = arg
++            options = args
+         elif opt in ("--lsfencedev"): lsfencedev = True;
+         elif opt in ("--lsfenceinst"): lsfenceinst = True; options = args
+         elif opt in ("--lsfailoverdomain"): lsfailoverdomain = True
+@@ -194,7 +205,7 @@ def main(argv):
+         elif opt in ("--setlogging"): setlogging = True; options = args
+         elif opt in ("--addlogger"): addlogger = True; options = args
+         elif opt in ("--rmlogger"): removelogger = True; options = args
+-        elif opt in ("--setmulticast"): setmulticast = True
++        elif opt in ("--setmulticast"): setmulticast = True; options = args
+         elif opt in ("--nodeid"): nodeid = arg
+         elif opt in ("--votes"): votes = arg
+         elif opt in ("-d"): debug = True
+@@ -228,6 +239,8 @@ def main(argv):
+     if (removefencedev): remove_fencedev(name)
+     if (addfenceinst): add_fenceinst(name, options)
+     if (removefenceinst): remove_fenceinst(name, options)
++    if (addunfenceinst): add_unfenceinst(name, options)
++    if (removeunfenceinst): remove_unfenceinst(name, options)
+     if (lsfencedev): list_fencedev()
+     if (lsfenceinst): list_fenceinst(options)
+     if (lsfailoverdomain): list_failoverdomain()
+@@ -254,7 +267,7 @@ def main(argv):
+     if (setlogging): set_logging(options)
+     if (addlogger): add_logger(options)
+     if (removelogger): remove_logger(options)
+-    if (setmulticast): set_multicast(arg)
++    if (setmulticast): set_multicast(options)
+     if (exp): expert_mode(tag, options)
+     if (exprm): expert_mode_remove(location)
+     if (sync): sync_cluster_conf()
+@@ -307,7 +320,7 @@ Node Operations:
+       --rmnode <node>
+                         Remove a node from the cluster
+       --nodeid <nodeid> Specify nodeid when adding a node
+-      --votes <votes>   Specify number of votes for a node
++      --votes <votes>   Specify number of votes when adding a node
+ 
+ Fencing Operations:
+       --lsfencedev      List all of the fence devices configured
+@@ -322,11 +335,16 @@ Fencing Operations:
+                         Add fence device
+       --rmfencedev <fence device name>
+                         Remove fence device
+-      --addfenceinst <fence device name> <node> <method> <options>
++      --addfenceinst <fence device name> <node> <method> [options]
+                         Add fence instance
+       --rmfenceinst <fence device name> <node> <method>
+                         Remove all instances of the fence device listed from
+                         the given method and node
++      --addunfenceinst <fence device name> <node> [options]
++                        Add an unfence instance
++      --rmunfenceinst <fence device name> <node>
++                        Remove all instances of the fence device listed from
++                        the unfence section of the node
+ 
+ Failover Domain Operations:
+       --lsfailoverdomain
+@@ -869,6 +887,64 @@ def remove_fenceinst(name, options):
+ 
+     set_cluster_conf(dom.toxml())
+ 
++def add_unfenceinst(name, options):
++    dom = minidom.parseString(get_cluster_conf_xml())
++    node_found = False
++    if len(options) < 1:
++        usage()
++        sys.exit(2)
++
++    nodename = options[0]
++
++    # Verify node exists
++    for node in dom.getElementsByTagName('clusternode'):
++        if node.getAttribute("name") == nodename:
++            node_found = True
++            break
++
++    if node_found == False:
++        print "Node '%s' does not currently exist in cluster.conf." % (nodename)
++        sys.exit(1)
++
++    if len(node.getElementsByTagName("unfence")) == 0:
++        unfence = dom.createElement("unfence")
++        node.appendChild(unfence)
++    else:
++        unfence = node.getElementsByTagName("unfence")[0]
++
++    newunfenceinst = dom.createElement("device")
++    newunfenceinst = set_element_attributes(newunfenceinst, options[1:])
++
++    newunfenceinst.setAttribute("name", name)
++    unfence.appendChild(newunfenceinst)
++    set_cluster_conf(dom.toxml())
++
++def remove_unfenceinst(name, options):
++    dom = minidom.parseString(get_cluster_conf_xml())
++    unfenceinst_found = False
++
++    if len(options) < 1:
++        usage()
++        sys.exit(2)
++
++    nodename = options[0]
++
++    # Verify unfence instance exists before attempting to remove
++    for node in dom.getElementsByTagName('clusternode'):
++        if node.getAttribute("name") == nodename:
++            for unfence in node.getElementsByTagName('unfence'):
++                for instance in unfence.getElementsByTagName('device'):
++                    if instance.getAttribute("name") == name:
++                        instance.parentNode.removeChild(instance)
++                        unfenceinst_found = True
++
++
++    if unfenceinst_found == False:
++        print "Unfence instance '%s' for node '%s' does not exist in cluster.conf." % (name, nodename)
++        sys.exit(1)
++
++    set_cluster_conf(dom.toxml())
++
+ def list_failoverdomain():
+     dom = minidom.parseString(get_cluster_conf_xml())
+     fds = dom.getElementsByTagName("failoverdomain")
+@@ -1579,9 +1655,10 @@ def remove_logger(options):
+             
+     set_cluster_conf(dom.toxml())
+ 
+-def set_multicast(arg):
++def set_multicast(options):
+     dom = minidom.parseString(get_cluster_conf_xml())
+ 
++
+     cman = dom.getElementsByTagName("cman")
+     if len(cman) == 0:
+         cman = dom.createElement("cman")
+@@ -1593,12 +1670,19 @@ def set_multicast(arg):
+         sys.exit(1)
+ 
+     mc = cman.getElementsByTagName('multicast')
++
++    # If 0 or 1 options are passed it's valid and we remove old configs
++    # If more than 1 option is passed, it's a usage error
++    if len(options) > 1:
++        print "Too many options passed to --setmulticast"
++        sys.exit(1)
++
+     for i in mc:
+         cman.removeChild(i)
+ 
+-    if arg != "":
++    if len(options) == 1:
+         mc = dom.createElement("multicast")
+-        mc.setAttribute("addr",arg)
++        mc.setAttribute("addr",options[0])
+         cman.appendChild(mc)
+ 
+     set_cluster_conf(dom.toxml())
+diff --git a/ricci/ccs/ccs.8 b/ricci/ccs/ccs.8
+index 84c2241..d7c7501 100644
+--- a/ricci/ccs/ccs.8
++++ b/ricci/ccs/ccs.8
+@@ -72,7 +72,7 @@ Remove a node from the cluster
+ .IP "--nodeid <nodeid>
+ Specify nodeid when adding a node
+ .IP "--votes <votes>
+-Specify number of votes for a node
++Specify number of votes when adding a node
+ .SS "FENCING OPERATIONS"
+ .IP "--lsfencedev
+ List all of the fence devices configured
+@@ -87,11 +87,16 @@ Remove a fence method from a specific node
+ Add fence device
+ .IP "--rmfencedev <fence device name>
+ Remove fence device
+-.IP "--addfenceinst <fence device name> <node> <method> <options>
++.IP "--addfenceinst <fence device name> <node> <method> [options]
+ Add fence instance
+ .IP "--rmfenceinst <fence device name> <node> <method>
+ Remove all instances of the fence device listed from
+ the given method and node
++.IP "--addunfenceinst <fence device name> <node> [options]
++Add an unfence instance
++.IP "--rmunfenceinst <fence device name> <node>
++Remove all instances of the fence device listed from
++the unfence section of the node
+ .SS "FAILOVER DOMAIN OPERATIONS"
+ .IP "--lsfailoverdomain
+ Lists all of the failover domains and failover domain
+@@ -179,7 +184,7 @@ ccs -h host1 --addmethod primary host2
+ .br
+ ccs -h host1 --addmethod primary host3
+ .br
+-ccs -h host1 --addfencedev myfence ipaddr=192.168.0.200 login=apc password=apc
++ccs -h host1 --addfencedev myfence agent=fence_apc ipaddr=192.168.0.200 login=apc passwd=apc
+ .br
+ ccs -h host1 --addfenceinst myfence host1 primary port=1
+ .br
+diff --git a/ricci/ccs/unit_tests/fence.conf.end b/ricci/ccs/unit_tests/fence.conf.end
+index 7985e98..7e39fc7 100644
+--- a/ricci/ccs/unit_tests/fence.conf.end
++++ b/ricci/ccs/unit_tests/fence.conf.end
+@@ -1,4 +1,4 @@
+-<cluster config_version="19" name="mycluster">
++<cluster config_version="27" name="mycluster">
+   <fence_daemon/>
+   <clusternodes>
+     <clusternode name="node1" nodeid="1">
+@@ -8,6 +8,11 @@
+         </method>
+         <method name="node1method2"/>
+       </fence>
++      <unfence>
++        <device name="myilo" port="15"/>
++        <device name="myilo" port="16"/>
++        <device name="myapc" port="17"/>
++      </unfence>
+     </clusternode>
+     <clusternode name="node2" nodeid="2">
+       <fence>
+diff --git a/ricci/ccs/unit_tests/misc.conf.end b/ricci/ccs/unit_tests/misc.conf.end
+index 89cbca6..65ae196 100644
+--- a/ricci/ccs/unit_tests/misc.conf.end
++++ b/ricci/ccs/unit_tests/misc.conf.end
+@@ -1,4 +1,4 @@
+-<cluster config_version="24" name="mycluster">
++<cluster config_version="27" name="mycluster">
+   <fence_daemon x="y" z="c"/>
+   <clusternodes>
+     <clusternode name="node1" nodeid="1"/>
+diff --git a/ricci/ccs/unit_tests/unittest.pl b/ricci/ccs/unit_tests/unittest.pl
+index a2e16b1..078a75d 100755
+--- a/ricci/ccs/unit_tests/unittest.pl
++++ b/ricci/ccs/unit_tests/unittest.pl
+@@ -65,6 +65,9 @@ sub misc_test {
+   test ("$CCS -f $t --setdlm x=y z=c",0);
+ 
+   test ("$CCS -f $t --setmulticast 55",0);
++  test ("$CCS -f $t --setmulticast 57",0);
++  test ("$CCS -f $t --setmulticast",0);
++  test ("$CCS -f $t --setmulticast 55",0);
+   test ("$CCS -f $t --setmulticast 56",0);
+ 
+   test ("$CCS -f $t --setfencedaemon a=b b=c",0);
+@@ -227,6 +230,19 @@ sub fence_test {
+   test ("$CCS -f $t --addfenceinst fence_apc node1 badmethod port=1",1);
+   test ("$CCS -f $t --rmfenceinst fence_ilo node1 node1method",0);
+   test ("$CCS -f $t --rmfenceinst fence_ilo node1 node1method",1);
++  test ("$CCS -f $t --rmunfenceinst fence_ilo node1 node1method",1);
++  test ("$CCS -f $t --addunfenceinst myilo node1 port=10",0);
++  test ("$CCS -f $t --addunfenceinst myilo node1 port=11",0);
++  test ("$CCS -f $t --addunfenceinst myapc node1 port=12",0);
++  test ("$CCS -f $t --addunfenceinst myapc nodeX port=12",1);
++  test ("$CCS -f $t --rmunfenceinst myapc nodeX",1);
++  test ("$CCS -f $t --rmunfenceinst myilo nodeX",1);
++  test ("$CCS -f $t --rmunfenceinst myapc node1",0);
++  test ("$CCS -f $t --rmunfenceinst myilo node1",0);
++  test ("$CCS -f $t --addunfenceinst myilo node1 port=15",0);
++  test ("$CCS -f $t --addunfenceinst myilo node1 port=16",0);
++  test ("$CCS -f $t --addunfenceinst myapc node1 port=17",0);
++
+   $retval = diff ($t,"$t.end");
+   #`rm $t`;
+   return $retval;

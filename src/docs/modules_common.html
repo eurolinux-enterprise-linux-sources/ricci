@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Modules - Common API</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.2  (Linux)">
+	<META NAME="CREATED" CONTENT="20060410;13011800">
+	<META NAME="CHANGED" CONTENT="20060412;18345900">
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<P>All modules receive &lt;request/&gt;, process it, and return
+&lt;response/&gt;. <BR>In case of API error, &lt;API_error/&gt; is
+returned. &lt;API_error/&gt; will have “description” attribute.
+&lt;API_error/&gt; will also have a variable “APIs” (list_str)
+attached to it, to ease debugging.
+</P>
+<P>&lt;request/&gt; has a &lt;function_call/&gt; and “API_version”
+(required) and “sequence” (optional) attributes. “sequence”
+is not used by module; it is just passed back thru &lt;response/&gt;
+tag.<BR>&lt;response/&gt; has a &lt;function_response/&gt; and
+“API_version” and “sequence” attributes.</P>
+<P>&lt;function_call/&gt;:<BR>Functions are invoked using this tag.
+“function_call” has to have “name” attribute. See respective
+<A HREF="modules.html">module</A> description for functions.
+<BR>&lt;function_call/&gt; receives &lt;var/&gt;s as input. See
+<A HREF="variables.html">Variables</A> for &lt;var/&gt; description.</P>
+<P ALIGN=LEFT>&lt;function_response/&gt;:<BR>&lt;function_response/&gt;
+will have “function_name” attribute, and returned &lt;var/&gt;s
+attached to it. Variables are defined by respective function calls.
+</P>
+<P ALIGN=LEFT>There will always be a “success” (boolean) variable
+in &lt;function_response/&gt;, besides function return values. <BR>If
+function was successfully executed, “success” will be “true”;
+otherwise, “success” will be “false” and two additional
+variables will be attached: “error_code” (int) and
+“error_description” (string). <BR>Error codes are defined by
+respective module functions; exception is generic_error (-1) which
+covers all other errors. <BR>Error descriptions are human readable
+descriptions of error; exception is generic error whose description
+might be too primitive for end-user consumption.
+</P>
+<P><BR><BR>
+</P>
+<P>Common functions:</P>
+<UL>
+	<LI><P>APIs</P>
+	<UL>
+		<P>Retrieve list of supported API versions.
+		</P>
+		<P>No input variables.
+		</P>
+		<P ALIGN=LEFT>Output variables: <BR>- “APIs” (list_str) –
+		list of supported APIs</P>
+		<P ALIGN=LEFT>On failure: <BR>- No special errors defined, only
+		generic ones might get returned.
+		</P>
+	</UL>
+</UL>
+<P><BR><BR>
+</P>
+<P><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3><B>Sample function
+without input vars:</B></FONT></FONT></P>
+<UL>
+	<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;request API_version=&quot;1.0&quot; sequence=&quot;1254&quot;&gt;</FONT></FONT></PRE>
+	<UL>
+		<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;function_call name=&quot;APIs&quot;/&gt;</FONT></FONT></PRE>
+	</UL>
+	<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;/request&gt;</FONT></FONT></PRE>
+</UL>
+<PRE></PRE>
+<UL>
+	<PRE><A NAME="line1"></A><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;response API_version=&quot;1.0&quot; sequence=&quot;1254&quot;&gt;</FONT></FONT></PRE>
+	<UL>
+		<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;function_response function_name=&quot;APIs&quot;&gt;</FONT></FONT></PRE>
+		<UL>
+			<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;APIs&quot; type=&quot;list_str&quot;&gt;</FONT></FONT></PRE>
+			<UL>
+				<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;listentry value=&quot;1.0&quot;/&gt;</FONT></FONT></PRE>
+			</UL>
+			<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;/var&gt;</FONT></FONT>
+<FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;success&quot; type=&quot;boolean&quot; value=&quot;true&quot;/&gt;</FONT></FONT></PRE>
+		</UL>
+		<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;/function_response&gt;</FONT></FONT></PRE>
+	</UL>
+	<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;/response&gt;</FONT></FONT></PRE>
+</UL>
+<PRE></PRE><P>
+<FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3><B>Sample function from
+“rpm” module that takes “search” variable: </B></FONT></FONT>
+</P>
+<UL>
+	<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;request API_version=&quot;1.0&quot; sequence=&quot;1254&quot;&gt;</FONT></FONT></PRE>
+	<UL>
+		<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;function_call name=&quot;query&quot;&gt;</FONT></FONT></PRE>
+		<UL>
+			<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;search&quot; type=&quot;list_xml&quot;&gt;</FONT></FONT></PRE>
+			<UL>
+				<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;rpm name=”gedit”/&gt;</FONT></FONT></PRE>
+			</UL>
+			<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;/var&gt;</FONT></FONT></PRE>
+		</UL>
+		<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;/function_call&gt;</FONT></FONT></PRE>
+	</UL>
+	<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;/request&gt;</FONT></FONT></PRE>
+</UL>
+<PRE></PRE>
+<UL>
+	<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;response API_version=&quot;1.0&quot; sequence=&quot;1254&quot;&gt;</FONT></FONT></PRE>
+	<UL>
+		<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;function_response function_name=&quot;query&quot;&gt;</FONT></FONT></PRE>
+		<UL>
+			<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;result&quot; type=&quot;list_xml&quot;&gt;</FONT></FONT></PRE>
+			<UL>
+				<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;rpm description=&quot;&quot; name=&quot;gedit&quot; repo_version=&quot;2.8.1-4&quot; summary=&quot;&quot; version=&quot;2.8.1-4&quot;/&gt;</FONT></FONT></PRE>
+			</UL>
+			<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;/var&gt;</FONT></FONT>
+<FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;success&quot; type=&quot;boolean&quot; value=&quot;true&quot;/&gt;</FONT></FONT></PRE>
+		</UL>
+		<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;/function_response&gt;</FONT></FONT></PRE>
+	</UL>
+	<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;/response&gt;</FONT></FONT></PRE>
+</UL>
+<P><BR><BR>
+</P>
+</BODY>
+</HTML>

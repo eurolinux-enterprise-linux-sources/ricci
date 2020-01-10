@@ -1,0 +1,31 @@
+From aeaf55e44e7b7156b027159a1bac99dda29a3fe5 Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Thu, 15 Nov 2012 13:14:39 -0600
+Subject: [PATCH 1/2] Updated --addresource to properly add resources when no
+ rm section is present
+
+Resolves: rhbz#866894
+---
+ ricci/ccs/ccs | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/ricci/ccs/ccs b/ricci/ccs/ccs
+index 60d4ebe..bdc2393 100755
+--- a/ricci/ccs/ccs
++++ b/ricci/ccs/ccs
+@@ -1489,8 +1489,11 @@ def add_resource(type, options):
+ 
+     # Verify resources section exists in cluster.conf
+     resources = dom.getElementsByTagName('resources')
++    rms = dom.getElementsByTagName('rm')
++    if len(rms) == 0:
++        resource = dom.getElementsByTagName('cluster')[0].appendChild(dom.createElement("rm"))
+     if len(resources) == 0:
+-        resources = dom.getElementsByTagName('cluster')[0].appendChild(dom.createElement("resources"))
++        resources = dom.getElementsByTagName('rm')[0].appendChild(dom.createElement("resources"))
+     elif len(resources) > 1:
+         print "Error: Too many resources elements in cluster.conf"
+         sys.exit(1)
+-- 
+1.7.11.7
+

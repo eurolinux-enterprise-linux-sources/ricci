@@ -1,0 +1,53 @@
+From: Jan Pokorny <jpokorny@redhat.com>
+Date: Tue, 13 Sep 2011 20:15:33 +0200
+Subject: [PATCH 1/4] (bz736795) avoid using uninitialized var if waitpid not succeeded
+
+Actually, modified lines, suspected as a source of undesired behavior observed
+regarding bz732483, were brought in as a fix for bz564490.
+
+This patch author's hypothesis about how things go wrong:
+
+1. int status;
+   - uninitialized local variable
+2. waitpid(pid, &status, WNOHANG);
+   - disregarding of return value leading to ...
+3. if (WIFEXITED(status))
+   - ... use of still uninitialized value in case waitpid did not succeeded
+     because of error or a case that process being wait for has not yet
+     changed the state
+
+1. + 2. + 3. -> (almost) unpredictably taking this or the other branch
+of computation according to unitialized value ("random data"), leading to...
+
+4. parent execution gets out of "while (true)" loop as in these correct cases:
+   a. waitpid (see 2.) works/used correctly this time
+   b. both remote ends of "stdout and stderr pipes" were closed;
+   then waits for child to finish, no longer reads anything from pipes
+5. child (actual execution of the required program, e.g. "yum" as in bz732483)
+   wants to write something to stdout/stderr, but once pipe buffer is full,
+   it is blocked
+
+4. + 5. -> deadlock
+
+Note: The fact that bad behavior had not been observed for quite a long time
+can be explained this way:
+    Content of uninitialized variable is (presumably) influenced by stack
+    contents in respective point of computation that in turn maybe influenced
+    by the compiler (i.e. instructions or maybe even memory addresses
+    [their patterns across similar environments?] being on the stack at that
+    very moment)
+
+Signed-off-by: Jan Pokorny <jpokorny@redhat.com>
+
+--- a/ricci/common/executils.cpp
++++ b/ricci/common/executils.cpp
+@@ -177,8 +177,7 @@
+ 		int ret = poll(poll_data, s, 500);
+ 		if (ret == 0) {
+ 			int status;
+-			waitpid(pid, &status, WNOHANG);
+-			if (WIFEXITED(status))
++			if (waitpid(pid, &status, WNOHANG) > 0 && WIFEXITED(status))
+ 				break;
+ 			continue;
+ 		} else if (ret == -1) {

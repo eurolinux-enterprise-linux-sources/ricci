@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<ricci version="1.0" function="process_batch" async="false">
+	<batch>
+		<module name="storage">
+			<request sequence="1254" API_version="1.0">
+				<function_call name="fstab_del">
+					<var name="mountpoint" type="string" mutable="false" value="/mnt/xen" />
+					<var name="device" type="string" mutable="false" value="/dev/cluster_vg/xen_guests" />
+				</function_call>
+			</request>
+		</module>
+	</batch>
+</ricci>
+

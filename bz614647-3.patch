@@ -1,0 +1,498 @@
+commit 6235befe12f59d7a016538f80ad15e10371d1631
+Author:     Chris Feist <cfeist@redhat.com>
+AuthorDate: Thu Feb 3 11:42:55 2011 -0600
+Commit:     Chris Feist <cfeist@redhat.com>
+CommitDate: Thu Feb 3 11:42:55 2011 -0600
+
+    Added expert mode to ccs
+    
+    - Added expert mode to ccs
+    - Removed extraneous .conf files
+
+diff --git a/ricci/ccs/ccs b/ricci/ccs/ccs
+index 8be4154..39e1042 100755
+--- a/ricci/ccs/ccs
++++ b/ricci/ccs/ccs
+@@ -72,6 +72,7 @@ def main(argv):
+     passwordset = False
+     nodeid = votes = False
+     checkconf = False
++    exp = exprm = False
+ 
+     global password, debug, sync, hostname, usefile, filename, activate
+ #    logging.basicConfig(level=logging.DEBUGRemove
+@@ -83,7 +84,7 @@ def main(argv):
+       "rmfailoverdomain=", "addservice=", "rmservice=", "addsubservice=", "rmsubservice=", "addresource=",
+       "rmresource=", "setquorumd","addheuristic","settotem", "setrm", "setcman", "setfencedaemon",
+       "setlogging", "addlogger","rmlogger","setmulticast=","sync","addfailoverdomainnode=", "file=", "nodeid=",
+-      "votes=", "rmfailoverdomainnode=", "setdlm", "rmheuristic", "startall", "stopall", "activate", "setconf", "lsquorum", "lsfailoverdomain", "lsmisc", "checkconf"])
++      "votes=", "rmfailoverdomainnode=", "setdlm", "rmheuristic", "startall", "stopall", "activate", "setconf", "lsquorum", "lsfailoverdomain", "lsmisc", "checkconf", "exp=", "exprm="])
+     except getopt.GetoptError:
+         usage()
+         sys.exit(2)
+@@ -197,6 +198,8 @@ def main(argv):
+         elif opt in ("--nodeid"): nodeid = arg
+         elif opt in ("--votes"): votes = arg
+         elif opt in ("-d"): debug = True
++      	elif opt in ("--exp"): exp = True; tag = arg; options = args
++      	elif opt in ("--exprm"): exprm = True; location = arg
+ 
+     if not hostname and not filename:
+         print "Must specify a hostname or filename."
+@@ -252,6 +255,8 @@ def main(argv):
+     if (addlogger): add_logger(options)
+     if (removelogger): remove_logger(options)
+     if (setmulticast): set_multicast(arg)
++    if (exp): expert_mode(tag, options)
++    if (exprm): expert_mode_remove(location)
+     if (sync): sync_cluster_conf()
+ 
+ def usage():
+@@ -276,6 +281,12 @@ Cluster configuration system.
+                         to activate config on all nodes)
+       --debug           Display debugging information to help troubleshoot
+                         connection issues with ricci
++      --exp tag [location] [options]
++                        Expert mode to add elements not currently defined in
++                        ccs (see man page for more information)
++      --exprm location
++                        Expert mode to remove elements not currently defined in
++                        ccs (see man page for more information)
+ 
+ Cluster Operations:
+       --createcluster <cluster>
+@@ -1106,8 +1117,9 @@ def add_subservice(name, options):
+     dom = minidom.parseString(get_cluster_conf_xml())
+     serviceFound = False
+ 
+-    services = options.pop(0).split(':')
+-    subservice_type = services.pop(-1)
++    location = options.pop(0).split(':')
++    subservice_type = location.pop(-1)
++    location = ":".join(location)
+ 
+     # Verify top level service exists
+     for service in dom.getElementsByTagName("service"):
+@@ -1119,29 +1131,11 @@ def add_subservice(name, options):
+         print "Unable to find service: %s" % name
+         sys.exit(1)
+ 
+-    for subserv in services:
+-        element_number = 0
+-        r = re.search(r"\[(\d+)\]$", subserv)
+-        if r:
+-            if r.group(1):
+-                element_number = int(r.group(1))
+-        subserv = re.sub(r"\[\d+\]$", "",  subserv)
+-
+ 
+-        count = 0
+-        subserviceFound = False
+-        for e in service.childNodes:
+-            if e.nodeType != e.ELEMENT_NODE:
+-                continue
+-            if e.tagName == subserv:
+-                if count == element_number:
+-                    service = e
+-                    subserviceFound = True
+-                    break
+-                else: count = count + 1
+-        if subserviceFound == False:
+-            print "Unable to find service %s" % "/".join(services)
+-            sys.exit(1)
++    service = getLocation(service, location)
++    if service == None:
++        print "Unable to find service %s" % location
++        sys.exit(1)
+ 
+     subservice = service.appendChild(dom.createElement(subservice_type))
+     subservice = set_element_attributes(subservice, options)
+@@ -1152,7 +1146,7 @@ def remove_subservice(name, options):
+     dom = minidom.parseString(get_cluster_conf_xml())
+     serviceFound = False
+ 
+-    services = options.pop(0).split(':')
++    location = options.pop(0)
+ 
+     # Verify that the service exists
+     for service in dom.getElementsByTagName("service"):
+@@ -1164,32 +1158,73 @@ def remove_subservice(name, options):
+         print "Unable to find service: %s" % name
+         sys.exit(1)
+ 
+-    for subserv in services:
++    service = getLocation(service, location)
++    if service == None:
++        print "Unable to find service %s" % location
++        sys.exit(1)
++
++    service.parentNode.removeChild(service)
++    set_cluster_conf(dom.toxml())
++
++def expert_mode(tag, options):
++    dom = minidom.parseString(get_cluster_conf_xml())
++
++    parent = dom.getElementsByTagName('cluster')[0]
++    if len(options) != 0:
++        location = options.pop(0)
++
++        parent = getLocation(parent,location) 
++        if parent == None:
++            print "Unable to find %s" % location
++            sys.exit(1)
++
++    newelement = parent.appendChild(dom.createElement(tag))
++    newelement = set_element_attributes(newelement, options)
++    set_cluster_conf(dom.toxml())
++
++def expert_mode_remove(location):
++    dom = minidom.parseString(get_cluster_conf_xml())
++
++    parent = dom.getElementsByTagName('cluster')[0]
++    parent = getLocation(parent,location) 
++    if parent == None:
++        print "Unable to find %s" % location
++        sys.exit(1)
++
++    parent.parentNode.removeChild(parent)
++    set_cluster_conf(dom.toxml())
++
++# Return the element specified by the location in dom
++# Elements separated by ':' and elements of the same name referenced by [n]
++def getLocation(dom, location):
++    if location == "":
++        return dom
++
++    elems = location.split(':')
++
++    for elem in elems:
+         element_number = 0
+-        r = re.search(r"\[(\d+)\]$", subserv)
++        r = re.search(r"\[(\d+)\]$", elem)
+         if r:
+             if r.group(1):
+                 element_number = int(r.group(1))
+-        subserv = re.sub(r"\[\d+\]$", "",  subserv)
+-
++        elem = re.sub(r"\[\d+\]$", "",  elem)
+ 
+         count = 0
+-        subserviceFound = False
+-        for e in service.childNodes:
+-            if e.nodeType != e.ELEMENT_NODE:
++        element_found = False
++        for node in dom.childNodes:
++            if node.nodeType != node.ELEMENT_NODE:
+                 continue
+-            if e.tagName == subserv:
++            if node.tagName == elem:
+                 if count == element_number:
+-                    service = e
+-                    subserviceFound = True
++                    dom = node
++                    element_found = True
+                     break
+                 else: count = count + 1
+-        if subserviceFound == False:
+-            print "Unable to find service %s" % "/".join(services)
+-            sys.exit(1)
++        if element_found == False:
++            return None
+ 
+-    service.parentNode.removeChild(service)
+-    set_cluster_conf(dom.toxml())
++    return dom
+ 
+ def add_resource(type, options):
+     dom = minidom.parseString(get_cluster_conf_xml())
+diff --git a/ricci/ccs/ccs.8 b/ricci/ccs/ccs.8
+index 81b298d..84c2241 100644
+--- a/ricci/ccs/ccs.8
++++ b/ricci/ccs/ccs.8
+@@ -39,6 +39,10 @@ Activate config on node (use this option with --sync
+ to activate config on all nodes)
+ .IP "--debug"
+ Display debugging information to help troubleshoot connection issues with ricci
++.IP "--exp tag [location] [options]
++Expert mode to add elements not currently defined in ccs
++.IP "--exprm location
++Expert mode to remove elements not currently defined in ccs
+ .SS "CLUSTER OPERATIONS"
+ .IP "--createcluster cluster"
+ Create a new cluster.conf (removing old one if it
+@@ -115,7 +119,8 @@ Removes a service and all of its subservices
+ .IP "--addsubservice <servicename> <subservice> [service options] ...
+ Add individual sub services, if adding services within
+ a tree, use ':' to separate elements and brackets to
+-identify subservices of the same type
++identify subservices of the same type.
++.br
+ Example: --addsubservice service_a nfs[1]:nfs[2]:nfs
+ .IP "--rmsubservice <servicename> <subservice>
+ Removes a specific subservice specified by the
+diff --git a/ricci/ccs/unit_tests/addtest.conf b/ricci/ccs/unit_tests/addtest.conf
+deleted file mode 100644
+index 20010c2..0000000
+--- a/ricci/ccs/unit_tests/addtest.conf
++++ /dev/null
+@@ -1,24 +0,0 @@
+-<cluster config_version="32" name="mycluster">
+-  <fence_daemon/>
+-  <clusternodes>
+-    <clusternode name="node1" nodeid="1"/>
+-    <clusternode name="node2" nodeid="2"/>
+-    <clusternode name="node3" nodeid="3"/>
+-    <clusternode name="node4" nodeid="4"/>
+-    <clusternode name="node5" nodeid="5"/>
+-    <clusternode name="node6" nodeid="6"/>
+-    <clusternode name="node7" nodeid="7"/>
+-    <clusternode name="node8" nodeid="8"/>
+-    <clusternode name="node10" nodeid="60"/>
+-    <clusternode name="node11" nodeid="9"/>
+-    <clusternode name="node12" nodeid="10" votes="4"/>
+-    <clusternode name="node13" nodeid="11"/>
+-    <clusternode name="node14" nodeid="14" votes="1"/>
+-  </clusternodes>
+-  <cman/>
+-  <fencedevices/>
+-  <rm>
+-    <failoverdomains/>
+-    <resources/>
+-  </rm>
+-</cluster>
+diff --git a/ricci/ccs/unit_tests/failover.conf b/ricci/ccs/unit_tests/failover.conf
+deleted file mode 100644
+index fc6df60..0000000
+--- a/ricci/ccs/unit_tests/failover.conf
++++ /dev/null
+@@ -1,32 +0,0 @@
+-<cluster config_version="24" name="mycluster">
+-  <fence_daemon/>
+-  <clusternodes>
+-    <clusternode name="node1" nodeid="1"/>
+-    <clusternode name="node2" nodeid="2"/>
+-  </clusternodes>
+-  <cman/>
+-  <fencedevices/>
+-  <rm>
+-    <failoverdomains>
+-      <failoverdomain name="fd1" nofailback="1" ordered="1" restricted="1">
+-        <failoverdomainnode name="node1"/>
+-      </failoverdomain>
+-      <failoverdomain name="fd2" nofailback="0" ordered="1" restricted="1">
+-        <failoverdomainnode name="node1"/>
+-      </failoverdomain>
+-      <failoverdomain name="fd3" nofailback="1" ordered="0" restricted="1">
+-        <failoverdomainnode name="node2" priority="51"/>
+-      </failoverdomain>
+-      <failoverdomain name="fd4" nofailback="1" ordered="1" restricted="0">
+-        <failoverdomainnode name="node2" priority="50"/>
+-        <failoverdomainnode name="node1" priority="1"/>
+-      </failoverdomain>
+-      <failoverdomain name="fd5" nofailback="0" ordered="0" restricted="1">
+-      </failoverdomain>
+-      <failoverdomain name="fd6" nofailback="0" ordered="1" restricted="0"/>
+-      <failoverdomain name="fd7" nofailback="1" ordered="0" restricted="0"/>
+-      <failoverdomain name="fd9" nofailback="0" ordered="0" restricted="1"/>
+-    </failoverdomains>
+-    <resources/>
+-  </rm>
+-</cluster>
+diff --git a/ricci/ccs/unit_tests/fence.conf b/ricci/ccs/unit_tests/fence.conf
+deleted file mode 100644
+index 7985e98..0000000
+--- a/ricci/ccs/unit_tests/fence.conf
++++ /dev/null
+@@ -1,30 +0,0 @@
+-<cluster config_version="19" name="mycluster">
+-  <fence_daemon/>
+-  <clusternodes>
+-    <clusternode name="node1" nodeid="1">
+-      <fence>
+-        <method name="node1method">
+-          <device name="fence_apc" port="1"/>
+-        </method>
+-        <method name="node1method2"/>
+-      </fence>
+-    </clusternode>
+-    <clusternode name="node2" nodeid="2">
+-      <fence>
+-        <method name="node2method"/>
+-        <method name="node2method2"/>
+-        <method name="node2method3"/>
+-      </fence>
+-    </clusternode>
+-  </clusternodes>
+-  <cman/>
+-  <fencedevices>
+-    <fencedevice agent="fence_ilo" name="fence_ilo" optiona="x" optionb="y"/>
+-    <fencedevice agent="fence_apc" name="fence_apc" optiona="x" optionb="y"/>
+-    <fencedevice agent="fence_apc" name="fence_apc2" optiona="x" optionb="y"/>
+-  </fencedevices>
+-  <rm>
+-    <failoverdomains/>
+-    <resources/>
+-  </rm>
+-</cluster>
+diff --git a/ricci/ccs/unit_tests/lsnodes.conf b/ricci/ccs/unit_tests/lsnodes.conf
+deleted file mode 100644
+index bfddad4..0000000
+--- a/ricci/ccs/unit_tests/lsnodes.conf
++++ /dev/null
+@@ -1,13 +0,0 @@
+-<cluster config_version="3" name="mycluster">
+-  <fence_daemon/>
+-  <clusternodes>
+-    <clusternode name="node1" nodeid="1"/>
+-    <clusternode name="node2" nodeid="2"/>
+-  </clusternodes>
+-  <cman/>
+-  <fencedevices/>
+-  <rm>
+-    <failoverdomains/>
+-    <resources/>
+-  </rm>
+-</cluster>
+diff --git a/ricci/ccs/unit_tests/misc.conf b/ricci/ccs/unit_tests/misc.conf
+deleted file mode 100644
+index 89cbca6..0000000
+--- a/ricci/ccs/unit_tests/misc.conf
++++ /dev/null
+@@ -1,23 +0,0 @@
+-<cluster config_version="24" name="mycluster">
+-  <fence_daemon x="y" z="c"/>
+-  <clusternodes>
+-    <clusternode name="node1" nodeid="1"/>
+-    <clusternode name="node2" nodeid="2"/>
+-  </clusternodes>
+-  <cman x="y" z="c">
+-    <multicast addr="56"/>
+-  </cman>
+-  <fencedevices/>
+-  <rm x="y" z="c">
+-    <failoverdomains/>
+-    <resources/>
+-  </rm>
+-  <totem x="y" z="c"/>
+-  <dlm x="y" z="c"/>
+-  <logging x="y" z="c">
+-    <logger mylog="1"/>
+-    <logger mylog="2"/>
+-    <logger mylog="3"/>
+-    <logger mylog="5"/>
+-  </logging>
+-</cluster>
+diff --git a/ricci/ccs/unit_tests/quorum.conf b/ricci/ccs/unit_tests/quorum.conf
+deleted file mode 100644
+index 4c7785d..0000000
+--- a/ricci/ccs/unit_tests/quorum.conf
++++ /dev/null
+@@ -1,17 +0,0 @@
+-<cluster config_version="11" name="mycluster">
+-  <fence_daemon/>
+-  <clusternodes>
+-    <clusternode name="node1" nodeid="1"/>
+-    <clusternode name="node2" nodeid="2"/>
+-  </clusternodes>
+-  <cman/>
+-  <fencedevices/>
+-  <rm>
+-    <failoverdomains/>
+-    <resources/>
+-  </rm>
+-  <quorumd options="AAA">
+-    <heuristic options="YYY"/>
+-    <heuristic options="CCC"/>
+-  </quorumd>
+-</cluster>
+diff --git a/ricci/ccs/unit_tests/service.conf b/ricci/ccs/unit_tests/service.conf
+deleted file mode 100644
+index c1b099b..0000000
+--- a/ricci/ccs/unit_tests/service.conf
++++ /dev/null
+@@ -1,48 +0,0 @@
+-<cluster config_version="36" name="mycluster">
+-  <fence_daemon/>
+-  <clusternodes>
+-    <clusternode name="node1" nodeid="1"/>
+-    <clusternode name="node2" nodeid="2"/>
+-  </clusternodes>
+-  <cman/>
+-  <fencedevices/>
+-  <rm>
+-    <failoverdomains/>
+-    <resources>
+-      <restype1 a="b" b="1"/>
+-      <restype2 a="b" b="2"/>
+-      <restype3 a="b" b="4"/>
+-      <restype3 a="b" b="6"/>
+-    </resources>
+-    <service name="service1">
+-      <nfs a="b" c="1"/>
+-    </service>
+-    <service a="b" c="d" name="service2">
+-      <nfs a="b" c="2">
+-        <nfs a="b" c="3">
+-          <nfs a="b" c="5"/>
+-          <nfs a="b" c="14">
+-            <nfs a="b" c="15"/>
+-          </nfs>
+-        </nfs>
+-        <nfs a="b" c="4">
+-          <nfs a="b" c="6">
+-            <nfs a="b" c="8"/>
+-            <nfs a="b" c="9">
+-              <deep a="b" c="11"/>
+-            </nfs>
+-          </nfs>
+-          <nfs a="b" c="6.1">
+-            <nfs a="b" c="10"/>
+-            <nfs a="b" c="13"/>
+-          </nfs>
+-        </nfs>
+-      </nfs>
+-      <nfs a="b" c="7">
+-        <nfs a="b" c="16"/>
+-      </nfs>
+-      <nfs a="b" c="7">
+-      </nfs>
+-    </service>
+-  </rm>
+-</cluster>
+diff --git a/ricci/ccs/unit_tests/unittest.pl b/ricci/ccs/unit_tests/unittest.pl
+index e84d425..a2e16b1 100755
+--- a/ricci/ccs/unit_tests/unittest.pl
++++ b/ricci/ccs/unit_tests/unittest.pl
+@@ -34,6 +34,16 @@ if (misc_test("misc.conf") == 0) {
+   print "Misc Test Succeeded\n";
+ }
+ 
++#if (expmode_test("exp.conf") == 0) {
++#  print "Expert Mode Test Succeeded\n";
++#}
++
++sub expmode_test {
++  $t = shift @_;
++  test ("$CCS -f $t --createcluster mycluster",0);
++  test ("$CCS -f $t --exp fence_daemon cluster",0);
++}
++
+ sub misc_test {
+   $t = shift @_;
+   test ("$CCS -f $t --createcluster mycluster",0);
+diff --git a/ricci/ccs/unit_tests/version.conf b/ricci/ccs/unit_tests/version.conf
+deleted file mode 100644
+index 6aa0fb5..0000000
+--- a/ricci/ccs/unit_tests/version.conf
++++ /dev/null
+@@ -1,10 +0,0 @@
+-<cluster config_version="51" name="mycluster">
+-  <fence_daemon/>
+-  <clusternodes/>
+-  <cman/>
+-  <fencedevices/>
+-  <rm>
+-    <failoverdomains/>
+-    <resources/>
+-  </rm>
+-</cluster>

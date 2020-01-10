@@ -1,0 +1,33 @@
+From 13fc0f7cde80ccf34486814592203cd00ea59fb0 Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Thu, 8 Aug 2013 13:09:03 -0500
+Subject: [PATCH 2/5] Prevent segfaults with ccs_sync when using multiple hosts
+
+- Resolves: rhbz#853890
+---
+ ricci/ccs_sync/ricci_conf.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ricci/ccs_sync/ricci_conf.c b/ricci/ccs_sync/ricci_conf.c
+index f7e1070..d87acb4 100644
+--- a/ricci/ccs_sync/ricci_conf.c
++++ b/ricci/ccs_sync/ricci_conf.c
+@@ -68,6 +68,7 @@ int main(int argc, const char const * const *argv) {
+ 	hash_t *dest_nodes;
+ 	int num_nodes = 0;
+ 	int increment_version = 0;
++	hash_t cmdline_nodes;
+ 
+ 	ret = hash_init(&node_hash, 5, string_compare, hash_string, hash_dtor);
+ 	if (ret == -1) {
+@@ -179,7 +180,6 @@ int main(int argc, const char const * const *argv) {
+ 		/* Send to all current member nodes */
+ 		dest_nodes = &node_hash;
+ 	} else {
+-		hash_t cmdline_nodes;
+ 		ret = hash_init(&cmdline_nodes, 5, string_compare,
+ 				hash_string, hash_dtor);
+ 		if (ret == -1) {
+-- 
+1.8.3.1
+

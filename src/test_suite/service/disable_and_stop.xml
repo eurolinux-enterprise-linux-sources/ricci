@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<ricci version="1.0" function="process_batch" async="false">
+<batch>
+
+<module name="service">
+<request sequence="1254" API_version="1.0">
+<function_call name="disable">
+  <var mutable="false" name="services" type="list_xml">
+    <service name="httpd"/>
+    <service name="xinetd"/>
+  </var>
+</function_call>
+</request>
+</module>
+
+<module name="service">
+<request sequence="1254" API_version="1.0">
+<function_call name="stop">
+  <var mutable="false" name="services" type="list_xml">
+    <service name="httpd"/>
+    <service name="xinetd"/>
+  </var>
+</function_call>
+</request>
+</module>
+
+<module name="service">
+<request sequence="1254" API_version="1.0">
+<function_call name="query">
+  <var mutable="false" name="search" type="list_xml">
+    <service name="httpd"/>
+    <service name="xinetd"/>
+  </var>
+</function_call>
+</request>
+</module>
+
+</batch>
+</ricci>

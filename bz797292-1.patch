@@ -1,0 +1,25 @@
+From e9661b995bc4bedc83a1e9961bc69a67457b632a Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Wed, 29 Feb 2012 18:08:32 -0600
+Subject: [PATCH] Fixed installed empty_cluster.conf name.
+
+---
+ ricci/ccs/Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/ricci/ccs/Makefile b/ricci/ccs/Makefile
+index 59a5418..d721a0f 100644
+--- a/ricci/ccs/Makefile
++++ b/ricci/ccs/Makefile
+@@ -15,7 +15,7 @@ install:
+ 	install ccs ${DESTDIR}/${SBINDIR}/ccs
+ 	install -d ${DESTDIR}/usr/share/ccs/
+ 	install cluster.rng.in ${DESTDIR}/usr/share/ccs/cluster.rng
+-	install empty_cluster.conf ${DESTDIR}/usr/share/ccs/cluster.rng
++	install empty_cluster.conf ${DESTDIR}/usr/share/ccs/empty_cluster.conf
+ 	install -d ${DESTDIR}/${MANDIR}/man8
+ 	install ccs.8 ${DESTDIR}/${MANDIR}/man8
+ 
+-- 
+1.7.7.6
+

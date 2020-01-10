@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Log Module</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.2  (Linux)">
+	<META NAME="CREATED" CONTENT="20060410;13011800">
+	<META NAME="CHANGED" CONTENT="20060605;15523900">
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<P>Log module retrieves log entries from system-wide log facilities,
+or specified log files.
+</P>
+<P>Module name: “log”
+</P>
+<P>Module version: 1.0
+</P>
+<P>See <A HREF="modules_common.html">Modules - Common API</A> for
+general module description.
+</P>
+<P ALIGN=LEFT>Module parses log files based on following criteria:<BR>
+- what log files (defaults to /var/log/messages and /var/log/syslog)<BR>
+- age of log entries (so one can retrieve logs from previous 4 days,
+or a month)<BR> - tags (similar to keywords) none, one or multiple.
+If none, everything matches; if one, matching match; if more than
+one, either their union or intersection match (see next bullet)<BR> -
+union or intersection, union being the default. Even if union is
+selected, returned log entries have matching tags attached; UI can
+group or intersect them in the cache, reducing number of round trips.
+</P>
+<P>As module processes log files, each entry is assigned multiple
+tags. First tag will be a process name that logged entry. Second is a
+PID (if supplied). Simple algorithm tries to extract as much of tags
+as possible. Those tags are matched against named groups of keywords,
+and if found, group name is attached to log entry as yet another tag.
+Purpose of tags is to group log entries. <BR>Search is performed on
+these tags. <BR>For example, ccsd log entry will get assigned “ccsd”
+and “cluster” tags; GFS entries will get “gfs”, “storage”
+and “cluster” tags; dlm entries will get “dlm”, “cluster”
+and “kernel” tags, ...
+</P>
+<P>Defined tag groups: <BR>- “cluster” - matches all log entries
+from Cluster Suite (includes “cluster service manager”, cman,
+gulm, ccsd, GFS and LVS, among others) <BR>- “cluster service
+manager” - matches all log entries from Cluster Service Manager
+(clurgmgr for now) <BR>- “lvs” - matches all log entries from
+Linux Virtual Server: ipvs, ipvsadm, piranha, ...<BR>- “storage”
+- matches all log entries about storage <BR>- “selinux” - matches
+selinux log entries (audit, pam_*, selinux)</P>
+<P>Log entry format:
+</P>
+<P>&lt;logentry domain=&quot;what it is about&quot; pid=”process
+ID” age=&quot;age in seconds&quot; msg=&quot;log message&quot;&gt;<BR>&lt;match
+tag=”matching tag1”/&gt;<BR>&lt;match tag=”matching
+tag2”/&gt;<BR>&lt;/logentry&gt;</P>
+<P>- “age” - age of entry in seconds (relative time was chosen,
+so that UI can display logs using user's time settings, and to remedy
+differences in clock settings) <BR>- “pid” - PID that generated
+this log entry. Not every process logs its PID, so “pid”
+attribute might end up empty<BR>- &lt;match&gt; - a tag this entry
+was successfully matched against (there could be multiple, eg. if
+search was performed on “kernel” and “cluster”, dlm log will
+be matched against both – could be used by UI to group or to find
+intersections within result – eg. “cluster” and “kernel”).
+</P>
+<P><BR><BR>
+</P>
+<P>Functions:
+</P>
+<UL>
+	<LI><P>APIs
+	</P>
+	<UL>
+		<P>Get supported API versions. See <A HREF="modules_common.html">Modules
+		- Common API</A> for description.
+		</P>
+	</UL>
+</UL>
+<UL>
+	<LI><P>get
+	</P>
+	<UL>
+		<P ALIGN=LEFT>Retrieve union of matching log entries that are at
+		most 'age' seconds old. To retrieve intersection, use
+		“intersection” variable. If no tags are specified, all entries
+		of matching age are returned. <BR>Log files to be searched are,
+		optionally, specified using “paths” variable. Files rotated by
+		logrotate are picked up automatically, eg. if /var/log/cron was
+		specified, /var/log/cron.1 2 3 ... will get picked up
+		automatically.
+		</P>
+		<P>Input variables: <BR>- “age” (int) – maximum age, in
+		seconds, of log entries to retrieve <BR>- “tags” (list_str) –
+		optional, list of tags whose matching log entries are to be
+		retrieved <BR>- “intersection” (boolean) – optional
+		(default=false), return intersection instead of union <BR>- “paths”
+		(list_str) – optional, list of paths to log files or directories.
+		Directories are searched recursively. Relative and non-existent
+		paths are discarded. If not specified, or empty, /var/log/messages
+		and /var/log/syslog are processed (along with .1 .2 .3 ...
+		extensions).
+		</P>
+		<P ALIGN=LEFT>Output variables: <BR>- “log_entries” (list_xml)
+		– list of matching entries (see above for &lt;logentry/&gt;
+		format)
+		</P>
+		<P ALIGN=LEFT>On failure: <BR>- No special errors defined, only
+		generic ones might get returned
+		</P>
+	</UL>
+</UL>
+<P ALIGN=LEFT><BR><BR>
+</P>
+</BODY>
+</HTML>

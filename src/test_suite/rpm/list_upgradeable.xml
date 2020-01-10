@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<ricci version="1.0" function="process_batch" async="false">
+<batch>
+
+<module name="rpm">
+<request sequence="1254" API_version="1.0">
+<function_call name="list">
+  <var name="sets" type="boolean" value="true"/>
+  <var name="rpms" type="boolean" value="true"/>
+  <var name="upgradeable" type="boolean" value="true"/>
+</function_call>
+</request>
+</module>
+
+</batch>
+</ricci>
+

@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Storage Module - Block Devices</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.2  (Linux)">
+	<META NAME="CREATED" CONTENT="20060410;13011800">
+	<META NAME="CHANGED" CONTENT="20060412;13093400">
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<P>&lt;block_device/&gt; represents a block device. Every
+&lt;block_device/&gt; is a target of some <A HREF="storage-mappers.html">&lt;mapper/&gt;</A>.
+</P>
+<P>Every block device has <A HREF="storage-content.html">&lt;content/&gt;</A>,
+which represent data stored on block device.
+</P>
+<P><BR><BR>
+</P>
+<P>Block devices are manipulated in different ways:</P>
+<UL>
+	<LI><P>Existing block devices are retrieved either by using
+	“get_bd(path)” <A HREF="storage_api.html">function</A> or by
+	extraction from <A HREF="storage-mappers.html">&lt;mapper/&gt;</A>.
+	</P>
+	<LI><P>New block devices are created by submitting
+	<A HREF="storage-bd_template.html">&lt;block_device_template/&gt;</A>
+	from &lt;new_targets/&gt; of <A HREF="storage-mappers.html">&lt;mapper/&gt;</A>
+	to Storage Module using “create_bd” <A HREF="storage_api.html">function</A>.
+
+	</P>
+	<LI><P>Properties are changed by modifying &lt;properties/&gt; tag,
+	see bellow, and submitting &lt;block_device/&gt; to Storage Module
+	using “modify_bd” <A HREF="storage_api.html"></A><A HREF="storage_api.html">function</A><A HREF="storage_api.html"></A>.
+		</P>
+	<LI><P>Content is manipulated by changing <A HREF="storage-content.html">&lt;content/&gt;</A>
+	tag, see bellow, and submitting &lt;block_device/&gt; to Storage
+	Module using “modify_bd” <A HREF="storage_api.html">function</A>.
+	Both, content and block device properties, can be modified using
+	single call to “modify_bd.”</P>
+	<LI><P>Block devices are removed by submitting &lt;block_device/&gt;
+	to Storage Module using “remove_bd” <A HREF="storage_api.html">function</A>.
+	Operation will succeed only if bd's “removable” property is
+	“true”.
+	</P>
+</UL>
+<P><BR><BR>
+</P>
+<P><B>Block Device XML description:</B></P>
+<PRE><A NAME="line22"></A><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;block_device mapper_id=&quot;unique mapper id&quot; mapper_type=&quot;mapper type&quot; path=&quot;path&quot; state_ind=&quot;fajanadaeacaoaiagaaaaacalajacaea&quot;&gt;<BR>     &lt;properties/&gt;</FONT></FONT>
+   <FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;content/&gt;<BR>&lt;/block_device&gt;</FONT></FONT>
+</PRE>
+<UL>
+	<LI><P>Every &lt;block_device/&gt; is a target of &lt;mapper/&gt;
+	which is of type “mapper_type” and id “mapper_id”.  <BR>It
+	also has a “path” and “state_ind”. State indicator
+	“state_ind” is a hashed string of block device properties; if
+	something changes on a block device, its state indicator will change
+	as well. It is used to detect mid-air collisions.
+	</P>
+	<LI><P><A NAME="line49"></A>&lt;properties/&gt; tag, which has
+	<A HREF="variables.html">variables</A> for children. <BR>Some
+	properties can be mutable; modifying them and sending
+	&lt;block_device/&gt; to Storage Module will commit changes to the
+	disk. <BR>Block devices from different “mapper_type”s have
+	different set of properties defined; some of them will be present in
+	all block devices, eg “removable”. See descriptions of
+	respective LINKME mappers. <BR>Example of properties for Logical
+	Volume:
+	</P>
+	<UL>
+		<P><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;properties&gt;</FONT></FONT></P>
+		<UL>
+			<PRE STYLE="margin-bottom: 0.2in"><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;attrs&quot; type=&quot;string&quot; value=&quot;-wi-ao&quot;/&gt;</FONT></FONT>
+<FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;extent_size&quot; type=&quot;int&quot; value=&quot;33554432&quot;/&gt;</FONT></FONT>
+<FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;lvname&quot; type=&quot;string&quot; value=&quot;root&quot;/&gt;</FONT></FONT>
+<FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;mirrored&quot; type=&quot;boolean&quot; value=&quot;false&quot;/&gt;</FONT></FONT>
+<FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;path&quot; type=&quot;string&quot; value=&quot;/dev/VG_main/root&quot;/&gt;</FONT></FONT>
+<FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;removable&quot; type=&quot;boolean&quot; value=&quot;true&quot;/&gt;</FONT></FONT>
+<FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var max=&quot;17179869184&quot; min=&quot;16106127360&quot; mutable=&quot;true&quot; name=&quot;size&quot; step=&quot;33554432&quot; type=&quot;int&quot; value=&quot;16106127360&quot;/&gt;</FONT></FONT>
+<FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;snapshot&quot; type=&quot;boolean&quot; value=&quot;false&quot;/&gt;</FONT></FONT>
+<FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;snapshots&quot; type=&quot;list_str&quot;/&gt;</FONT></FONT>
+<FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;uuid&quot; type=&quot;string&quot; value=&quot;lEI9Zt-LzZt-aMa2-glrC-zC69-M6J3-KaGSHt&quot;/&gt;</FONT></FONT>
+<FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;vgname&quot; type=&quot;string&quot; value=&quot;VG_main&quot;/&gt;</FONT></FONT></PRE>
+		</UL>
+		<PRE STYLE="margin-bottom: 0.2in"><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;/properties&gt;</FONT></FONT></PRE>
+	</UL>
+</UL>
+<PRE STYLE="margin-bottom: 0.2in"><A NAME="line58"></A>                                                                        </PRE>
+<UL>
+	<LI><P><A HREF="storage-content.html">&lt;content/&gt;</A> tag,
+	which represent data stored on block device. &lt;content/&gt; also
+	contains data about new contents.
+	</P>
+</UL>
+<P><BR><BR>
+</P>
+</BODY>
+</HTML>

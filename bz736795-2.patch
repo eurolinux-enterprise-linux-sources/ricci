@@ -1,0 +1,80 @@
+From: Jan Pokorny <jpokorny@redhat.com>
+Date: Tue, 13 Sep 2011 20:16:42 +0200
+Subject: [PATCH 2/4] (bz736795) executils: add comments wrt. exec'ing multi-process program
+
+... primarily to make code principles clear, to explain quite surprising
+"waitpid" (bz564490 fix) and generally to avoid future confusions.
+
+Comment in executils.h briefly presents related issues to the "blackbox" user.
+
+Signed-off-by: Jan Pokorny <jpokorny@redhat.com>
+
+--- a/ricci/common/executils.cpp
++++ b/ricci/common/executils.cpp
+@@ -37,6 +37,8 @@
+ static void read_data(struct pollfd& poll_info, bool& fd_closed, String& data);
+ static void close_fd(int fd);
+ 
++// NOTE: Execution of multi-process programs "parent exits, child continues"
++//       requires caution (see "Since bz564490" comment/consult executils.h).
+ int
+ execute(const String& path,
+ 		const std::vector<String>& args,
+@@ -176,6 +178,36 @@
+ 		// wait for events
+ 		int ret = poll(poll_data, s, 500);
+ 		if (ret == 0) {
++			// Since bz564490, we no longer rely on "pipes closed iff exit status ready"
++			// (easy counterexample: parent in multi-process program exits while its
++			// child keeps the descriptors unclosed; FD_CLOEXEC is not a remedy) and
++			// thus we keep watching here whether the main process of executed program
++			// has exited and once it has, we are done (no waiting for any child/ren).
++			//
++			// Rationale 1 behind taking care of the main process only:
++			// a. common case -- exit on behalf of main process (single/multi-process)
++			// b. multi-process program with child surviving main process
++			//    -- rare case, we prefer exit~returned exit status (as with old virsh)
++			//
++			// Rationale 2 behind taking the test right here:
++			// This branch guarantees that we don't miss any data yet to be read
++			// (POLLIN -> has to read first even if the process has already exited);
++			// POLLERR|POLLHUP|POLLNVAL cases for particular descriptor mean a half-way
++			// pass the infloop where another, blocking, waitpid takes care, anyway.
++			//
++			// Note 1: Placing the test here causes two issues (solving of which is
++			// not worth the code complexity growth or even possible code break):
++			// a. the captured stdout/stderr may contain data produced by the child
++			//    as per Rationale 1b. generated even AFTER the point parent exited
++			//    (more writers in such case is strange, still parent data not missed)
++			// b. child as per Rationale 1b. could prevent this branch to be taken by
++			//    consistently generating data on stdin/stderr (even stranger scenario).
++			//
++			// Note 2: Preferred scenario as per Rationale 1b. will cause issues in
++			// case child process, survived its parent, will try to use stdout/stderr
++			// as these were initially (before local exec) turned into write ends of
++			// respective pipes -- child's write will generate SIGPIPE signal
++			// and further run may fail (depending on the child's robustness).
+ 			int status;
+ 			if (waitpid(pid, &status, WNOHANG) > 0 && WIFEXITED(status))
+ 				break;
+
+--- a/ricci/include/executils.h
++++ b/ricci/include/executils.h
+@@ -30,6 +30,17 @@
+ ** return 0 on success, non-zero on failure
+ ** Kill the child process after @timeout ms has elapsed,
+ ** if @timeout is negative, there's no no timeout
++**
++** /note
++** Execution of multi-process programs "parent exits, child continues"
++** requires caution.  This function returns when main process of such executed
++** program exits (i.e., no waiting for any child/ren) and this may lead
++** to unexpected results.
++** If any child produces something on its stdout/stderr (presumably inherited
++** from parent) AFTER the point the parent exited, a portion of such data may
++** still be captured in @out/@err buffer.  In addition, child surviving its
++** parent may fail when trying to write to its stdout/stderr (effectively
++** pipes with as-of-now closed read ends).
+ */
+ int execute(const String& path,
+ 			const std::vector<String>& args,

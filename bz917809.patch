@@ -1,0 +1,26 @@
+From a8d539752232f8df0b9a0b581cbcdb2a8457b40e Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Thu, 12 Jun 2014 19:56:49 -0500
+Subject: [PATCH 2/5] If not hostname or filename is specified, use 'localhost'
+
+---
+ ricci/ccs/ccs | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/ricci/ccs/ccs b/ricci/ccs/ccs
+index fe787da..c34045d 100755
+--- a/ricci/ccs/ccs
++++ b/ricci/ccs/ccs
+@@ -250,8 +250,7 @@ def main(argv):
+         elif opt in ("--getschema"): getclusterschema = True;
+ 
+     if not hostname and not filename:
+-        print "Must specify a hostname or filename."
+-        sys.exit(2)
++        hostname = "localhost"
+ 
+     if (getconf): get_cluster_conf()
+     if (sendconf): send_cluster_conf()
+-- 
+1.9.3
+

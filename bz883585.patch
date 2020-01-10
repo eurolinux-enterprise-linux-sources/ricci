@@ -1,0 +1,39 @@
+From f06fa33203392559a70a59e22c17ea24dfc68e26 Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Thu, 8 Aug 2013 10:02:24 -0500
+Subject: [PATCH 1/5] Don't install man pages exuctable
+
+Resolves: rhbz#883585
+---
+ ricci/ccs/Makefile | 2 +-
+ ricci/man/Makefile | 4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/ricci/ccs/Makefile b/ricci/ccs/Makefile
+index d721a0f..fed7e39 100644
+--- a/ricci/ccs/Makefile
++++ b/ricci/ccs/Makefile
+@@ -17,7 +17,7 @@ install:
+ 	install cluster.rng.in ${DESTDIR}/usr/share/ccs/cluster.rng
+ 	install empty_cluster.conf ${DESTDIR}/usr/share/ccs/empty_cluster.conf
+ 	install -d ${DESTDIR}/${MANDIR}/man8
+-	install ccs.8 ${DESTDIR}/${MANDIR}/man8
++	install -m644 ccs.8 ${DESTDIR}/${MANDIR}/man8
+ 
+ test:
+ 	cd unit_tests; ./unittest.pl
+diff --git a/ricci/man/Makefile b/ricci/man/Makefile
+index 88d7bc6..ffd06cb 100644
+--- a/ricci/man/Makefile
++++ b/ricci/man/Makefile
+@@ -14,5 +14,5 @@ include ../make/defines.mk
+ 
+ install:
+ 	install -d ${mandir}/man8
+-	install ccs_sync.8 ${mandir}/man8
+-	install ricci.8 ${mandir}/man8
++	install -m644 ccs_sync.8 ${mandir}/man8
++	install -m644 ricci.8 ${mandir}/man8
+-- 
+1.8.3.1
+

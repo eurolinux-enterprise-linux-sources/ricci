@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<ricci version="1.0" function="process_batch" async="false">
+<batch>
+
+<module name="log">
+<request sequence="1254" API_version="1.0">
+<function_call name="get">
+  <var mutable="false" name="age" type="int" value="86400"/>
+  <var mutable="false" name="intersection" type="boolean" value="false"/>
+  <var mutable="false" name="tags" type="list_str">
+    <listentry value="cluster"/>
+  </var>
+</function_call>
+</request>
+</module>
+
+</batch>
+</ricci>

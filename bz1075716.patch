@@ -1,0 +1,228 @@
+From f4894929b5c9bbf345b2692d592ff9c212a58edc Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Mon, 16 Jun 2014 16:41:53 -0500
+Subject: [PATCH] Added command line option to disable SSLv2 ricci connections
+
+- Added '-s' command line option to disable SSLv2 ricci connections
+- Added RICCIOPTS variable to set '-s' option in /etc/sysconfig/cluster
+  or /etc/sysconfig/ricci
+- Patch from Cedric Buissart (cbuissar@redhat.com)
+---
+ ricci/init.d/ricci             |  8 +++++++-
+ ricci/man/ricci.8              |  3 +++
+ ricci/ricci/ClientInstance.cpp |  5 +++--
+ ricci/ricci/ClientInstance.h   |  2 +-
+ ricci/ricci/SSLInstance.cpp    |  7 +++++--
+ ricci/ricci/SSLInstance.h      |  2 +-
+ ricci/ricci/Server.cpp         |  5 +++--
+ ricci/ricci/Server.h           |  3 ++-
+ ricci/ricci/main.cpp           | 10 ++++++++--
+ 9 files changed, 33 insertions(+), 12 deletions(-)
+
+diff --git a/ricci/init.d/ricci b/ricci/init.d/ricci
+index 5662b16..07e17bf 100755
+--- a/ricci/init.d/ricci
++++ b/ricci/init.d/ricci
+@@ -16,6 +16,12 @@
+ # Grab the network config file
+ . /etc/sysconfig/network
+ 
++RICCIOPTS=""
++
++# Get potential non-default ricci option (e.g. RICCIOPTS )
++[ -f /etc/sysconfig/cluster ] && . /etc/sysconfig/cluster
++[ -f /etc/sysconfig/ricci ] && . /etc/sysconfig/ricci
++
+ PATH=/sbin:/bin:/usr/sbin:/usr/bin
+ export PATH
+ 
+@@ -182,7 +188,7 @@ case $1 in
+ 
+ 		check_ricci_lockfiles
+ 		echo -n $"Starting $ID: "
+-		daemon "$RICCID" -u "$RUNASUSER"
++		daemon "$RICCID" -u "$RUNASUSER" $RICCIOPTS
+ 		echo
+ 		ret=$?
+ 
+diff --git a/ricci/man/ricci.8 b/ricci/man/ricci.8
+index 2a69fc4..60cf209 100644
+--- a/ricci/man/ricci.8
++++ b/ricci/man/ricci.8
+@@ -21,6 +21,9 @@ Enable debugging
+ \fB\-f\fR
+ Run in the foreground
+ .TP
++\fB\-s\fR
++Prevent insecure SSLv2 connections.
++.TP
+ \fB\-u <user/UID>\fR
+ Run with the specified user/UID instead of root
+ .TP
+diff --git a/ricci/ricci/ClientInstance.cpp b/ricci/ricci/ClientInstance.cpp
+index 8e31649..7e728c5 100644
+--- a/ricci/ricci/ClientInstance.cpp
++++ b/ricci/ricci/ClientInstance.cpp
+@@ -46,8 +46,9 @@ static Mutex counter_mutex;
+ 
+ 
+ ClientInstance::ClientInstance(	ClientSocket sock,
+-								DBusController& dbus_controller) :
+-	_ssl(sock),
++				bool secure,
++				DBusController& dbus_controller) :
++	_ssl(sock, secure),
+ 	_dbus_controller(dbus_controller),
+ 	_done(false)
+ {
+diff --git a/ricci/ricci/ClientInstance.h b/ricci/ricci/ClientInstance.h
+index 77e5077..3ebe965 100644
+--- a/ricci/ricci/ClientInstance.h
++++ b/ricci/ricci/ClientInstance.h
+@@ -34,7 +34,7 @@
+ class ClientInstance : public Thread
+ {
+ 	public:
+-		ClientInstance(ClientSocket sock, DBusController& dbus_controller);
++		ClientInstance(ClientSocket sock, bool secure, DBusController& dbus_controller);
+ 		virtual ~ClientInstance();
+ 		virtual bool done();
+ 
+diff --git a/ricci/ricci/SSLInstance.cpp b/ricci/ricci/SSLInstance.cpp
+index 13cb2ea..6fe4b85 100644
+--- a/ricci/ricci/SSLInstance.cpp
++++ b/ricci/ricci/SSLInstance.cpp
+@@ -153,7 +153,7 @@ ssl_id_callback(void)
+ // ##### class SSLInstance #####
+ 
+ 
+-SSLInstance::SSLInstance(ClientSocket sock) :
++SSLInstance::SSLInstance(ClientSocket sock, bool secure) :
+ 	_sock(sock),
+ 	_accepted(false)
+ {
+@@ -175,8 +175,11 @@ SSLInstance::SSLInstance(ClientSocket sock) :
+ 			CRYPTO_set_id_callback(ssl_id_callback);
+ 
+ 			// create context
+-			if (!ctx)
++			if (!ctx) {
+ 				ctx = SSL_CTX_new(SSLv23_server_method());
++				if (secure)
++					SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_COMPRESSION);
++			}
+ 			if (!ctx)
+ 				throw String("SSL context creation failed");
+ 
+diff --git a/ricci/ricci/SSLInstance.h b/ricci/ricci/SSLInstance.h
+index 742888c..42e2364 100644
+--- a/ricci/ricci/SSLInstance.h
++++ b/ricci/ricci/SSLInstance.h
+@@ -33,7 +33,7 @@
+ class SSLInstance
+ {
+ 	public:
+-		SSLInstance(ClientSocket sock);
++		SSLInstance(ClientSocket sock, bool secure);
+ 		virtual ~SSLInstance();
+ 
+ 		bool accept(unsigned int timeout);
+diff --git a/ricci/ricci/Server.cpp b/ricci/ricci/Server.cpp
+index cec1927..746eec2 100644
+--- a/ricci/ricci/Server.cpp
++++ b/ricci/ricci/Server.cpp
+@@ -45,10 +45,11 @@ static time_t last_purge = 0;
+ static bool shutdown_pending = false;
+ static void shutdown(int);
+ 
+-Server::Server(const ServerSocket& serv_sock) :
++Server::Server(const ServerSocket& serv_sock, bool isSecure) :
+ 	_server(serv_sock)
+ {
+ 	_server.nonblocking(true);
++	secure = isSecure;
+ }
+ 
+ Server::~Server()
+@@ -116,7 +117,7 @@ Server::run()
+ 		if (poll_data.revents & POLLIN) {
+ 			try {
+ 				ClientSocket sock = _server.accept();
+-				counting_auto_ptr<ClientInstance> client(new ClientInstance(sock, _dbus_controller));
++				counting_auto_ptr<ClientInstance> client(new ClientInstance(sock, secure, _dbus_controller));
+ 
+ 				client->start();
+ 				clients.push_back(client);
+diff --git a/ricci/ricci/Server.h b/ricci/ricci/Server.h
+index 560dbf5..000b658 100644
+--- a/ricci/ricci/Server.h
++++ b/ricci/ricci/Server.h
+@@ -29,7 +29,7 @@
+ class Server
+ {
+ 	public:
+-		Server(const ServerSocket& serv_sock);
++		Server(const ServerSocket& serv_sock, bool isSecure);
+ 		virtual ~Server();
+ 
+ 		void run();
+@@ -37,6 +37,7 @@ class Server
+ 	private:
+ 		ServerSocket _server;
+ 		DBusController _dbus_controller;
++		bool secure;
+ };
+ 
+ #endif
+diff --git a/ricci/ricci/main.cpp b/ricci/ricci/main.cpp
+index ebd7763..ccc6786 100644
+--- a/ricci/ricci/main.cpp
++++ b/ricci/ricci/main.cpp
+@@ -48,6 +48,7 @@ bool foreground = false;
+ bool debug = false;
+ bool advertise_cluster = false;
+ bool self_fence = false;
++bool secure = false;
+ 
+ void print_help(void) {
+ 	printf("Usage: ricci [options]\n\
+@@ -57,6 +58,7 @@ void print_help(void) {
+    -F         Enable support for commands that allow clients to force\n\
+               a reboot (same effect as /sbin/reboot -fn) as an alternative\n\
+               to proper fencing.\n\
++   -s         Prevent insecure SSLv2 connections.\n\
+    -h         Print this help dialog.\n\
+    -p <port>  Listen for connections on the specified port.\n\
+    -u <user>   Drop root and run with the specified uid.\n");
+@@ -131,7 +133,7 @@ int main(int argc, char **argv) {
+ 	int32_t ricci_port = RICCI_SERVER_PORT;
+ 	int ret;
+ 
+-	while ((ret = getopt(argc, argv, "cdfFhu:p:")) != EOF) {
++	while ((ret = getopt(argc, argv, "cdfFshu:p:")) != EOF) {
+ 		switch (ret) {
+ 			case 'c':
+ 				advertise_cluster = true;
+@@ -145,6 +147,10 @@ int main(int argc, char **argv) {
+ 				foreground = true;
+ 				break;
+ 
++			case 's':
++				secure = true;
++				break;
++
+ 			case 'F':
+ 				self_fence = true;
+ 				break;
+@@ -222,7 +228,7 @@ int main(int argc, char **argv) {
+ 			}
+ 		}
+ 
+-		Server server(serv_sock);
++		Server server(serv_sock, secure);
+ 		server.run();
+ 	} catch ( String e ) {
+ 		cerr	<< __FILE__ << ":" << __LINE__ << ": "
+-- 
+1.9.3
+

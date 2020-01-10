@@ -1,0 +1,21 @@
+commit 048570c94dd0e8700c760a75a3a68901678d79a2
+Author:     Chris Feist <cfeist@redhat.com>
+AuthorDate: Tue Mar 29 13:24:47 2011 -0500
+Commit:     Chris Feist <cfeist@redhat.com>
+CommitDate: Tue Mar 29 13:26:18 2011 -0500
+
+    Fixed traceback with --checkconf
+
+diff --git a/ricci/ccs/ccs b/ricci/ccs/ccs
+index 2af36a6..418658b 100755
+--- a/ricci/ccs/ccs
++++ b/ricci/ccs/ccs
+@@ -1792,7 +1792,7 @@ def check_cluster_conf():
+         xml2 = get_cluster_conf_xml()
+         if xml2 != xml:
+             print "Node: %s does not match" % hostname
+-            bad_nodes << hostname
++            bad_nodes.append(hostname)
+ 
+     hostname = orig_hostname
+     if len(bad_nodes) > 0:

@@ -1,0 +1,70 @@
+From a96e1ff61ea5095864ca1b07a5a2af111d7c68a2 Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Fri, 3 Feb 2012 15:56:54 -0600
+Subject: [PATCH] ccs_sync now returns 1 when there is an error syncing the
+ file
+
+Resolves: rhbz#738008
+---
+ ricci/ccs_sync/ricci_conf.c |   10 +++++++---
+ 1 files changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/ricci/ccs_sync/ricci_conf.c b/ricci/ccs_sync/ricci_conf.c
+index 6ffa85c..ad00195 100644
+--- a/ricci/ccs_sync/ricci_conf.c
++++ b/ricci/ccs_sync/ricci_conf.c
+@@ -59,6 +59,7 @@ static const char rgetopt_args[] = "f:c:p:hivVw";
+ int main(int argc, const char const * const *argv) {
+ 	int opt;
+ 	int ret;
++	int sync_fail;
+ 	char *conf_path = NULL;
+ 	char *cert_db_dir = NULL;
+ 	xmlDocPtr doc;
+@@ -224,7 +225,7 @@ int main(int argc, const char const * const *argv) {
+ 		exit(1);
+ 	}
+ 
+-	sync_cluster_conf(doc, dest_nodes);
++	sync_fail = sync_cluster_conf(doc, dest_nodes);
+ 
+ 	hash_destroy(&node_hash);
+ 	if (dest_nodes != &node_hash)
+@@ -236,7 +237,7 @@ int main(int argc, const char const * const *argv) {
+ 	free(pd);
+ 
+ 	shutdown_libnss_ssl();
+-	exit(0);
++	exit(sync_fail);
+ }
+ 
+ static int string_compare(void *l, void *r) {
+@@ -361,6 +362,7 @@ oom0:
+ static int sync_cluster_conf(xmlDocPtr conf_xml, hash_t *nodes) {
+ 	hash_t conn_hash;
+ 	int ret;
++	int error_occurred = 0;
+ 
+ 	ret = hash_init(&conn_hash, 5, ricci_conn_cmp, hash_int32, ricci_conn_dtor);
+ 	if (ret == -1) {
+@@ -402,6 +404,8 @@ static int sync_cluster_conf(xmlDocPtr conf_xml, hash_t *nodes) {
+ 			}
+ 
+ 			ret = ricci_conn_handler(c, &pd[i], conf_xml);
++			if (ret < 0)
++			  error_occurred = 1;
+ 			if (ret < 0 || c->state == RICCI_STATE_DONE) {
+ 				hash_remove(&conn_hash, pd[i].fd);
+ 				pd_off = ricci_clear_pollfd(pd, i, pd_off);
+@@ -410,7 +414,7 @@ static int sync_cluster_conf(xmlDocPtr conf_xml, hash_t *nodes) {
+ 	}
+ 
+ 	hash_destroy(&conn_hash);
+-	return (0);
++	return (error_occurred);
+ }
+ 
+ static void print_help(char const * const *argv) {
+-- 
+1.7.7.6
+

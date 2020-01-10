@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<ricci version="1.0" function="process_batch" async="false">
+	<batch>
+		<module name="storage">
+			<request sequence="1254" API_version="1.0">
+				<function_call name="get_fs_group_members" >
+					<var mutable="false" name="fsname" value="gfsname" type="string" />
+				</function_call>
+			</request>
+		</module>
+	</batch>
+</ricci>
+

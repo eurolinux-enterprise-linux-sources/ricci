@@ -1,0 +1,3 @@
+libClusterMonitorSnmp.so
+*.orig
+*.rej

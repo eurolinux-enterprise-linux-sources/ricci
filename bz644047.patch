@@ -1,0 +1,22 @@
+--- ricci-0.16.2/ccs_sync/ricci_net.c.bz644047	2010-11-30 15:26:45.851838976 -0600
++++ ricci-0.16.2/ccs_sync/ricci_net.c	2010-11-30 15:26:59.114843725 -0600
+@@ -205,7 +205,7 @@ static int ricci_conn_handler_want_send_
+ 		char *passwd;
+ 
+ 		snprintf(prompt, sizeof(prompt),
+-			"Enter the root password for %s: ", c->hostname);
++			"Enter the ricci password for %s: ", c->hostname);
+ 		printf("You have not authenticated to the ricci daemon on %s\n",
+ 			c->hostname);
+ 
+--- ricci-0.16.2/ricci/Auth.cpp.bz644047	2010-11-30 15:13:56.520902117 -0600
++++ ricci-0.16.2/ricci/Auth.cpp	2010-11-30 15:14:08.153839610 -0600
+@@ -70,7 +70,7 @@ Auth::authenticate(const String& passwd)
+ 		if (ret != SASL_OK)
+ 			throw String("authentication engine error");
+ 
+-		ret = sasl_checkpass(conn, "root", 4, passwd.c_str(), passwd.size());
++		ret = sasl_checkpass(conn, "ricci", 5, passwd.c_str(), passwd.size());
+ 		if (ret == SASL_OK)
+ 			success = true;
+ 		else {

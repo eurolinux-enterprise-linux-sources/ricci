@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Storage Module - Mappers</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.2  (Linux)">
+	<META NAME="CREATED" CONTENT="20060410;13011800">
+	<META NAME="CHANGED" CONTENT="20060412;18153900">
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<P>Mapper is anything that imports block devices on one side, and
+exports block devices on the other side, performing some mapping or
+data manipulation.  <BR>Mappers abstract Volume Groups, Partition
+Tables, RAIDs (Software and ATA), Multipath, dm-crypt, ... . <BR>There
+is also a special Mapper that doesn't import anything, and exports
+local and remote physical Hard Drives.
+</P>
+<P>Imported block devices are called “sources”, exported ones are
+called “targets”; programs write data to targets, mapper writes
+to sources.
+</P>
+<P><BR><BR>
+</P>
+<P>Available mapper types (“mapper_type” see bellow):</P>
+<UL>
+	<LI><P>“<A HREF="storage-mapper-hard_drives.xml">hard_drives</A>”
+	- Local and remote hard drives (no sources, just targets)</P>
+	<LI><P>“<A HREF="storage-mapper-volume_group.xml">volume_group</A>”
+	- Volume Group</P>
+	<LI><P>“<A HREF="storage-mapper-partition_table.xml">partition_table</A>”
+	- Partition Table</P>
+	<LI><P>“multipath” - dm-multipath implementation of multipath</P>
+	<LI><P>“<A HREF="storage-mapper-mdraid.xml">mdraid</A>” -
+	Software RAID</P>
+	<LI><P>“ataraid” - ATA-RAID</P>
+	<LI><P>“crypto” - encrypting mappers (dm-crypt and cryptoloop)</P>
+</UL>
+<P><BR><BR>
+</P>
+<P>Mappers are manipulated in different ways:</P>
+<UL>
+	<LI><P>Existing mappers are retrieved using “get_mappers”
+	<A HREF="storage_api.html">function</A>.
+	</P>
+	<LI><P>Mappers are created by submitting <A HREF="storage-mapper_template.html">&lt;mapper_template/&gt;</A>
+	to Storage Module using “create_mapper” <A HREF="storage_api.html">function</A>.
+	Mapper templates are retrieved using “get_mapper_templates”
+	<A HREF="storage_api.html">function</A>.
+	</P>
+	<LI><P>Properties are changed by modifying &lt;properties/&gt; tag,
+	see bellow, and submitting &lt;mapper/&gt; to Storage Module using
+	“modify_mapper” <A HREF="storage_api.html">function</A>.
+	</P>
+	<LI><P>New sources are added by submitting &lt;block_device/&gt;s
+	from &lt;new_sources/&gt;, see below, to Storage Module using
+	“add_mapper_sources” <A HREF="storage_api.html">function</A>.
+	<BR>It is module's responsibility to insert, into &lt;new_sources/&gt;,
+	only those block devices which are appropriate to become this
+	mapper's sources. <BR>For some mapper_types, it is also possible to
+	add new source manipulating <A HREF="storage-content.html">&lt;content/&gt;</A>
+	of <A HREF="storage-bds.html">&lt;block_device/&gt;</A> of other
+	mappers.
+	</P>
+	<LI><P>New targets are created by submitting
+	<A HREF="storage-bd_template.html">&lt;block_device_template/&gt;</A>
+	from &lt;new_targets/&gt;, see below, to Storage Module using
+	“create_bd” <A HREF="storage_api.html">function</A>.
+	</P>
+	<LI><P>Mappers are removed by submitting &lt;mapper/&gt; to Storage
+	Module using “remove_mapper” <A HREF="storage_api.html">function</A>.
+	Operation will succeed only if mapper's “removable” property is
+	“true”.
+	</P>
+</UL>
+<P><BR><BR>
+</P>
+<P><B>Mapper XML description:</B></P>
+<PRE><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;mapper mapper_id=&quot;unique ID&quot; mapper_type=&quot;mapper type&quot; state_ind=&quot;hashed properties&quot;&gt;</FONT></FONT>
+  <FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;properties/&gt;</FONT></FONT>
+  <FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;sources/&gt;</FONT></FONT>
+  <FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;targets/&gt;</FONT></FONT>
+  <FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;new_sources/&gt;</FONT></FONT>
+  <FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;new_targets/&gt;</FONT></FONT>
+<FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;/mapper&gt;</FONT></FONT></PRE>
+<UL>
+	<LI><P>Every mapper has “mapper_id”, that uniquely identifies it
+	in a managed system. <BR>It also has a “mapper_type” and
+	“state_ind”. State indicator “state_ind” is a hashed string
+	of mapper properties; if something changes within mapper, its state
+	indicator will change as well. It is used to detect mid-air
+	collisions.
+	</P>
+	<LI><P>&lt;properties/&gt; tag, which has <A HREF="variables.html">variables</A>
+	for children. <BR>Some properties can be mutable; modifying them and
+	sending &lt;mapper/&gt; to Storage Module will commit changes to the
+	disk. <BR>Every “mapper_type” has different set of properties
+	defined; some of them will be present in all mappers, eg
+	“removable”. See descriptions of respective LINKME mappers.
+	<BR>Example of properties for Volume Groups:
+	</P>
+	<UL>
+		<PRE STYLE="margin-bottom: 0.2in"><FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;properties&gt;</FONT></FONT>
+     <FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;attrs&quot; type=&quot;string&quot; value=&quot;wz—n-&quot;/&gt;</FONT></FONT>
+     <FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;true&quot; name=&quot;clustered&quot; type=&quot;boolean&quot; value=&quot;false&quot;/&gt;</FONT></FONT>
+     <FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;extent_size&quot; type=&quot;int&quot; value=&quot;33554432&quot;/&gt;</FONT></FONT>
+     <FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;extents_free&quot; type=&quot;int&quot; value=&quot;1374&quot;/&gt;</FONT></FONT>
+     <FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;extents_total&quot; type=&quot;int&quot; value=&quot;2366&quot;/&gt;</FONT></FONT>
+     <FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;extents_used&quot; type=&quot;int&quot; value=&quot;992&quot;/&gt;</FONT></FONT>
+     <FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;max_lvs&quot; type=&quot;int&quot; value=&quot;256&quot;/&gt;</FONT></FONT>
+     <FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;max_pvs&quot; type=&quot;int&quot; value=&quot;256&quot;/&gt;</FONT></FONT>
+     <FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;removable&quot; type=&quot;boolean&quot; value=&quot;true&quot;/&gt;</FONT></FONT>
+     <FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;uuid&quot; type=&quot;string&quot; value=&quot;di8aFc-RXYt-iyoK-ah0B-e10i-EiGb-5Lum1N&quot;/&gt;</FONT></FONT>
+     <FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;var mutable=&quot;false&quot; name=&quot;vgname&quot; type=&quot;string&quot; value=&quot;VG_main&quot;/&gt;</FONT></FONT>
+<FONT FACE="Nimbus Roman No9 L"><FONT SIZE=3>&lt;/properties&gt;</FONT></FONT></PRE>
+	</UL>
+	<LI><P>&lt;sources/&gt; tag, which has <A HREF="storage-bds.html">&lt;block_device/&gt;</A>s
+	for children. Content of those block devices will be LINKME
+	“mapper_source”s of this mapper. Source block devices are
+	exported by some other mappers.
+	</P>
+	<LI><P>&lt;new_sources/&gt; tag, which has <A HREF="storage-bds.html">&lt;block_device/&gt;</A>s
+	for children. These block devices can become new sources of this
+	mapper.
+	</P>
+	<LI><P>&lt;targets/&gt; tag, which has <A HREF="storage-bds.html">&lt;block_device/&gt;</A>s
+	for children. Target block devices are block devices exported by
+	this mapper, and can have anything for a content.
+	</P>
+	<LI><P>&lt;new_targets/&gt; tag, which has <A HREF="storage-bd_template.html">&lt;block_device_template/&gt;</A>s
+	for children. These templates are used for creation of new targets
+	of this mapper.
+	</P>
+</UL>
+<P><BR><BR>
+</P>
+</BODY>
+</HTML>

@@ -1,0 +1,27 @@
+From b4412ff76f7b0a9446b7356dce622c3727b6d6f6 Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Thu, 15 Nov 2012 13:16:08 -0600
+Subject: [PATCH 2/2] Fixed redirect which wouldn't allow creation of keys in
+ a read-only folder
+
+Resolves: rhbz#867019
+---
+ ricci/ccs/ccs | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ricci/ccs/ccs b/ricci/ccs/ccs
+index bdc2393..96ca267 100755
+--- a/ricci/ccs/ccs
++++ b/ricci/ccs/ccs
+@@ -2250,7 +2250,7 @@ emailAddress           = root@localhost
+         if (debug):
+             redirect = ""
+         else:
+-            redirect = " > /dev/null 2&>1"
++            redirect = " > /dev/null 2>&1"
+ 
+         os.system ("/usr/bin/openssl genrsa -out %s 2048 %s" % (key,redirect))
+         os.system ("/usr/bin/openssl req -new -x509 -key %s -out %s -days 1825 -config ~/.ccs/cacert.config" % (key,cert))
+-- 
+1.7.11.7
+

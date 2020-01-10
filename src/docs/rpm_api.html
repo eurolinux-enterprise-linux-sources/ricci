@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Rpm Module</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.2  (Linux)">
+	<META NAME="CREATED" CONTENT="20060410;13011800">
+	<META NAME="CHANGED" CONTENT="20060411;17341500">
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<P>Rpm module manages rpm packages. Allows retrieval of currently
+installed rpms, querying repositories, and installation/upgrade of
+rpms using repositories. (rpm and up2date/yum frontend)
+</P>
+<P>Module name: “rpm”
+</P>
+<P>Module version: 1.0</P>
+<P>See <A HREF="modules_common.html">Modules - Common API</A> for
+general module description.
+</P>
+<P>Rpm module has a notion of rpm and set (set of rpms). Sets are
+here to simplify installation of multiple packages, eg cluster
+deployment.
+</P>
+<P>&lt;rpm name=”rpm name” summary=”summary”
+description=”description” version=”installed version”
+repo_version=”version in repository”/&gt;<BR>If “version” is
+empty, rpm is not installed. If “repo_version” is empty, package
+is not in repository. If “repo_version” &gt; “version”,
+package can be installed/upgraded.
+</P>
+<P ALIGN=LEFT>&lt;set name=”set name” summary=”summary”
+description=”description” installed=&quot;true&quot;
+in_repository=&quot;true&quot; installable=&quot;true&quot;/&gt;<BR>If
+installable is “true”, set of rpms can be installed, if not
+installed; and upgraded, if already installed.
+</P>
+<P>There are couple of predefined rpm sets: <BR>- “Cluster Base”
+- base infrastructure of Red Hat Cluster Suite (currently ccs, cman,
+dlm, fence, and respective kernel-... rpms) <BR>- “Cluster Base -
+Gulm” - base infrastructure of Red Hat Cluster Suite using GULM lock
+manager (currently ccs, gulm, and respective kernel-... rpms)
+<BR>- “Cluster Service Manager” - (currently rgmanager, magma,
+magma-plugins) <BR>- “Clustered Storage” - shared storage
+(currently GFS, lvm2-cluster and respective kernel-... rpms) <BR>-
+“Linux Virtual Server” - (currently ipvsadm, piranha)</P>
+<P>Functions:
+</P>
+<UL>
+	<LI><P>APIs</P>
+	<UL>
+		<P>Get supported API versions. See <A HREF="modules_common.html">Modules
+		- Common API</A> for description.</P>
+	</UL>
+</UL>
+<UL>
+	<LI><P>list</P>
+	<UL>
+		<P ALIGN=LEFT>Retrieve list of installed rpms and rpms in
+		repository. Arguments specify the list of what is to be retrieved.
+		<BR>If neither “rpms” nor “sets” are specified, returned
+		list will be empty. List can be further tuned with “installed”,
+		“installable” and “upgradeable”.</P>
+		<P>Input variables:<BR>- “rpms” (boolean) – optional,
+		retrieve list of rpms<BR>- “sets” (boolean) – optional,
+		retrieve list of sets<BR>- “installed” (boolean) – optional,
+		retrieve installed<BR>- “installable” (boolean) – optional,
+		retrieve installable (in repo)<BR>- “upgradeable” (boolean) –
+		optional, retrieve upgradeable (installed and in repo)</P>
+		<P ALIGN=LEFT>Output variables:<BR>- “rpms” (list_xml) – list
+		of matching rpms<BR>- “sets” (list_xml) - list of matching sets</P>
+		<P ALIGN=LEFT>On failure:<BR>- No special errors defined, only
+		generic ones might get returned.</P>
+	</UL>
+	<LI><P>query
+	</P>
+	<UL>
+		<P ALIGN=LEFT>Query rpms and sets, both locally installed and in
+		repository, by rpm/set name.
+		</P>
+		<P>Input variables: <BR>- “search” (list_xml) – list of rpms
+		and sets to query. Rpm format &lt;rpm name=”rpm name”/&gt;; set
+		format &lt;set name=”set name”/&gt;.
+		</P>
+		<P ALIGN=LEFT>Output variables: <BR>- “result” (list_xml) –
+		list of matching rpms and sets.
+		</P>
+		<P>On failure: <BR>- No special errors defined, only generic ones
+		might get returned.
+		</P>
+	</UL>
+	<LI><P>install
+	</P>
+	<UL>
+		<P ALIGN=LEFT>Install/upgrade rpms and sets from repository.</P>
+		<P>Input variables: <BR>- “rpms” (list_xml) – optional, list of rpms to
+		install/upgrade. Rpm format &lt;rpm name=”rpm name”/&gt;. <BR>-
+		“sets” (list_xml) – optional, list of sets to install/upgrade. Set
+		format &lt;set name=”set name”/&gt;. <BR>-
+		“upgrade” (boolean) – optional (defaults to true), upgrade already installed packages/sets.
+		</P>
+		<P>No output variables.
+		</P>
+		<P>On failure: <BR>- No special errors defined, only generic ones
+		might get returned.
+		</P>
+	</UL>
+	<LI><P>repository_configured
+	</P>
+	<UL>
+		<P ALIGN=LEFT>Is this managed system configured to use repository,
+		and capable of retrieving rpms?</P>
+		<P>No input variables.
+		</P>
+		<P>Output variables:<BR>- “ repository_configured” (boolean) –
+		whether repository is available to this managed system</P>
+		<P>On failure: <BR>- No special errors defined, only generic ones
+		might get returned.
+		</P>
+	</UL>
+</UL>
+<P><BR><BR>
+</P>
+</BODY>
+</HTML>

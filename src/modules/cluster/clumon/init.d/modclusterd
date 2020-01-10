@@ -1,0 +1,158 @@
+#!/bin/sh
+#
+# Copyright (C) 2005-2008 Red Hat, Inc.
+#
+# This program is Free Software. You may modify and/or redistribute it under
+# the terms of the GNU General Public License version 2, or (at your option)
+# any later version.
+#
+# description:  Starts and stops Ricci Cluster Module - cluster monitor
+# chkconfig: - 99 01
+#
+
+# Source function library
+. /etc/init.d/functions
+
+# Grab the network config file
+. /etc/sysconfig/network
+
+# Grab cluster start config if it exists
+[ -f /etc/sysconfig/cluster ] && . /etc/sysconfig/cluster
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+export PATH
+
+ID="Cluster Module - cluster monitor"
+MODCLUSTERD="modclusterd"
+CFG_FILE="/etc/cluster/cluster.conf"
+PIDFILE="/var/run/modclusterd.pid"
+LOCKFILE="/var/lock/subsys/modclusterd"
+
+#
+# Only root wants to run this...
+#
+[ `id -u` = 0 ] || exit 4
+
+#
+# If we're not configured, then don't start anything.
+#
+[ "${NETWORKING}" = "yes" ] || exit 1
+
+modclusterd_status() {
+	if [ -f "$PIDFILE" ]; then
+		status -p "$PIDFILE" "$MODCLUSTERD"
+		ret=$?
+	else
+		status "$MODCLUSTERD"
+		ret=$?
+	fi
+	return $ret
+}
+
+check_modclusterd_lockfiles() {
+	modclusterd_status >& /dev/null
+	ret=$?
+	if [ "$ret" -eq 1 ] || [ "$ret" -eq 2 ]; then
+		# stale pid and/or lockfile
+		rm -f -- "$PIDFILE" "$LOCKFILE"
+	fi
+	return 0
+}
+
+modclusterd_stop() {
+	modclusterd_status >& /dev/null
+	ret=$?
+
+	if [ "$ret" -ne 0 ]; then
+		# already stopped - no error
+		check_modclusterd_lockfiles
+		return 0
+	fi
+
+	killproc "$MODCLUSTERD" SIGTERM
+
+	modclusterd_status >& /dev/null
+	ret=$?
+
+	max_wait=10
+	cur_wait=0
+	while [ "$ret" -eq 0 ] && [ $cur_wait -lt $max_wait ]; do
+		sleep 1
+		cur_wait=`expr $cur_wait + 1`
+		modclusterd_status >& /dev/null
+		ret=$?
+	done
+
+	modclusterd_status >& /dev/null
+	ret=$?
+
+	if [ "$ret" -ne 0 ]; then
+		rm -f -- "$PIDFILE" "$LOCKFILE"
+		return 0
+	fi
+
+	return 1
+}
+
+case $1 in
+	start)
+		echo -n $"Starting $ID: "
+		check_modclusterd_lockfiles
+		daemon "$MODCLUSTERD"
+		ret=$?
+		if [ "$ret" -eq 0 ]; then
+			touch -- "$LOCKFILE"
+			/usr/bin/logger -t "$MODCLUSTERD" -- "startup succeeded"
+		else
+			/usr/bin/logger -t "$MODCLUSTERD" -- "startup failed"
+			ret=1
+		fi
+		echo
+	;;
+
+	restart)
+		$0 stop
+		$0 start
+		ret=$?
+	;;
+
+	status)
+		modclusterd_status
+		ret=$?
+	;;
+
+	stop)
+		echo -n "Shutting down $ID: "
+		modclusterd_stop
+		ret=$?
+		if [ "$ret" -eq 0 ]; then
+			/usr/bin/logger -t "$MODCLUSTERD" -- "shutdown succeeded"
+		else
+			/usr/bin/logger -t "$MODCLUSTERD" -- "shutdown failed"
+			ret=1
+		fi
+		echo
+	;;
+
+	condrestart)
+		if [ -f "$PIDFILE" ]; then
+			$0 restart
+			ret=$?
+		fi
+	;;
+
+	try-restart)
+		ret=3
+	;;
+
+	reload)
+		ret=3
+	;;
+
+	*)
+		echo $"Usage: $0 {start|stop|reload|restart|status}"
+		ret=3
+	;;
+esac
+
+exit $ret

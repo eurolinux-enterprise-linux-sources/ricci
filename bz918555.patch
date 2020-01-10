@@ -1,0 +1,26 @@
+From b57f390ce38cb22d81c78fdc0eaf9116513181e7 Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Thu, 8 Aug 2013 13:17:04 -0500
+Subject: [PATCH 3/5] Show fence_daemon options properly with --lsmisc
+
+Resolves: rhbz#918555
+---
+ ricci/ccs/ccs | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ricci/ccs/ccs b/ricci/ccs/ccs
+index 96ca267..bd77aa0 100755
+--- a/ricci/ccs/ccs
++++ b/ricci/ccs/ccs
+@@ -1830,7 +1830,7 @@ def list_misc():
+     list_tag(dom, "cman", "CMAN")
+     list_tag(dom, "multicast", "Multicast")
+     list_tag(dom, "altmulticast", "Alt Multicast")
+-    list_tag(dom, "fencedaemon", "Fence Daemon")
++    list_tag(dom, "fence_daemon", "Fence Daemon")
+     list_tag(dom, "logging", "Logging")
+     list_tag(dom, "logging_daemon", "  Logging Daemons")
+ 
+-- 
+1.8.3.1
+

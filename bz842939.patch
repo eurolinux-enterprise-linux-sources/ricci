@@ -1,0 +1,51 @@
+From ce9d897f7c294b3eae54fc6eee837babeb0e4b87 Mon Sep 17 00:00:00 2001
+From: Ryan McCabe <rmccabe@redhat.com>
+Date: Tue, 24 Jul 2012 22:16:45 -0400
+Subject: [PATCH] ricci: Fix for split lines in yum output
+
+Fix ricci-modrpm to be able to deal with lines being wrapped in
+'yum -y list all' output.
+
+Signed-off-by: Ryan McCabe <rmccabe@redhat.com>
+---
+ ricci/modules/rpm/PackageHandler.cpp | 17 ++++++++++++++++-
+ 1 file changed, 16 insertions(+), 1 deletion(-)
+
+diff --git a/ricci/modules/rpm/PackageHandler.cpp b/ricci/modules/rpm/PackageHandler.cpp
+index f0b47f8..47edbe3 100644
+--- a/ricci/modules/rpm/PackageHandler.cpp
++++ b/ricci/modules/rpm/PackageHandler.cpp
+@@ -78,7 +78,7 @@ PackageInstaller::available_rpms()
+ 		line = utils::strip(line);
+ 		vector<String> words = utils::split(line);
+ 		vector<String>::size_type l = words.size();
+-		if (l < 3)
++		if (l < 1)
+ 			continue;
+ 
+ 		String name = words[0];
+@@ -86,6 +86,21 @@ PackageInstaller::available_rpms()
+ 		if (idx == String::npos)
+ 			continue;
+ 		name = name.substr(0, idx);
++
++		/* If we didn't read 3 fields, yum has split the lines */
++		size_t i = l;
++		while (i < 3 && iter != lines.end()) {
++			iter++;
++			String remainder(*iter);
++			remainder = utils::strip(remainder);
++			vector<String> rwords = utils::split(remainder);
++			vector<String>::size_type rlen = rwords.size();
++			for (size_t j = 0 ; j < rlen ; j++)
++				words.push_back(rwords[j]);
++			i += rlen;
++		}
++		if (i < 3)
++			continue;
+ 		String version = words[1];
+ 		rpms[name] = version;
+ 	}
+-- 
+1.7.11.7
+

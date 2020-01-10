@@ -1,0 +1,29 @@
+From 4aa88e5a0d516c5ad26fd83cab54cca78b0094ca Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Fri, 3 Feb 2012 17:55:49 -0600
+Subject: [PATCH] If ricci user password isn't set, log a warning message
+
+Resolves: rhbz#773383
+---
+ ricci/init.d/ricci |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+diff --git a/ricci/init.d/ricci b/ricci/init.d/ricci
+index ce2841f..b7815b0 100755
+--- a/ricci/init.d/ricci
++++ b/ricci/init.d/ricci
+@@ -175,6 +175,11 @@ case $1 in
+ 			generate_nss_certs
+ 		fi
+ 
++		passwd -S ricci | grep '(Password locked.)$' >& /dev/null
++		if [ "$?" -ne 1 ] ; then
++		  	/usr/bin/logger -t "$RICCID" -- "ricci user password is not set, no clients cannot connect"
++		fi
++
+ 		check_ricci_lockfiles
+ 		echo -n $"Starting $ID: "
+ 		daemon "$RICCID" -u "$RUNASUSER"
+-- 
+1.7.7.6
+

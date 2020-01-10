@@ -1,0 +1,58 @@
+commit b393b3012be41c93dbe9ab180e539cbe143b86c5
+Author:     Chris Feist <cfeist@redhat.com>
+AuthorDate: Mon Jan 3 15:25:23 2011 -0600
+Commit:     Chris Feist <cfeist@redhat.com>
+CommitDate: Mon Jan 3 15:25:23 2011 -0600
+
+    Added man page for ricci
+    
+    Resolves: rhbz#602399
+
+diff --git a/ricci/man/Makefile b/ricci/man/Makefile
+index 6a3f883..88d7bc6 100644
+--- a/ricci/man/Makefile
++++ b/ricci/man/Makefile
+@@ -15,3 +15,4 @@ include ../make/defines.mk
+ install:
+ 	install -d ${mandir}/man8
+ 	install ccs_sync.8 ${mandir}/man8
++	install ricci.8 ${mandir}/man8
+diff --git a/ricci/man/ricci.8 b/ricci/man/ricci.8
+new file mode 100644
+index 0000000..2a69fc4
+--- /dev/null
++++ b/ricci/man/ricci.8
+@@ -0,0 +1,33 @@
++.TH RICCI "8"
++.SH NAME
++ricci \- cluster management and configuration daemon
++.SH SYNOPSIS
++.B ricci
++[\fIOPTIONS\fR]
++.SH DESCRIPTION
++.PP
++ricci is a cluster management and configuration daemon. The ricci daemon, dispatches incoming messages to underlying management modules.
++
++When run with no options, ricci runs as a daemon and listens to the default port (11111).
++
++Ricci must be run by the root user.
++.TP
++\fB\-c\fR
++Announce cluster name and OS to unauthenticated clients
++.TP
++\fB\-d\fR
++Enable debugging
++.TP
++\fB\-f\fR
++Run in the foreground
++.TP
++\fB\-u <user/UID>\fR
++Run with the specified user/UID instead of root
++.TP
++\fB\-h\fR
++Display a usage message
++.SH EXAMPLES
++.PP
++.TP
++ricci -u ricci
++Start the ricci daemon running as the ricci user

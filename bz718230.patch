@@ -1,0 +1,184 @@
+From 06b9cdb30e3ee553b0b16f31786b918776f89f54 Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Wed, 27 Jul 2011 13:59:32 -0500
+Subject: [PATCH] Added support for --addvm & --rmvm
+
+Resolves: rhbz#718230
+---
+ ricci/ccs/ccs                         |   69 ++++++++++++++++++++++++++++++++-
+ ricci/ccs/ccs.8                       |    4 ++
+ ricci/ccs/unit_tests/service.conf.end |    5 ++-
+ ricci/ccs/unit_tests/unittest.pl      |    8 ++++
+ 4 files changed, 84 insertions(+), 2 deletions(-)
+
+diff --git a/ricci/ccs/ccs b/ricci/ccs/ccs
+index e672a95..709cb73 100755
+--- a/ricci/ccs/ccs
++++ b/ricci/ccs/ccs
+@@ -70,6 +70,7 @@ def main(argv):
+     listquorum = setquorumd = addheuristic = removeheuristic = False
+     settotem = setrm = setcman = setfencedaemon = False
+     setlogging = addlogging = removelogging = False
++    addvm = removevm = False
+     listmisc = False
+     setdlm = setmulticast = False
+     passwordset = False
+@@ -90,7 +91,7 @@ def main(argv):
+       "setlogging", "addlogging","rmlogging","setmulticast","sync","addfailoverdomainnode=", "file=", "nodeid=",
+       "votes=", "rmfailoverdomainnode=", "setdlm", "rmheuristic", "startall", "stopall", "activate",
+       "setconf", "lsquorum", "lsfailoverdomain", "lsmisc", "checkconf", "exp=", "exprm=", "addunfenceinst=",
+-      "rmunfenceinst=","ignore", "debug"])
++      "rmunfenceinst=","addvm=","rmvm=", "ignore", "debug"])
+     except getopt.GetoptError:
+         usage()
+         sys.exit(2)
+@@ -198,6 +199,13 @@ def main(argv):
+             removeresource = True
+             name = arg
+             options = args
++        elif opt in ("--addvm"):
++            addvm = True
++            name = arg
++            options = args
++        elif opt in ("--rmvm"):
++            removevm = True
++            name = arg
+         elif opt in ("--lsquorumd"): listquorum = True
+         elif opt in ("--setquorumd"): setquorumd = True; options = args
+         elif opt in ("--addheuristic"): addheuristic = True; options = args
+@@ -260,6 +268,8 @@ def main(argv):
+     if (removesubservice): remove_subservice(name, options)
+     if (addresource): add_resource(name, options)
+     if (removeresource): remove_resource(name, options)
++    if (addvm): add_vm(name,options)
++    if (removevm): remove_vm(name)
+     if (listquorum): list_quorum()
+     if (setquorumd): set_quorumd(options)
+     if (addheuristic): add_heuristic(options)
+@@ -386,6 +396,10 @@ Service Operations:
+                         Add service to cluster
+       --rmservice <servicename>
+                         Removes a service and all of its subservices
++      --addvm <virtual machine name> [vm options] ...
++                        Add a virtual machine to the cluster
++      --rmvm <virtual machine name>
++                        Removes named virtual machine from the cluster
+       --addsubservice <servicename> <subservice> [service options] ...
+                         Add individual subservices, if adding child services,
+                         use ':' to separate parent and child subservices
+@@ -1433,6 +1447,59 @@ def remove_resource(type, options):
+             
+     set_cluster_conf(dom.toxml())
+ 
++def add_vm(vmname, options):
++    dom = minidom.parseString(get_cluster_conf_xml())
++
++    # Verify rm section exists in cluster.conf
++    rm = dom.getElementsByTagName('rm')
++    if len(rm) == 0:
++        rm = dom.getElementsByTagName('cluster')[0].appendChild(dom.createElement("rm"))
++    elif len(rm) > 1:
++        print "Error: Too many rm elements in cluster.conf"
++        sys.exit(1)
++    else:
++        rm = rm[0]
++
++    # Verify name is unique, if no name then we don't search for duplicates
++    if rm != False:
++        for vm in rm.childNodes:
++            if vm.nodeType == minidom.Node.TEXT_NODE:
++                continue
++            if vm.getAttribute("name") == vmname:
++                print "Duplicate name: %s" % vmname
++                sys.exit(1)
++
++    newvm = dom.createElement("vm")
++    newvm = set_element_attributes(newvm, options)
++    newvm.setAttribute("name", vmname)
++
++    rm = dom.getElementsByTagName('rm')[0]
++    rm.appendChild(newvm)
++    set_cluster_conf(dom.toxml())
++
++def remove_vm(name):
++    vmRemoved = False
++
++    dom = minidom.parseString(get_cluster_conf_xml())
++
++    rm = dom.getElementsByTagName("rm")
++    if len(rm) > 0:
++        rm = rm[0]
++        vms = rm.getElementsByTagName("vm")
++        for vm in vms:
++            if vm.getAttribute("name") == name:
++                rm.removeChild(vm)
++                vmRemoved = True
++    else:
++        print "No <rm> section in cluster.conf"
++        sys.exit(1)
++
++    if not vmRemoved:
++        print "Unable to find virtual machine: %s" % name
++        sys.exit(1)
++
++    set_cluster_conf(dom.toxml())
++
+ def list_quorum():
+     xml = get_cluster_conf_xml()
+     dom = minidom.parseString(xml)
+diff --git a/ricci/ccs/ccs.8 b/ricci/ccs/ccs.8
+index 662ac3a..ab21a1c 100644
+--- a/ricci/ccs/ccs.8
++++ b/ricci/ccs/ccs.8
+@@ -125,6 +125,10 @@ Remove specified resource with resource options
+ Add service to cluster
+ .IP "--rmservice <servicename>
+ Removes a service and all of its subservices
++.IP "--addvm <virtual machine name> [vm options] ...
++Adds a virtual machine to the cluster
++.IP "--rmvm <virtual machine name>
++Removes named virtual machine from the cluster
+ .IP "--addsubservice <servicename> <subservice> [service options] ...
+ Add individual subservices, if adding child services,
+ use ':' to separate parent and child subservices
+diff --git a/ricci/ccs/unit_tests/service.conf.end b/ricci/ccs/unit_tests/service.conf.end
+index 2d3ee3d..a3fdd75 100644
+--- a/ricci/ccs/unit_tests/service.conf.end
++++ b/ricci/ccs/unit_tests/service.conf.end
+@@ -1,4 +1,4 @@
+-<cluster config_version="35" name="mycluster">
++<cluster config_version="40" name="mycluster">
+   <fence_daemon/>
+   <clusternodes>
+     <clusternode name="node1" nodeid="1"/>
+@@ -43,5 +43,8 @@
+       <nfsclient name="b" target="7">
+       </nfsclient>
+     </service>
++    <vm autostart="1" migrate="live" name="vmname2"/>
++    <vm autostart="0" migrate="live" name="vmname3"/>
++    <vm autostart="1" migrate="live" name="vmname1"/>
+   </rm>
+ </cluster>
+diff --git a/ricci/ccs/unit_tests/unittest.pl b/ricci/ccs/unit_tests/unittest.pl
+index 9330fda..fca12d2 100755
+--- a/ricci/ccs/unit_tests/unittest.pl
++++ b/ricci/ccs/unit_tests/unittest.pl
+@@ -184,6 +184,14 @@ sub service_test {
+   test ("$CCS -f $t --rmresource ip address=3",0);
+   test ("$CCS -f $t --rmresource ip address=5",0);
+ 
++  test ("$CCS -f $t --addvm vmname1 a=b",1);
++  test ("$CCS -f $t --addvm vmname1 autostart=0 migrate=live",0);
++  test ("$CCS -f $t --addvm vmname2 autostart=1 migrate=live",0);
++  test ("$CCS -f $t --addvm vmname3 autostart=0 migrate=live",0);
++  test ("$CCS -f $t --addvm vmname1 autostart=0 migrate=live",1);
++  test ("$CCS -f $t --rmvm vmname1",0);
++  test ("$CCS -f $t --addvm vmname1 autostart=1 migrate=live",0);
++
+ 
+   $retval = diff ($t,"$t.end");
+   #`rm $t`;
+-- 
+1.7.6
+

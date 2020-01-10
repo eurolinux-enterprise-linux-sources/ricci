@@ -1,0 +1,175 @@
+commit 754a694974e7f43189150a5808b0dcde9b4fe275
+Author:     Chris Feist <cfeist@redhat.com>
+AuthorDate: Tue Apr 5 19:13:00 2011 -0500
+Commit:     Chris Feist <cfeist@redhat.com>
+CommitDate: Tue Apr 5 19:13:00 2011 -0500
+
+    Updated logging for RHEL6
+
+diff --git a/ricci/ccs/ccs b/ricci/ccs/ccs
+index d35d32b..e672a95 100755
+--- a/ricci/ccs/ccs
++++ b/ricci/ccs/ccs
+@@ -69,7 +69,7 @@ def main(argv):
+     removeservice = removesubservice = removeresource = False
+     listquorum = setquorumd = addheuristic = removeheuristic = False
+     settotem = setrm = setcman = setfencedaemon = False
+-    setlogging = addlogger = removelogger = False
++    setlogging = addlogging = removelogging = False
+     listmisc = False
+     setdlm = setmulticast = False
+     passwordset = False
+@@ -87,7 +87,7 @@ def main(argv):
+       "addfenceinst=", "rmfenceinst=", "lsfencedev", "lsfenceinst", "sync", "addfailoverdomain=",
+       "rmfailoverdomain=", "addservice=", "rmservice=", "addsubservice=", "rmsubservice=", "addresource=",
+       "rmresource=", "setquorumd","addheuristic","settotem", "setrm", "setcman", "setfencedaemon",
+-      "setlogging", "addlogger","rmlogger","setmulticast","sync","addfailoverdomainnode=", "file=", "nodeid=",
++      "setlogging", "addlogging","rmlogging","setmulticast","sync","addfailoverdomainnode=", "file=", "nodeid=",
+       "votes=", "rmfailoverdomainnode=", "setdlm", "rmheuristic", "startall", "stopall", "activate",
+       "setconf", "lsquorum", "lsfailoverdomain", "lsmisc", "checkconf", "exp=", "exprm=", "addunfenceinst=",
+       "rmunfenceinst=","ignore", "debug"])
+@@ -209,8 +209,8 @@ def main(argv):
+         elif opt in ("--setdlm"): setdlm = True; options = args
+         elif opt in ("--setfencedaemon"): setfencedaemon = True; options = args
+         elif opt in ("--setlogging"): setlogging = True; options = args
+-        elif opt in ("--addlogger"): addlogger = True; options = args
+-        elif opt in ("--rmlogger"): removelogger = True; options = args
++        elif opt in ("--addlogging"): addlogging = True; options = args
++        elif opt in ("--rmlogging"): removelogging = True; options = args
+         elif opt in ("--setmulticast"): setmulticast = True; options = args
+         elif opt in ("--nodeid"): nodeid = arg
+         elif opt in ("--votes"): votes = arg
+@@ -271,8 +271,8 @@ def main(argv):
+     if (setdlm): set_dlm(options)
+     if (setfencedaemon): set_fencedaemon(options)
+     if (setlogging): set_logging(options)
+-    if (addlogger): add_logger(options)
+-    if (removelogger): remove_logger(options)
++    if (addlogging): add_logging_daemon(options)
++    if (removelogging): remove_logging_daemon(options)
+     if (setmulticast): set_multicast(options)
+     if (exp): expert_mode(tag, options)
+     if (exprm): expert_mode_remove(location)
+@@ -436,10 +436,10 @@ Misc Options
+                         Set fence daemon options
+       --setlogging [logging options]
+                         Set logging options
+-      --addlogger [logger options]
+-                        Add a logger
+-      --rmlogger [logger options]
+-                        Remove a logger
++      --addlogging [logging_daemon options]
++                        Add a logging daemon (see cluster.conf for options)
++      --rmlogging [logging_daemon options]
++                        Remove the logging daemon with specified options
+   """
+ 
+ def stop_node(node, inthread=False):
+@@ -1537,7 +1537,7 @@ def list_misc():
+     list_tag(dom, "multicast", "Multicast")
+     list_tag(dom, "fencedaemon", "Fence Daemon")
+     list_tag(dom, "logging", "Logging")
+-    list_tag(dom, "logger", "  logger")
++    list_tag(dom, "logging_daemon", "  Logging Daemons")
+ 
+ def set_totem(options):
+     dom = minidom.parseString(get_cluster_conf_xml())
+@@ -1648,7 +1648,7 @@ def set_logging(options):
+     logging = set_element_attributes(logging, options)
+     set_cluster_conf(dom.toxml())
+ 
+-def add_logger(options):
++def add_logging_daemon(options):
+     dom = minidom.parseString(get_cluster_conf_xml())
+ 
+     logging = dom.getElementsByTagName('logging')
+@@ -1660,13 +1660,13 @@ def add_logger(options):
+     else:
+         logging = logging[0]
+ 
+-    logger = dom.createElement("logger")
++    logger = dom.createElement("logging_daemon")
+     logger = set_element_attributes(logger, options)
+ 
+     logging.appendChild(logger)
+     set_cluster_conf(dom.toxml())
+ 
+-def remove_logger(options):
++def remove_logging_daemon(options):
+     dom = minidom.parseString(get_cluster_conf_xml())
+     loggerMatch = False
+ 
+diff --git a/ricci/ccs/ccs.8 b/ricci/ccs/ccs.8
+index c6a9cb8..662ac3a 100644
+--- a/ricci/ccs/ccs.8
++++ b/ricci/ccs/ccs.8
+@@ -176,10 +176,10 @@ if no multicast address is given)
+ Set fence daemon options
+ .IP "--setlogging [logging options]
+ Set logging options
+-.IP "--addlogger [logger options]
+-Add a logger
+-.IP "--rmlogger [logger options]
+-Remove a logger
++.IP "--addlogging [logging daemon options]
++Add a logging daemon (see cluster.conf for options)
++.IP "--rmlogging [logging daemon options]
++Remove the logging daemon with the specified options
+ .SH FILES
+ .I ~/.ccs/cacert.config ~/.ccs/cacert.pem ~/.ccs/privkey.pem
+ .RS
+diff --git a/ricci/ccs/unit_tests/misc.conf.end b/ricci/ccs/unit_tests/misc.conf.end
+index 192568f..dd21d07 100644
+--- a/ricci/ccs/unit_tests/misc.conf.end
++++ b/ricci/ccs/unit_tests/misc.conf.end
+@@ -1,4 +1,4 @@
+-<cluster config_version="21" name="mycluster">
++<cluster config_version="26" name="mycluster">
+   <fence_daemon override_time="c" post_fail_delay="y"/>
+   <clusternodes>
+     <clusternode name="node1" nodeid="1"/>
+@@ -14,5 +14,9 @@
+   </rm>
+   <totem join="y" token="c"/>
+   <dlm enable_fencing="1" timewarn="4"/>
+-  <logging syslog_facility="y" syslog_priority="c"/>
++  <logging syslog_facility="y" syslog_priority="c">
++    <logging_daemon name="1" to_logfile="1"/>
++    <logging_daemon name="3" to_logfile="3"/>
++    <logging_daemon name="5" to_logfile="5"/>
++  </logging>
+ </cluster>
+diff --git a/ricci/ccs/unit_tests/unittest.pl b/ricci/ccs/unit_tests/unittest.pl
+index 0ac5ee6..9330fda 100755
+--- a/ricci/ccs/unit_tests/unittest.pl
++++ b/ricci/ccs/unit_tests/unittest.pl
+@@ -51,6 +51,7 @@ if (quorum_test("quorum.conf") == 0) {
+   exit 0;
+ }
+ 
++
+ if (misc_test("misc.conf") == 0) {
+   print "Misc Test Succeeded\n";
+ } else {
+@@ -103,14 +104,14 @@ sub misc_test {
+   test ("$CCS -f $t --setlogging to_syslog=b to_logfile=c",0);
+   test ("$CCS -f $t --setlogging syslog_facility=y syslog_priority=c",0);
+ 
+-#  test ("$CCS -f $t --addlogger mylog=1",0);
+-#  test ("$CCS -f $t --addlogger mylog=2",0);
+-#  test ("$CCS -f $t --addlogger mylog=3",0);
+-#  test ("$CCS -f $t --addlogger mylog=4",0);
+-#  test ("$CCS -f $t --addlogger mylog=5",0);
++  test ("$CCS -f $t --addlogging name=1 to_logfile=1",0);
++  test ("$CCS -f $t --addlogging name=2 loc=2",1);
++  test ("$CCS -f $t --addlogging name=3 to_logfile=3",0);
++  test ("$CCS -f $t --addlogging name=4 to_logfile=4",0);
++  test ("$CCS -f $t --addlogging name=5 to_logfile=5",0);
+ 
+-#  test ("$CCS -f $t --rmlogger mylog=4",0);
+-#  test ("$CCS -f $t --rmlogger mylog=4",1);
++  test ("$CCS -f $t --rmlogging name=4",0);
++  test ("$CCS -f $t --rmlogging name=4",1);
+ 
+   $retval = diff ($t,"$t.end");
+   #`rm $t`;

@@ -1,0 +1,30 @@
+From: Jan Pokorny <jpokorny@redhat.com>
+Date: Tue, 13 Sep 2011 21:12:15 +0200
+Subject: [PATCH 3/4] (bz736795) executils: add comments wrt. read_data() branches
+
+Signed-off-by: Jan Pokorny <jpokorny@redhat.com>
+
+--- a/ricci/common/executils.cpp
++++ b/ricci/common/executils.cpp
+@@ -269,14 +269,21 @@
+ 			char data_in[4096];
+ 			int ret = read(fd, data_in, sizeof(data_in));
+ 			if (ret < 0)
++				// if it was errno==EINTR, POLLIN event will be kept, otherwise
++				// presumably cleared and problem indicated with POLLERR|POLNVAL
+ 				return;
+ 			if (ret == 0) {
++				// EOF;  it may be (without guarantees) accompanied with POLLHUP event
++				// upon current/next poll (see [1]), but handle this safely in any case
++				// [1] http://www.greenend.org.uk/rjk/2001/06/poll.html
+ 				close_fd(fd);
+ 				fd_closed = true;
+ 				return;
+ 			}
+ 			data.append(data_in, ret);
+ 			if (ret == sizeof(data_in))
++				// shortcut to ensure that no data are missed when POLLIN|POLLHUP
++				// and we haven't read all yet (POLLIN will remain set in such case)
+ 				return;
+ 		} catch ( ... ) {
+ 			close_fd(fd);
