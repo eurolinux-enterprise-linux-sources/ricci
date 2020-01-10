@@ -10,7 +10,7 @@
 
 Name: ricci
 Version: 0.16.2
-Release: 86%{?dist}
+Release: 87%{?dist}
 License: GPLv2
 URL: http://sources.redhat.com/cluster/conga/
 Group: System Environment/Base
@@ -118,6 +118,7 @@ BuildRequires: cyrus-sasl-devel >= 2.1
 ExclusiveArch: i686 x86_64
 
 Requires: oddjob dbus openssl cyrus-sasl >= 2.1 file nss-tools modcluster
+Requires: nss >= 3.21.0-2.el6
 # shadow-utils:groupadd,useradd; util-linux-ng:/sbin/nologin
 Requires: shadow-utils util-linux-ng
 # modstorage
@@ -329,6 +330,10 @@ The Red Hat Cluster Configuration System
 %{_datadir}/ccs/empty_cluster.conf
 
 %changelog
+* Tue Nov 08 2016 Chris Feist <cfeist@redhat.com> - 0.16.2-87
+- ricci: require the RHEL 6.8 version of nss (or newer)
+- Resolves: rhbz#1360821
+
 * Mon Mar 21 2016 Jan Pokorny <jpokorny@redhat.com> - 0.16.2-86
 - ccs: sync cluster.rng schema with latest updates from cluster packages
   (last-minute revamp), now also incl. new "oradg" resource agent
