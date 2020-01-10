@@ -10,7 +10,7 @@
 
 Name: ricci
 Version: 0.16.2
-Release: 75%{?dist}.1
+Release: 75%{?dist}.2
 License: GPLv2
 URL: http://sources.redhat.com/cluster/conga/
 Group: System Environment/Base
@@ -90,6 +90,9 @@ Patch70: bz1076713.patch
 Patch71: bz1044122.patch
 Patch72: bz1055424.patch
 Patch73: bz1187745.patch
+Patch74: bz1156157.patch
+Patch75: bz1156157-2.patch
+Patch76: bz1156157-3.patch
 
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -185,6 +188,9 @@ Requires(postun): initscripts
 %patch71 -p1 -b .bz1044122
 %patch72 -p1 -b .bz1055424
 %patch73 -p1 -b .bz1187745
+%patch74 -p2 -b .bz1156157
+%patch75 -p2 -b .bz1156157-2
+%patch76 -p2 -b .bz1156157-3
 
 
 %build
@@ -293,6 +299,10 @@ The Red Hat Cluster Configuration System
 %{_datadir}/ccs/empty_cluster.conf
 
 %changelog
+* Thu May 28 2015 Chris Feist <cfeist@redhat.com> - 0.16.2-75.2
+- ricci: disable SSLv2/SSLv3 by default, added '-x' option to enable SSLv2/3
+- Resolves: rhbz#1222411
+
 * Tue Mar 10 2015 Jan Pokorný <jpokorny@redhat.com> - 0.16.2-75.1
 - ricci: fix modules cannot return values due to bug in Module::empty_response
          (introduced with rhbz#1044122 fix)

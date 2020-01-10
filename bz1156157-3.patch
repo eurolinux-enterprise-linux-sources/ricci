@@ -1,0 +1,25 @@
+From 370df53db8cd04dd99603ede2349f0e3feb2e675 Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Wed, 22 Apr 2015 15:14:57 -0500
+Subject: [PATCH] Added missing 'x' option to getopts
+
+---
+ ricci/ricci/main.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ricci/ricci/main.cpp b/ricci/ricci/main.cpp
+index 5092bd4..bfe1fd9 100644
+--- a/ricci/ricci/main.cpp
++++ b/ricci/ricci/main.cpp
+@@ -134,7 +134,7 @@ int main(int argc, char **argv) {
+ 	int32_t ricci_port = RICCI_SERVER_PORT;
+ 	int ret;
+ 
+-	while ((ret = getopt(argc, argv, "cdfFshu:p:")) != EOF) {
++	while ((ret = getopt(argc, argv, "cdfFshxu:p:")) != EOF) {
+ 		switch (ret) {
+ 			case 'c':
+ 				advertise_cluster = true;
+-- 
+2.1.0
+

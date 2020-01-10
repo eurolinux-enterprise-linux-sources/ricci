@@ -1,0 +1,64 @@
+From cdcffaf7441668f686e9bcd24d8801e084ed1d1f Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Tue, 3 Mar 2015 16:59:59 -0600
+Subject: [PATCH] Set default to disallow SSLv2/3 connections
+
+- Added '-x' option to enable SSLv2/3 connections
+---
+ ricci/man/ricci.8    | 5 ++++-
+ ricci/ricci/main.cpp | 9 +++++++--
+ 2 files changed, 11 insertions(+), 3 deletions(-)
+
+diff --git a/ricci/man/ricci.8 b/ricci/man/ricci.8
+index 60cf209..45eeaf9 100644
+--- a/ricci/man/ricci.8
++++ b/ricci/man/ricci.8
+@@ -22,7 +22,10 @@ Enable debugging
+ Run in the foreground
+ .TP
+ \fB\-s\fR
+-Prevent insecure SSLv2 connections.
++Prevent insecure SSLv2/3 connections (default).
++.TP
++\fB\-x\fR
++Allow insecure SSLv2/3 connections.
+ .TP
+ \fB\-u <user/UID>\fR
+ Run with the specified user/UID instead of root
+diff --git a/ricci/ricci/main.cpp b/ricci/ricci/main.cpp
+index ccc6786..5092bd4 100644
+--- a/ricci/ricci/main.cpp
++++ b/ricci/ricci/main.cpp
+@@ -48,7 +48,7 @@ bool foreground = false;
+ bool debug = false;
+ bool advertise_cluster = false;
+ bool self_fence = false;
+-bool secure = false;
++bool secure = true;
+ 
+ void print_help(void) {
+ 	printf("Usage: ricci [options]\n\
+@@ -58,7 +58,8 @@ void print_help(void) {
+    -F         Enable support for commands that allow clients to force\n\
+               a reboot (same effect as /sbin/reboot -fn) as an alternative\n\
+               to proper fencing.\n\
+-   -s         Prevent insecure SSLv2 connections.\n\
++   -s         Prevent insecure SSLv2/3 connections. (default)\n\
++   -x	      Allow insecure SSLv2/3 connections.\n\
+    -h         Print this help dialog.\n\
+    -p <port>  Listen for connections on the specified port.\n\
+    -u <user>   Drop root and run with the specified uid.\n");
+@@ -151,6 +152,10 @@ int main(int argc, char **argv) {
+ 				secure = true;
+ 				break;
+ 
++			case 'x':
++				secure = false;
++				break;
++
+ 			case 'F':
+ 				self_fence = true;
+ 				break;
+-- 
+2.1.0
+
