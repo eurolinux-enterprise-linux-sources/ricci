@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# Copyright 2015 Red Hat, Inc. All rights reserved.
+# Copyright 2016 Red Hat, Inc. All rights reserved.
 #
 # This copyrighted material is made available to anyone wishing to use,
 # modify, copy, or redistribute it subject to the terms and conditions
@@ -10,7 +10,7 @@
 
 Name: ricci
 Version: 0.16.2
-Release: 81%{?dist}
+Release: 86%{?dist}
 License: GPLv2
 URL: http://sources.redhat.com/cluster/conga/
 Group: System Environment/Base
@@ -102,6 +102,12 @@ Patch82: bz1187745.patch
 Patch83: bz1210679.patch
 Patch84: bz1079032-2.patch
 Patch85: bz1156157-3.patch
+Patch86: bz1265735.patch
+Patch87: bz1272588.patch
+Patch88: bz1079529.patch
+Patch89: bz1192637.patch
+Patch90: bz1188108.patch
+Patch91: bz1192637-1.patch
 
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -209,6 +215,12 @@ Requires(postun): initscripts
 %patch83 -p1 -b .bz1210679
 %patch84 -p2 -b .bz1079032-2
 %patch85 -p2 -b .bz1156157-3
+%patch86 -p1 -b .bz1265735
+%patch87 -p1 -b .bz1272588
+%patch88 -p1 -b .bz1079529
+%patch89 -p1 -b .bz1192637
+%patch90 -p1 -b .bz1188108
+%patch91 -p1 -b .bz1192637-1
 
 %build
 %configure --arch=%{_arch} --docdir=%{_docdir}
@@ -245,6 +257,7 @@ reboot, rpm, storage, service, virtual machine, and log management modules.
 			%{_sbindir}/ricci
 %attr(-,root,ricci)	%{_libexecdir}/ricci/
 			%{_docdir}/ricci-%{version}/
+
 # modrpm
 %config(noreplace)	%{_sysconfdir}/oddjobd.conf.d/ricci-modrpm.oddjob.conf
 %config(noreplace)	%{_sysconfdir}/dbus-1/system.d/ricci-modrpm.systembus.conf
@@ -316,7 +329,34 @@ The Red Hat Cluster Configuration System
 %{_datadir}/ccs/empty_cluster.conf
 
 %changelog
-* Wed Apr 21 2015 Chris Feist <cfeist@redhat.com> - 0.16.2-81
+* Mon Mar 21 2016 Jan Pokorny <jpokorny@redhat.com> - 0.16.2-86
+- ccs: sync cluster.rng schema with latest updates from cluster packages
+  (last-minute revamp), now also incl. new "oradg" resource agent
+- Resolves: rhbz#1272588
+
+* Tue Mar 15 2016 Chris Feist <cfeist@redhat.com> - 0.16.2-85
+- ccs: Added a 10s timeout when using --usealt to speed up failover
+- Resolves: rhbz#1192637
+
+* Wed Feb 24 2016 Chris Feist <cfeist@redhat.com> - 0.16.2-84
+- ccs: provide option to backup cluster.conf files when editing
+- ccs: when stopping all nodes send an option to ricci to shutdown
+  the cluster before shutting down all of the nodes
+- ccs: Added --usealt option to force ccs to try to connect to
+  ricci on the alt node if the normal node interface is not responding
+- Resolves: rhbz#1079529 rhbz#1192637 rhbz#1188108
+
+* Wed Feb 24 2016 Jan Pokorny <jpokorny@redhat.com> - 0.16.2-83
+- ccs: sync cluster.rng schema with latest updates from cluster packages
+  (last-minute revamp) incl. reflecting fix up for wrongly generated
+  RNG schema for cluster configuration wrt. "action" tag
+- Resolves: rhbz#1272588
+
+* Mon Jan 18 2016 Chris Feist <cfeist@redhat.com> - 0.16.2-82
+- ricci: Ricci only accepts TLS1.2, non RC4 and non 3DES ciphers
+- Resolves: rhbz#1265735
+
+* Wed Apr 22 2015 Chris Feist <cfeist@redhat.com> - 0.16.2-81
 - ricci: fixed issue with '-x' option not being recognized
 - Resolves: rhbz#1156157
 

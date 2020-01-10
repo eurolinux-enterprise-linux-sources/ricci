@@ -1,0 +1,528 @@
+diff -urN a/ccs/cluster.rng.in b/ccs/cluster.rng.in
+--- a/ccs/cluster.rng.in	2016-03-21 23:32:02.463449315 +0100
++++ b/ccs/cluster.rng.in	2016-03-21 23:43:21.339616910 +0100
+@@ -290,6 +290,28 @@
+         rha:default="3" rha:sample="5"/>
+    </optional>
+    <optional>
++    <attribute name="rrp_problem_count_mcast_threshold" rha:description="This  
++        specifies the  number of times a problem is detected with
++        multicast before setting the link faulty for passive rrp  mode.
++        This variable is unused in active rrp mode.
++        The default is 10 times rrp_problem_count_threshold."/>
++   </optional>
++   <optional>
++    <attribute name="rrp_problem_count_timeout" rha:description="This 
++        specifies the time in milliseconds to wait before decrementing
++        the problem count by 1 for a particular ring to ensure a
++        link is not marked faulty for transient network failures.
++        The default is 2000 milliseconds."
++        rha:default="2000"/>
++   </optional>
++   <optional>
++    <attribute name="rrp_autorecovery_check_timeout" rha:description="This
++        specifies the time in milliseconds to check if  the  failed
++        ring can be auto-recovered.
++        The default is 1000 milliseconds."
++        rha:default="1000"/>
++   </optional>
++   <optional>
+     <attribute name="secauth" rha:description="This attribute specifies
+        that HMAC/SHA1 authentication should be used to authenticate all
+        messages. It further specifies that all data should be encrypted
+@@ -1187,9 +1209,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -1233,9 +1256,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -1309,9 +1333,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -1372,9 +1397,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -1426,9 +1452,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -1467,9 +1494,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -1530,9 +1558,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -1600,9 +1629,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -1654,9 +1684,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -1700,9 +1731,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -1756,9 +1788,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -1813,9 +1846,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -1870,9 +1904,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -1928,9 +1963,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -1973,9 +2009,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -2018,9 +2055,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -2070,9 +2108,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -2120,9 +2159,61 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
++      </interleave>
++    </element>
++  </define>
++
++
++  <define name="ORADG">
++    <element name="oradg" rha:description="Oracle Data Guard Failover Instance">
++      <choice>
++      <group>
++        <!-- rgmanager specific stuff -->
++        <attribute name="ref" rha:description="Reference to existing oradg resource in the resources section."/>
++      </group>
++      <group>
++        <attribute name="name" rha:description="Oracle SID"/>
++        <attribute name="user" rha:description="Oracle User Name"/>
++        <attribute name="home" rha:description="Oracle Home Directory"/>
++        <optional>
++          <attribute name="listeners" rha:description="Oracle listeners"/>
++        </optional>
++        <optional>
++          <attribute name="vhost" rha:description="Virtual hostname for DB Console"/>
++        </optional>
++        <optional>
++          <attribute name="lockfile" rha:description="Pathname for lockfile"/>
++        </optional>
++        <optional>
++          <attribute name="tns_admin" rha:description="Full path to the directory containing tnsnames.ora"/>
++        </optional>
++      </group>
++      </choice>
++      <optional>
++        <attribute name="__independent_subtree" rha:description="Treat this and all children as an independent subtree."/>
++      </optional>
++      <optional>
++        <attribute name="__enforce_timeouts" rha:description="Consider a timeout for operations as fatal."/>
+       </optional>
++      <optional>
++        <attribute name="__max_failures" rha:description="Maximum number of failures before returning a failure to a status check."/>
++      </optional>
++      <optional>
++        <attribute name="__failure_expire_time" rha:description="Amount of time before a failure is forgotten."/>
++      </optional>
++      <optional>
++        <attribute name="__max_restarts" rha:description="Maximum number restarts for an independent subtree before giving up."/>
++      </optional>
++      <optional>
++        <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
++      </optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
++        <ref name="CHILDREN"/>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -2167,9 +2258,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -2208,9 +2300,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -2262,9 +2355,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -2313,9 +2407,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -2353,9 +2448,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -2399,9 +2495,10 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
+     </element>
+   </define>
+ 
+@@ -2440,6 +2537,9 @@
+           <attribute name="migrate" rha:description="Migration type (live or pause, default = live)."/>
+         </optional>
+         <optional>
++          <attribute name="migrate_options" rha:description="Extra options for the guest live migration."/>
++        </optional>
++        <optional>
+           <attribute name="tunnelled" rha:description="Tunnel data over ssh to securely migrate virtual machines."/>
+         </optional>
+         <optional>
+@@ -2495,15 +2595,33 @@
+       <optional>
+         <attribute name="__restart_expire_time" rha:description="Amount of time before a failure is forgotten for an independent subtree."/>
+       </optional>
+-      <optional>
++      <interleave>
++        <ref name="RESOURCEACTION"/>
+         <ref name="CHILDREN"/>
+-      </optional>
++      </interleave>
++    </element>
++  </define>
++
++  <define name="RESOURCEACTION">
++   <zeroOrMore>
++    <element name="action" rha:description="Overrides resource action timings for a resource instance.">
++     <attribute name="name" rha:description="Name of resource action (start, stop, status, etc.)."/>
++     <optional>
++      <attribute name="depth" rha:description="Status check depth (resource agent dependent; * = all depths)."/>
++     </optional>
++     <optional>
++      <attribute name="interval" rha:description="Status check interval."/>
++     </optional>
++     <optional>
++      <attribute name="timeout" rha:description="Action timeout.  Meaningless unless __enforce_timeouts is set for this resource."/>
++     </optional>
+     </element>
++   </zeroOrMore>
+   </define>
+ 
+   <define name="CHILDREN">
+     <zeroOrMore>
+-     <choice>
++      <choice>
+ 
+         <ref name="SERVICE"/>
+         <ref name="ASEHAAGENT"/>
+@@ -2523,6 +2641,7 @@
+         <ref name="NFSSERVER"/>
+         <ref name="OPENLDAP"/>
+         <ref name="ORACLEDB"/>
++        <ref name="ORADG"/>
+         <ref name="ORAINSTANCE"/>
+         <ref name="ORALISTENER"/>
+         <ref name="POSTGRES-8"/>
+@@ -2530,27 +2649,10 @@
+         <ref name="SCRIPT"/>
+         <ref name="TOMCAT-6"/>
+         <ref name="VM"/>
+-      <ref name="RESOURCEACTION"/>
+-     </choice>
++      </choice>
+     </zeroOrMore>
+   </define>
+ 
+-  <define name="RESOURCEACTION">
+-   <zeroOrMore>
+-    <element name="action" rha:description="Overrides resource action timings for a resource instance.">
+-     <attribute name="name" rha:description="Name of resource action (start, stop, status, etc.)."/>
+-     <optional>
+-      <attribute name="depth" rha:description="Status check depth (resource agent dependent; * = all depths)."/>
+-     </optional>
+-     <optional>
+-      <attribute name="interval" rha:description="Status check interval."/>
+-     </optional>
+-     <optional>
+-      <attribute name="timeout" rha:description="Action timeout.  Meaningless unless __enforce_timeouts is set for this resource."/>
+-     </optional>
+-    </element>
+-   </zeroOrMore>
+-  </define>
+ <!-- End autogenerated resources definitions -->
+ <!-- Autogenerated fence definitions -->
+  <define name="FENCEDEVICEOPTIONS">
+@@ -3813,6 +3915,9 @@
+           <attribute name="privlvl" rha:description="Privilege level on IPMI device" />
+         </optional>
+         <optional>
++          <attribute name="timeout" rha:description="Timeout (sec) for IPMI operation" />
++        </optional>
++        <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+         </optional>
+         <optional>
+@@ -4154,6 +4259,9 @@
+           <attribute name="privlvl" rha:description="Privilege level on IPMI device" />
+         </optional>
+         <optional>
++          <attribute name="timeout" rha:description="Timeout (sec) for IPMI operation" />
++        </optional>
++        <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+         </optional>
+         <optional>
+@@ -4323,6 +4431,9 @@
+           <attribute name="privlvl" rha:description="Privilege level on IPMI device" />
+         </optional>
+         <optional>
++          <attribute name="timeout" rha:description="Timeout (sec) for IPMI operation" />
++        </optional>
++        <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+         </optional>
+         <optional>
+@@ -4738,6 +4849,9 @@
+           <attribute name="privlvl" rha:description="Privilege level on IPMI device" />
+         </optional>
+         <optional>
++          <attribute name="timeout" rha:description="Timeout (sec) for IPMI operation" />
++        </optional>
++        <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+         </optional>
+         <optional>
+@@ -5002,6 +5116,9 @@
+           <attribute name="privlvl" rha:description="Privilege level on IPMI device" />
+         </optional>
+         <optional>
++          <attribute name="timeout" rha:description="Timeout (sec) for IPMI operation" />
++        </optional>
++        <optional>
+           <attribute name="verbose" rha:description="Verbose mode" />
+         </optional>
+         <optional>

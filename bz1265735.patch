@@ -1,0 +1,44 @@
+diff -up ricci-0.16.2/man/ricci.8.bz1265735 ricci-0.16.2/man/ricci.8
+--- ricci-0.16.2/man/ricci.8.bz1265735	2016-01-18 17:15:29.488126536 -0600
++++ ricci-0.16.2/man/ricci.8	2016-01-18 17:16:04.863200338 -0600
+@@ -22,10 +22,10 @@ Enable debugging
+ Run in the foreground
+ .TP
+ \fB\-s\fR
+-Prevent insecure SSLv2/3 connections (default).
++Prevent SSLv2/3, RC4 and TLS1.0/1.1 connections. (default).
+ .TP
+ \fB\-x\fR
+-Allow insecure SSLv2/3 connections.
++Allow TLS1.0/1.1 and insecure SSLv2/3 & RC4 connections.
+ .TP
+ \fB\-u <user/UID>\fR
+ Run with the specified user/UID instead of root
+diff -up ricci-0.16.2/ricci/main.cpp.bz1265735 ricci-0.16.2/ricci/main.cpp
+--- ricci-0.16.2/ricci/main.cpp.bz1265735	2016-01-18 17:13:55.327930089 -0600
++++ ricci-0.16.2/ricci/main.cpp	2016-01-18 17:15:03.405072119 -0600
+@@ -58,8 +58,8 @@ void print_help(void) {
+    -F         Enable support for commands that allow clients to force\n\
+               a reboot (same effect as /sbin/reboot -fn) as an alternative\n\
+               to proper fencing.\n\
+-   -s         Prevent insecure SSLv2/3 connections. (default)\n\
+-   -x	      Allow insecure SSLv2/3 connections.\n\
++   -s         Prevent SSLv2/3, RC4 and TLS1.0/1.1 connections. (default)\n\
++   -x         Allow TLS1.0/1.1 and insecure SSLv2/3 & RC4 connections.\n\
+    -h         Print this help dialog.\n\
+    -p <port>  Listen for connections on the specified port.\n\
+    -u <user>   Drop root and run with the specified uid.\n");
+diff -up ricci-0.16.2/ricci/SSLInstance.cpp.bz1265735 ricci-0.16.2/ricci/SSLInstance.cpp
+--- ricci-0.16.2/ricci/SSLInstance.cpp.bz1265735	2016-01-18 16:55:40.411655250 -0600
++++ ricci-0.16.2/ricci/SSLInstance.cpp	2016-01-18 16:55:40.428655285 -0600
+@@ -178,7 +178,9 @@ SSLInstance::SSLInstance(ClientSocket so
+ 			if (!ctx) {
+ 				ctx = SSL_CTX_new(SSLv23_server_method());
+ 				if (secure)
+-					SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_COMPRESSION | SSL_OP_NO_SSLv3);
++					SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_COMPRESSION | SSL_OP_NO_SSLv3 | SSL_OP_NO_TLSv1 | SSL_OP_NO_TLSv1_1);
++					SSL_CTX_set_cipher_list(ctx, "DEFAULT:!RC4:!3DES:@STRENGTH");
++
+ 			}
+ 			if (!ctx)
+ 				throw String("SSL context creation failed");

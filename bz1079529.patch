@@ -1,0 +1,35 @@
+From 1d4bc96ecd16aa6dba6fccd73b64f9277394e5c8 Mon Sep 17 00:00:00 2001
+From: Chris Feist <cfeist@redhat.com>
+Date: Wed, 24 Feb 2016 15:10:02 -0600
+Subject: [PATCH 1/3] When stopping all nodes, use cluster shutdown command
+ with ricci
+
+---
+ ccs | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/ccs/ccs b/ccs/ccs
+index 53495ab..8ad4dba 100755
+--- a/ccs/ccs
++++ b/ccs/ccs
+@@ -561,9 +561,15 @@ Misc Options
+ 
+ def stop_node(node, inthread=False):
+     if (noenable):
+-        xml = send_ricci_command("cluster", "stop_node", node, ("disable_services", "boolean", "false"))
++        if not inthread:
++            xml = send_ricci_command("cluster", "stop_node", node, ("disable_services", "boolean", "false"))
++        else:
++            xml = send_ricci_command("cluster", "stop_node", node, ("disable_services", "boolean", "false"), ("cluster_shutdown", "boolean", "true"))
+     else:
+-        xml = send_ricci_command("cluster", "stop_node", node)
++        if not inthread:
++            xml = send_ricci_command("cluster", "stop_node", node)
++        else:
++            xml = send_ricci_command("cluster", "stop_node", node, ("cluster_shutdown", "boolean", "true"))
+ 
+     dom = minidom.parseString(xml)
+     vars = dom.getElementsByTagName('var')
+-- 
+2.5.0
+
